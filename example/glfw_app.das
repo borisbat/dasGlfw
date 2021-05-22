@@ -38,18 +38,6 @@ def glfw_app ( title:string; blk : block<(w,h:int):void> )
         glfwMakeContextCurrent(window)
         glfwSwapBuffers(window)
 
-def glBeginEnd(prim:uint;blk:block)
-    glBegin(prim)
-    invoke(blk)
-    glEnd()
-
-def gluPerspective(fovy,aspectRatio,znear,zfar:double)
-    var ymax = znear * tan(fovy/2.0lf)
-    var ymin = -ymax
-    var xmin = -ymax * aspectRatio
-    var xmax = ymax * aspectRatio
-    glFrustum(-xmax, xmax, -ymax, ymax, znear, zfar)
-
 [export]
 def main
 
