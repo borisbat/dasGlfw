@@ -46,13 +46,13 @@ ENDIF()
             "${glfw_INCLUDE_DIR}/GLFW/glfw3.h"
             "${GL_H}"
         )
-		CPP_BIND_AST(
+		DAS_CPP_BIND_AST(
 			GLFW_GENERATE
 			generate_glfw.das
 			${DAS_GLFW_DIR}/src/glfw_headers.h
 			${DAS_GLFW_DIR}/src/module_glfw
 			${DAS_GLFW_DIR}/src
-			${glfw_INCLUDE_DIR}
+			"${glfw_INCLUDE_DIR}"
 			"${DAS_GLFW_CONSTS}"
 		)
 	ENDIF()
