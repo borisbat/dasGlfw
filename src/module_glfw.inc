@@ -1743,9 +1743,11 @@ addExtern<DAS_BIND_FUN(glColor4d)>(*this, lib, "glColor4d",SideEffects::worstDef
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
+#ifdef _WIN32
 addExtern<DAS_BIND_FUN(__report_gsfailure)>(*this, lib, "__report_gsfailure",SideEffects::worstDefault, "__report_gsfailure")
 	->args({"_StackCookie"})
 ;
+#endif
 #endif
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glMapGrid1d)>(*this, lib, "glMapGrid1d",SideEffects::worstDefault, "glMapGrid1d")
