@@ -39,7 +39,7 @@ namespace das {
     void DasGlfw_KeyFunction ( GLFWwindow* window, int keyCode, int scanCode, int action, int modes ) {
         auto & cb = g_Callbacks[window].keyCB;
         if ( cb.context ) {
-            das_invoke_lambda<void>::invoke<GLFWwindow *,int,int,int,int>(cb.context,cb.lambda,
+            das_invoke_lambda<void>::invoke<GLFWwindow *,int,int,int,int>(cb.context,nullptr,cb.lambda,
                 window,keyCode,scanCode,action,modes);
         }
     }
@@ -47,7 +47,7 @@ namespace das {
     void DasGlfw_CharFunction ( GLFWwindow* window, unsigned int cp ) {
         auto & cb = g_Callbacks[window].charCB;
         if ( cb.context ) {
-            das_invoke_lambda<void>::invoke<GLFWwindow *,unsigned int>(cb.context,cb.lambda,
+            das_invoke_lambda<void>::invoke<GLFWwindow *,unsigned int>(cb.context,nullptr,cb.lambda,
                 window,cp);
         }
     }
@@ -55,7 +55,7 @@ namespace das {
     void DasGlfw_CursorPosFunction ( GLFWwindow* window, double x, double y ) {
         auto & cb = g_Callbacks[window].cursorCB;
         if ( cb.context ) {
-            das_invoke_lambda<void>::invoke<GLFWwindow *,double,double>(cb.context,cb.lambda,
+            das_invoke_lambda<void>::invoke<GLFWwindow *,double,double>(cb.context,nullptr,cb.lambda,
                 window,x,y);
         }
     }
@@ -63,7 +63,7 @@ namespace das {
     void DasGlfw_CursorEnterFunction ( GLFWwindow* window, int enter ) {
         auto & cb = g_Callbacks[window].cursorEnterCB;
         if ( cb.context ) {
-            das_invoke_lambda<void>::invoke<GLFWwindow *,bool>(cb.context,cb.lambda,
+            das_invoke_lambda<void>::invoke<GLFWwindow *,bool>(cb.context,nullptr,cb.lambda,
                 window,enter!=0);
         }
     }
@@ -71,7 +71,7 @@ namespace das {
     void DasGlfw_MouseFunction ( GLFWwindow* window, int buttons, int action, int modes ) {
         auto & cb = g_Callbacks[window].mouseCB;
         if ( cb.context ) {
-            das_invoke_lambda<void>::invoke<GLFWwindow *,int,int,int>(cb.context,cb.lambda,
+            das_invoke_lambda<void>::invoke<GLFWwindow *,int,int,int>(cb.context,nullptr,cb.lambda,
                 window,buttons,action,modes);
         }
     }
@@ -79,7 +79,7 @@ namespace das {
     void DasGlfw_ScrollFunction ( GLFWwindow* window, double x, double y ) {
         auto & cb = g_Callbacks[window].scrollCB;
         if ( cb.context ) {
-            das_invoke_lambda<void>::invoke<GLFWwindow *,double,double>(cb.context,cb.lambda,
+            das_invoke_lambda<void>::invoke<GLFWwindow *,double,double>(cb.context,nullptr,cb.lambda,
                 window,x,y);
         }
     }
