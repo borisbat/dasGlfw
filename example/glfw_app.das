@@ -1,6 +1,7 @@
 require daslib/glfw_boost
 require daslib/defer
 require math
+require opengl
 
 var mouse_x = 0.
 var mouse_y = 0.
@@ -46,15 +47,15 @@ def main
 
     glfw_app("Testing GLFW") <| $(display_w, display_h)
 
-        glViewport(0, 0, display_w, display_h)
-        glClearColor(0.2, 0.2, 0.2, 1.0)
-        glClearDepth(1.0lf)
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+        opengl::glViewport(0, 0, display_w, display_h)
+        opengl::glClearColor(0.2, 0.2, 0.2, 1.0)
+        opengl::glClearDepth(1.0lf)
+        opengl::glClear(opengl::GL_COLOR_BUFFER_BIT|opengl::GL_DEPTH_BUFFER_BIT)
 
-        glEnable(GL_DEPTH_TEST)
-        glDepthFunc(GL_LEQUAL)
+        opengl::glEnable(opengl::GL_DEPTH_TEST)
+        opengl::glDepthFunc(opengl::GL_LEQUAL)
         glShadeModel(GL_SMOOTH)
-        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
+        opengl::glHint(GL_PERSPECTIVE_CORRECTION_HINT, opengl::GL_NICEST)
 
         let aspect = double(display_w) / double(display_h)
         glMatrixMode(GL_PROJECTION)
@@ -73,7 +74,7 @@ def main
         if rot_tri > 360.
             rot_tri -= 360.
 
-        glBeginEnd(GL_QUADS) <|
+        glBeginEnd(opengl::GL_QUADS) <|
             glColor3f(0.0f, 1.0f, 0.0f)
             glVertex3f( 1.0f, 1.0f, -1.0f)
             glVertex3f(-1.0f, 1.0f, -1.0f)
@@ -110,7 +111,7 @@ def main
         glRotatef(mouse_y,1.0,0.0,0.0)
         glRotatef(-mouse_x,0.0,1.0,0.0)
 
-        glBeginEnd(GL_TRIANGLES) <|
+        glBeginEnd(opengl::GL_TRIANGLES) <|
             glColor3f(1.0f, 0.0f, 0.0f)
             glVertex3f( 0.0f, 1.0f, 0.0f)
             glColor3f(0.0f, 1.0f, 0.0f)

@@ -64,6 +64,7 @@ ENDIF()
 			${DAS_GLFW_DIR}/src/module_opengl.ann.inc
 			${DAS_GLFW_DIR}/src/module_opengl.const_inc
 			${DAS_GLFW_DIR}/src/module_opengl.cpp
+			${DAS_GLFW_DIR}/src/module_opengl_win.cpp
 			${DAS_GLFW_DIR}/src/module_opengl_ann.cpp
 			${DAS_GLFW_DIR}/src/module_opengl_const.cpp
 			${DAS_GLFW_DIR}/src/module_opengl_fun.cpp
