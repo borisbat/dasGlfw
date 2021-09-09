@@ -158,11 +158,6 @@ void glGetVertexAttribIiv ( GLuint index, GLenum pname, GLint * params ) {
     (*fptr)(index, pname, params);
 }
 
-void glStencilMask ( GLuint mask ) {
-    static PFNGLSTENCILMASKPROC fptr = (PFNGLSTENCILMASKPROC) dasWglGetProcAddress("glStencilMask");
-    (*fptr)(mask);
-}
-
 void glClearBufferData ( GLenum target, GLenum internalformat, GLenum format, GLenum type, const void * data ) {
     static PFNGLCLEARBUFFERDATAPROC fptr = (PFNGLCLEARBUFFERDATAPROC) dasWglGetProcAddress("glClearBufferData");
     (*fptr)(target, internalformat, format, type, data);
@@ -323,11 +318,6 @@ void glDrawArraysInstancedARB ( GLenum mode, GLint first, GLsizei count, GLsizei
     (*fptr)(mode, first, count, primcount);
 }
 
-void glTexSubImage1D ( GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void * pixels ) {
-    static PFNGLTEXSUBIMAGE1DPROC fptr = (PFNGLTEXSUBIMAGE1DPROC) dasWglGetProcAddress("glTexSubImage1D");
-    (*fptr)(target, level, xoffset, width, format, type, pixels);
-}
-
 void glProgramUniform3i64NV ( GLuint program, GLint location, GLint64EXT x, GLint64EXT y, GLint64EXT z ) {
     static PFNGLPROGRAMUNIFORM3I64NVPROC fptr = (PFNGLPROGRAMUNIFORM3I64NVPROC) dasWglGetProcAddress("glProgramUniform3i64NV");
     (*fptr)(program, location, x, y, z);
@@ -336,11 +326,6 @@ void glProgramUniform3i64NV ( GLuint program, GLint location, GLint64EXT x, GLin
 void glVertexAttribP3ui ( GLuint index, GLenum type, GLboolean normalized, GLuint value ) {
     static PFNGLVERTEXATTRIBP3UIPROC fptr = (PFNGLVERTEXATTRIBP3UIPROC) dasWglGetProcAddress("glVertexAttribP3ui");
     (*fptr)(index, type, normalized, value);
-}
-
-void glBindTexture ( GLenum target, GLuint texture ) {
-    static PFNGLBINDTEXTUREPROC fptr = (PFNGLBINDTEXTUREPROC) dasWglGetProcAddress("glBindTexture");
-    (*fptr)(target, texture);
 }
 
 void glClearBufferfv ( GLenum buffer, GLint drawbuffer, const GLfloat * value ) {
@@ -473,11 +458,6 @@ void glLinkProgram ( GLuint program ) {
     (*fptr)(program);
 }
 
-void glDrawBuffer ( GLenum buf ) {
-    static PFNGLDRAWBUFFERPROC fptr = (PFNGLDRAWBUFFERPROC) dasWglGetProcAddress("glDrawBuffer");
-    (*fptr)(buf);
-}
-
 void glGetMultiTexGenivEXT ( GLenum texunit, GLenum coord, GLenum pname, GLint * params ) {
     static PFNGLGETMULTITEXGENIVEXTPROC fptr = (PFNGLGETMULTITEXGENIVEXTPROC) dasWglGetProcAddress("glGetMultiTexGenivEXT");
     (*fptr)(texunit, coord, pname, params);
@@ -556,11 +536,6 @@ void glUniform4ui64NV ( GLint location, GLuint64EXT x, GLuint64EXT y, GLuint64EX
 void glCopyImageSubData ( GLuint srcName, GLenum srcTarget, GLint srcLevel, GLint srcX, GLint srcY, GLint srcZ, GLuint dstName, GLenum dstTarget, GLint dstLevel, GLint dstX, GLint dstY, GLint dstZ, GLsizei srcWidth, GLsizei srcHeight, GLsizei srcDepth ) {
     static PFNGLCOPYIMAGESUBDATAPROC fptr = (PFNGLCOPYIMAGESUBDATAPROC) dasWglGetProcAddress("glCopyImageSubData");
     (*fptr)(srcName, srcTarget, srcLevel, srcX, srcY, srcZ, dstName, dstTarget, dstLevel, dstX, dstY, dstZ, srcWidth, srcHeight, srcDepth);
-}
-
-void glPixelStorei ( GLenum pname, GLint param ) {
-    static PFNGLPIXELSTOREIPROC fptr = (PFNGLPIXELSTOREIPROC) dasWglGetProcAddress("glPixelStorei");
-    (*fptr)(pname, param);
 }
 
 void glProgramUniform1i64vNV ( GLuint program, GLint location, GLsizei count, const GLint64EXT * value ) {
@@ -713,16 +688,6 @@ void glProgramUniform2fvEXT ( GLuint program, GLint location, GLsizei count, con
     (*fptr)(program, location, count, value);
 }
 
-void glEnable ( GLenum cap ) {
-    static PFNGLENABLEPROC fptr = (PFNGLENABLEPROC) dasWglGetProcAddress("glEnable");
-    (*fptr)(cap);
-}
-
-GLboolean glIsEnabled ( GLenum cap ) {
-    static PFNGLISENABLEDPROC fptr = (PFNGLISENABLEDPROC) dasWglGetProcAddress("glIsEnabled");
-    return (*fptr)(cap);
-}
-
 void glSampleMaski ( GLuint maskNumber, GLbitfield mask ) {
     static PFNGLSAMPLEMASKIPROC fptr = (PFNGLSAMPLEMASKIPROC) dasWglGetProcAddress("glSampleMaski");
     (*fptr)(maskNumber, mask);
@@ -761,11 +726,6 @@ void glUniform1ui64vNV ( GLint location, GLsizei count, const GLuint64EXT * valu
 void glDrawElementsInstancedARB ( GLenum mode, GLsizei count, GLenum type, const void * indices, GLsizei primcount ) {
     static PFNGLDRAWELEMENTSINSTANCEDARBPROC fptr = (PFNGLDRAWELEMENTSINSTANCEDARBPROC) dasWglGetProcAddress("glDrawElementsInstancedARB");
     (*fptr)(mode, count, type, indices, primcount);
-}
-
-void glHint ( GLenum target, GLenum mode ) {
-    static PFNGLHINTPROC fptr = (PFNGLHINTPROC) dasWglGetProcAddress("glHint");
-    (*fptr)(target, mode);
 }
 
 void glGetIntegeri_v ( GLenum target, GLuint index, GLint * data ) {
@@ -843,11 +803,6 @@ void glProgramUniform2dv ( GLuint program, GLint location, GLsizei count, const 
     (*fptr)(program, location, count, value);
 }
 
-void glPixelStoref ( GLenum pname, GLfloat param ) {
-    static PFNGLPIXELSTOREFPROC fptr = (PFNGLPIXELSTOREFPROC) dasWglGetProcAddress("glPixelStoref");
-    (*fptr)(pname, param);
-}
-
 void glCopyTextureSubImage1D ( GLuint texture, GLint level, GLint xoffset, GLint x, GLint y, GLsizei width ) {
     static PFNGLCOPYTEXTURESUBIMAGE1DPROC fptr = (PFNGLCOPYTEXTURESUBIMAGE1DPROC) dasWglGetProcAddress("glCopyTextureSubImage1D");
     (*fptr)(texture, level, xoffset, x, y, width);
@@ -866,11 +821,6 @@ void glGetnUniformui64vARB ( GLuint program, GLint location, GLsizei bufSize, GL
 void glVertexArrayFogCoordOffsetEXT ( GLuint vaobj, GLuint buffer, GLenum type, GLsizei stride, GLintptr offset ) {
     static PFNGLVERTEXARRAYFOGCOORDOFFSETEXTPROC fptr = (PFNGLVERTEXARRAYFOGCOORDOFFSETEXTPROC) dasWglGetProcAddress("glVertexArrayFogCoordOffsetEXT");
     (*fptr)(vaobj, buffer, type, stride, offset);
-}
-
-void glGetBooleanv ( GLenum pname, GLboolean * data ) {
-    static PFNGLGETBOOLEANVPROC fptr = (PFNGLGETBOOLEANVPROC) dasWglGetProcAddress("glGetBooleanv");
-    (*fptr)(pname, data);
 }
 
 void glStencilThenCoverFillPathNV ( GLuint path, GLenum fillMode, GLuint mask, GLenum coverMode ) {
@@ -896,11 +846,6 @@ void glVertexAttrib1sv ( GLuint index, const GLshort * v ) {
 void glGetTextureLevelParameterfvEXT ( GLuint texture, GLenum target, GLint level, GLenum pname, GLfloat * params ) {
     static PFNGLGETTEXTURELEVELPARAMETERFVEXTPROC fptr = (PFNGLGETTEXTURELEVELPARAMETERFVEXTPROC) dasWglGetProcAddress("glGetTextureLevelParameterfvEXT");
     (*fptr)(texture, target, level, pname, params);
-}
-
-GLenum glGetError (  ) {
-    static PFNGLGETERRORPROC fptr = (PFNGLGETERRORPROC) dasWglGetProcAddress("glGetError");
-    return (*fptr)();
 }
 
 void glPolygonOffsetClamp ( GLfloat factor, GLfloat units, GLfloat clamp ) {
@@ -1143,11 +1088,6 @@ void glBindProgramPipeline ( GLuint pipeline ) {
     (*fptr)(pipeline);
 }
 
-void glPolygonMode ( GLenum face, GLenum mode ) {
-    static PFNGLPOLYGONMODEPROC fptr = (PFNGLPOLYGONMODEPROC) dasWglGetProcAddress("glPolygonMode");
-    (*fptr)(face, mode);
-}
-
 void glUniform1iv ( GLint location, GLsizei count, const GLint * value ) {
     static PFNGLUNIFORM1IVPROC fptr = (PFNGLUNIFORM1IVPROC) dasWglGetProcAddress("glUniform1iv");
     (*fptr)(location, count, value);
@@ -1156,16 +1096,6 @@ void glUniform1iv ( GLint location, GLsizei count, const GLint * value ) {
 void glGetUniformui64vARB ( GLuint program, GLint location, GLuint64 * params ) {
     static PFNGLGETUNIFORMUI64VARBPROC fptr = (PFNGLGETUNIFORMUI64VARBPROC) dasWglGetProcAddress("glGetUniformui64vARB");
     (*fptr)(program, location, params);
-}
-
-void glClearColor ( GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha ) {
-    static PFNGLCLEARCOLORPROC fptr = (PFNGLCLEARCOLORPROC) dasWglGetProcAddress("glClearColor");
-    (*fptr)(red, green, blue, alpha);
-}
-
-void glCopyTexImage2D ( GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border ) {
-    static PFNGLCOPYTEXIMAGE2DPROC fptr = (PFNGLCOPYTEXIMAGE2DPROC) dasWglGetProcAddress("glCopyTexImage2D");
-    (*fptr)(target, level, internalformat, x, y, width, height, border);
 }
 
 const GLubyte * glGetStringi ( GLenum name, GLuint index ) {
@@ -1291,11 +1221,6 @@ void glCopyTextureImage1DEXT ( GLuint texture, GLenum target, GLint level, GLenu
 void glProgramParameteri ( GLuint program, GLenum pname, GLint value ) {
     static PFNGLPROGRAMPARAMETERIPROC fptr = (PFNGLPROGRAMPARAMETERIPROC) dasWglGetProcAddress("glProgramParameteri");
     (*fptr)(program, pname, value);
-}
-
-void glDepthFunc ( GLenum func ) {
-    static PFNGLDEPTHFUNCPROC fptr = (PFNGLDEPTHFUNCPROC) dasWglGetProcAddress("glDepthFunc");
-    (*fptr)(func);
 }
 
 void glGetVertexArrayIndexediv ( GLuint vaobj, GLuint index, GLenum pname, GLint * param ) {
@@ -1513,29 +1438,14 @@ void glPopGroupMarkerEXT (  ) {
     (*fptr)();
 }
 
-void glTexSubImage2D ( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void * pixels ) {
-    static PFNGLTEXSUBIMAGE2DPROC fptr = (PFNGLTEXSUBIMAGE2DPROC) dasWglGetProcAddress("glTexSubImage2D");
-    (*fptr)(target, level, xoffset, yoffset, width, height, format, type, pixels);
-}
-
 void glGenSamplers ( GLsizei count, GLuint * samplers ) {
     static PFNGLGENSAMPLERSPROC fptr = (PFNGLGENSAMPLERSPROC) dasWglGetProcAddress("glGenSamplers");
     (*fptr)(count, samplers);
 }
 
-void glPolygonOffset ( GLfloat factor, GLfloat units ) {
-    static PFNGLPOLYGONOFFSETPROC fptr = (PFNGLPOLYGONOFFSETPROC) dasWglGetProcAddress("glPolygonOffset");
-    (*fptr)(factor, units);
-}
-
 void glGetNamedProgramLocalParameterfvEXT ( GLuint program, GLenum target, GLuint index, GLfloat * params ) {
     static PFNGLGETNAMEDPROGRAMLOCALPARAMETERFVEXTPROC fptr = (PFNGLGETNAMEDPROGRAMLOCALPARAMETERFVEXTPROC) dasWglGetProcAddress("glGetNamedProgramLocalParameterfvEXT");
     (*fptr)(program, target, index, params);
-}
-
-void glTexParameterf ( GLenum target, GLenum pname, GLfloat param ) {
-    static PFNGLTEXPARAMETERFPROC fptr = (PFNGLTEXPARAMETERFPROC) dasWglGetProcAddress("glTexParameterf");
-    (*fptr)(target, pname, param);
 }
 
 void glProgramUniform3fvEXT ( GLuint program, GLint location, GLsizei count, const GLfloat * value ) {
@@ -1551,11 +1461,6 @@ void glMinSampleShading ( GLfloat value ) {
 void glDrawVkImageNV ( GLuint64 vkImage, GLuint sampler, GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, GLfloat z, GLfloat s0, GLfloat t0, GLfloat s1, GLfloat t1 ) {
     static PFNGLDRAWVKIMAGENVPROC fptr = (PFNGLDRAWVKIMAGENVPROC) dasWglGetProcAddress("glDrawVkImageNV");
     (*fptr)(vkImage, sampler, x0, y0, x1, y1, z, s0, t0, s1, t1);
-}
-
-void glCopyTexImage1D ( GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLint border ) {
-    static PFNGLCOPYTEXIMAGE1DPROC fptr = (PFNGLCOPYTEXIMAGE1DPROC) dasWglGetProcAddress("glCopyTexImage1D");
-    (*fptr)(target, level, internalformat, x, y, width, border);
 }
 
 void glGetQueryBufferObjectuiv ( GLuint id, GLuint buffer, GLenum pname, GLintptr offset ) {
@@ -1578,11 +1483,6 @@ void glGetQueryBufferObjecti64v ( GLuint id, GLuint buffer, GLenum pname, GLintp
     (*fptr)(id, buffer, pname, offset);
 }
 
-void glFrontFace ( GLenum mode ) {
-    static PFNGLFRONTFACEPROC fptr = (PFNGLFRONTFACEPROC) dasWglGetProcAddress("glFrontFace");
-    (*fptr)(mode);
-}
-
 void glVertexAttrib1f ( GLuint index, GLfloat x ) {
     static PFNGLVERTEXATTRIB1FPROC fptr = (PFNGLVERTEXATTRIB1FPROC) dasWglGetProcAddress("glVertexAttrib1f");
     (*fptr)(index, x);
@@ -1601,11 +1501,6 @@ void glCreateQueries ( GLenum target, GLsizei n, GLuint * ids ) {
 void glGetBufferPointerv ( GLenum target, GLenum pname, void ** params ) {
     static PFNGLGETBUFFERPOINTERVPROC fptr = (PFNGLGETBUFFERPOINTERVPROC) dasWglGetProcAddress("glGetBufferPointerv");
     (*fptr)(target, pname, params);
-}
-
-void glScissor ( GLint x, GLint y, GLsizei width, GLsizei height ) {
-    static PFNGLSCISSORPROC fptr = (PFNGLSCISSORPROC) dasWglGetProcAddress("glScissor");
-    (*fptr)(x, y, width, height);
 }
 
 void glBindVertexBuffers ( GLuint first, GLsizei count, const GLuint * buffers, const GLintptr * offsets, const GLsizei * strides ) {
@@ -1686,11 +1581,6 @@ void glMultiDrawElements ( GLenum mode, const GLsizei * count, GLenum type, cons
 void glUniform3iv ( GLint location, GLsizei count, const GLint * value ) {
     static PFNGLUNIFORM3IVPROC fptr = (PFNGLUNIFORM3IVPROC) dasWglGetProcAddress("glUniform3iv");
     (*fptr)(location, count, value);
-}
-
-void glTexParameteri ( GLenum target, GLenum pname, GLint param ) {
-    static PFNGLTEXPARAMETERIPROC fptr = (PFNGLTEXPARAMETERIPROC) dasWglGetProcAddress("glTexParameteri");
-    (*fptr)(target, pname, param);
 }
 
 void glVertexAttribI3i ( GLuint index, GLint x, GLint y, GLint z ) {
@@ -1833,11 +1723,6 @@ void glUniform2i64ARB ( GLint location, GLint64 x, GLint64 y ) {
     (*fptr)(location, x, y);
 }
 
-void glCopyTexSubImage2D ( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height ) {
-    static PFNGLCOPYTEXSUBIMAGE2DPROC fptr = (PFNGLCOPYTEXSUBIMAGE2DPROC) dasWglGetProcAddress("glCopyTexSubImage2D");
-    (*fptr)(target, level, xoffset, yoffset, x, y, width, height);
-}
-
 void glUseShaderProgramEXT ( GLenum type, GLuint program ) {
     static PFNGLUSESHADERPROGRAMEXTPROC fptr = (PFNGLUSESHADERPROGRAMEXTPROC) dasWglGetProcAddress("glUseShaderProgramEXT");
     (*fptr)(type, program);
@@ -1953,11 +1838,6 @@ void glCompressedTextureSubImage3DEXT ( GLuint texture, GLenum target, GLint lev
     (*fptr)(texture, target, level, xoffset, yoffset, zoffset, width, height, depth, format, imageSize, bits);
 }
 
-void glReadBuffer ( GLenum src ) {
-    static PFNGLREADBUFFERPROC fptr = (PFNGLREADBUFFERPROC) dasWglGetProcAddress("glReadBuffer");
-    (*fptr)(src);
-}
-
 void glUniform3uiv ( GLint location, GLsizei count, const GLuint * value ) {
     static PFNGLUNIFORM3UIVPROC fptr = (PFNGLUNIFORM3UIVPROC) dasWglGetProcAddress("glUniform3uiv");
     (*fptr)(location, count, value);
@@ -1996,11 +1876,6 @@ void glTexAttachMemoryNV ( GLenum target, GLuint memory, GLuint64 offset ) {
 void glVertexAttribI1i ( GLuint index, GLint x ) {
     static PFNGLVERTEXATTRIBI1IPROC fptr = (PFNGLVERTEXATTRIBI1IPROC) dasWglGetProcAddress("glVertexAttribI1i");
     (*fptr)(index, x);
-}
-
-void glDrawArrays ( GLenum mode, GLint first, GLsizei count ) {
-    static PFNGLDRAWARRAYSPROC fptr = (PFNGLDRAWARRAYSPROC) dasWglGetProcAddress("glDrawArrays");
-    (*fptr)(mode, first, count);
 }
 
 void glProgramUniform1d ( GLuint program, GLint location, GLdouble v0 ) {
@@ -2086,11 +1961,6 @@ void glProgramUniform1i ( GLuint program, GLint location, GLint v0 ) {
 void glProgramUniform2i ( GLuint program, GLint location, GLint v0, GLint v1 ) {
     static PFNGLPROGRAMUNIFORM2IPROC fptr = (PFNGLPROGRAMUNIFORM2IPROC) dasWglGetProcAddress("glProgramUniform2i");
     (*fptr)(program, location, v0, v1);
-}
-
-const GLubyte * glGetString ( GLenum name ) {
-    static PFNGLGETSTRINGPROC fptr = (PFNGLGETSTRINGPROC) dasWglGetProcAddress("glGetString");
-    return (*fptr)(name);
 }
 
 void glUniformBlockBinding ( GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding ) {
@@ -2338,11 +2208,6 @@ void glEndConditionalRender (  ) {
     (*fptr)();
 }
 
-void glBlendFunc ( GLenum sfactor, GLenum dfactor ) {
-    static PFNGLBLENDFUNCPROC fptr = (PFNGLBLENDFUNCPROC) dasWglGetProcAddress("glBlendFunc");
-    (*fptr)(sfactor, dfactor);
-}
-
 void glProgramUniform2d ( GLuint program, GLint location, GLdouble v0, GLdouble v1 ) {
     static PFNGLPROGRAMUNIFORM2DPROC fptr = (PFNGLPROGRAMUNIFORM2DPROC) dasWglGetProcAddress("glProgramUniform2d");
     (*fptr)(program, location, v0, v1);
@@ -2521,11 +2386,6 @@ void glVertexAttribL4ui64vNV ( GLuint index, const GLuint64EXT * v ) {
 void glCompressedTexImage1D ( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLint border, GLsizei imageSize, const void * data ) {
     static PFNGLCOMPRESSEDTEXIMAGE1DPROC fptr = (PFNGLCOMPRESSEDTEXIMAGE1DPROC) dasWglGetProcAddress("glCompressedTexImage1D");
     (*fptr)(target, level, internalformat, width, border, imageSize, data);
-}
-
-void glClearStencil ( GLint s ) {
-    static PFNGLCLEARSTENCILPROC fptr = (PFNGLCLEARSTENCILPROC) dasWglGetProcAddress("glClearStencil");
-    (*fptr)(s);
 }
 
 void glVertexAttribL4d ( GLuint index, GLdouble x, GLdouble y, GLdouble z, GLdouble w ) {
@@ -2938,11 +2798,6 @@ void glEndQuery ( GLenum target ) {
     (*fptr)(target);
 }
 
-void glGetTexImage ( GLenum target, GLint level, GLenum format, GLenum type, void * pixels ) {
-    static PFNGLGETTEXIMAGEPROC fptr = (PFNGLGETTEXIMAGEPROC) dasWglGetProcAddress("glGetTexImage");
-    (*fptr)(target, level, format, type, pixels);
-}
-
 void glGetInternalformativ ( GLenum target, GLenum internalformat, GLenum pname, GLsizei count, GLint * params ) {
     static PFNGLGETINTERNALFORMATIVPROC fptr = (PFNGLGETINTERNALFORMATIVPROC) dasWglGetProcAddress("glGetInternalformativ");
     (*fptr)(target, internalformat, pname, count, params);
@@ -2953,24 +2808,9 @@ void glEnableVertexArrayAttribEXT ( GLuint vaobj, GLuint index ) {
     (*fptr)(vaobj, index);
 }
 
-void glDepthRange ( GLdouble n, GLdouble f ) {
-    static PFNGLDEPTHRANGEPROC fptr = (PFNGLDEPTHRANGEPROC) dasWglGetProcAddress("glDepthRange");
-    (*fptr)(n, f);
-}
-
-void glGetTexLevelParameteriv ( GLenum target, GLint level, GLenum pname, GLint * params ) {
-    static PFNGLGETTEXLEVELPARAMETERIVPROC fptr = (PFNGLGETTEXLEVELPARAMETERIVPROC) dasWglGetProcAddress("glGetTexLevelParameteriv");
-    (*fptr)(target, level, pname, params);
-}
-
 GLboolean glIsStateNV ( GLuint state ) {
     static PFNGLISSTATENVPROC fptr = (PFNGLISSTATENVPROC) dasWglGetProcAddress("glIsStateNV");
     return (*fptr)(state);
-}
-
-void glCopyTexSubImage1D ( GLenum target, GLint level, GLint xoffset, GLint x, GLint y, GLsizei width ) {
-    static PFNGLCOPYTEXSUBIMAGE1DPROC fptr = (PFNGLCOPYTEXSUBIMAGE1DPROC) dasWglGetProcAddress("glCopyTexSubImage1D");
-    (*fptr)(target, level, xoffset, x, y, width);
 }
 
 void glUniform4iv ( GLint location, GLsizei count, const GLint * value ) {
@@ -3113,11 +2953,6 @@ void glProgramUniform1iv ( GLuint program, GLint location, GLsizei count, const 
     (*fptr)(program, location, count, value);
 }
 
-void glDisable ( GLenum cap ) {
-    static PFNGLDISABLEPROC fptr = (PFNGLDISABLEPROC) dasWglGetProcAddress("glDisable");
-    (*fptr)(cap);
-}
-
 void glSamplerParameterIiv ( GLuint sampler, GLenum pname, const GLint * param ) {
     static PFNGLSAMPLERPARAMETERIIVPROC fptr = (PFNGLSAMPLERPARAMETERIIVPROC) dasWglGetProcAddress("glSamplerParameterIiv");
     (*fptr)(sampler, pname, param);
@@ -3131,11 +2966,6 @@ void glBlendEquationiARB ( GLuint buf, GLenum mode ) {
 void glNamedFramebufferTexture ( GLuint framebuffer, GLenum attachment, GLuint texture, GLint level ) {
     static PFNGLNAMEDFRAMEBUFFERTEXTUREPROC fptr = (PFNGLNAMEDFRAMEBUFFERTEXTUREPROC) dasWglGetProcAddress("glNamedFramebufferTexture");
     (*fptr)(framebuffer, attachment, texture, level);
-}
-
-void glDrawElements ( GLenum mode, GLsizei count, GLenum type, const void * indices ) {
-    static PFNGLDRAWELEMENTSPROC fptr = (PFNGLDRAWELEMENTSPROC) dasWglGetProcAddress("glDrawElements");
-    (*fptr)(mode, count, type, indices);
 }
 
 void glUniformMatrix3fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
@@ -3438,16 +3268,6 @@ void glUniform3ui64NV ( GLint location, GLuint64EXT x, GLuint64EXT y, GLuint64EX
     (*fptr)(location, x, y, z);
 }
 
-void glGetTexLevelParameterfv ( GLenum target, GLint level, GLenum pname, GLfloat * params ) {
-    static PFNGLGETTEXLEVELPARAMETERFVPROC fptr = (PFNGLGETTEXLEVELPARAMETERFVPROC) dasWglGetProcAddress("glGetTexLevelParameterfv");
-    (*fptr)(target, level, pname, params);
-}
-
-void glColorMask ( GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha ) {
-    static PFNGLCOLORMASKPROC fptr = (PFNGLCOLORMASKPROC) dasWglGetProcAddress("glColorMask");
-    (*fptr)(red, green, blue, alpha);
-}
-
 void glBeginQuery ( GLenum target, GLuint id ) {
     static PFNGLBEGINQUERYPROC fptr = (PFNGLBEGINQUERYPROC) dasWglGetProcAddress("glBeginQuery");
     (*fptr)(target, id);
@@ -3551,11 +3371,6 @@ void glVertexAttribL2d ( GLuint index, GLdouble x, GLdouble y ) {
 void glCompressedTexSubImage2D ( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const void * data ) {
     static PFNGLCOMPRESSEDTEXSUBIMAGE2DPROC fptr = (PFNGLCOMPRESSEDTEXSUBIMAGE2DPROC) dasWglGetProcAddress("glCompressedTexSubImage2D");
     (*fptr)(target, level, xoffset, yoffset, width, height, format, imageSize, data);
-}
-
-void glPointSize ( GLfloat size ) {
-    static PFNGLPOINTSIZEPROC fptr = (PFNGLPOINTSIZEPROC) dasWglGetProcAddress("glPointSize");
-    (*fptr)(size);
 }
 
 void glProgramUniformui64NV ( GLuint program, GLint location, GLuint64EXT value ) {
@@ -3731,11 +3546,6 @@ GLboolean glIsProgram ( GLuint program ) {
 void glUniform1i64vNV ( GLint location, GLsizei count, const GLint64EXT * value ) {
     static PFNGLUNIFORM1I64VNVPROC fptr = (PFNGLUNIFORM1I64VNVPROC) dasWglGetProcAddress("glUniform1i64vNV");
     (*fptr)(location, count, value);
-}
-
-void glStencilFunc ( GLenum func, GLint ref, GLuint mask ) {
-    static PFNGLSTENCILFUNCPROC fptr = (PFNGLSTENCILFUNCPROC) dasWglGetProcAddress("glStencilFunc");
-    (*fptr)(func, ref, mask);
 }
 
 void glProgramUniform3iv ( GLuint program, GLint location, GLsizei count, const GLint * value ) {
@@ -4193,11 +4003,6 @@ void glBindBufferBase ( GLenum target, GLuint index, GLuint buffer ) {
     (*fptr)(target, index, buffer);
 }
 
-void glGenTextures ( GLsizei n, GLuint * textures ) {
-    static PFNGLGENTEXTURESPROC fptr = (PFNGLGENTEXTURESPROC) dasWglGetProcAddress("glGenTextures");
-    (*fptr)(n, textures);
-}
-
 void glMemoryBarrierByRegion ( GLbitfield barriers ) {
     static PFNGLMEMORYBARRIERBYREGIONPROC fptr = (PFNGLMEMORYBARRIERBYREGIONPROC) dasWglGetProcAddress("glMemoryBarrierByRegion");
     (*fptr)(barriers);
@@ -4291,16 +4096,6 @@ void glGetnTexImageARB ( GLenum target, GLint level, GLenum format, GLenum type,
 void glTexBuffer ( GLenum target, GLenum internalformat, GLuint buffer ) {
     static PFNGLTEXBUFFERPROC fptr = (PFNGLTEXBUFFERPROC) dasWglGetProcAddress("glTexBuffer");
     (*fptr)(target, internalformat, buffer);
-}
-
-void glViewport ( GLint x, GLint y, GLsizei width, GLsizei height ) {
-    static PFNGLVIEWPORTPROC fptr = (PFNGLVIEWPORTPROC) dasWglGetProcAddress("glViewport");
-    (*fptr)(x, y, width, height);
-}
-
-void glGetPointerv ( GLenum pname, void ** params ) {
-    static PFNGLGETPOINTERVPROC fptr = (PFNGLGETPOINTERVPROC) dasWglGetProcAddress("glGetPointerv");
-    (*fptr)(pname, params);
 }
 
 void glClipControl ( GLenum origin, GLenum depth ) {
@@ -4573,11 +4368,6 @@ void glFramebufferTexture ( GLenum target, GLenum attachment, GLuint texture, GL
     (*fptr)(target, attachment, texture, level);
 }
 
-void glFlush (  ) {
-    static PFNGLFLUSHPROC fptr = (PFNGLFLUSHPROC) dasWglGetProcAddress("glFlush");
-    (*fptr)();
-}
-
 void glProgramBinary ( GLuint program, GLenum binaryFormat, const void * binary, GLsizei length ) {
     static PFNGLPROGRAMBINARYPROC fptr = (PFNGLPROGRAMBINARYPROC) dasWglGetProcAddress("glProgramBinary");
     (*fptr)(program, binaryFormat, binary, length);
@@ -4586,11 +4376,6 @@ void glProgramBinary ( GLuint program, GLenum binaryFormat, const void * binary,
 void glGetTextureParameterfvEXT ( GLuint texture, GLenum target, GLenum pname, GLfloat * params ) {
     static PFNGLGETTEXTUREPARAMETERFVEXTPROC fptr = (PFNGLGETTEXTUREPARAMETERFVEXTPROC) dasWglGetProcAddress("glGetTextureParameterfvEXT");
     (*fptr)(texture, target, pname, params);
-}
-
-void glClear ( GLbitfield mask ) {
-    static PFNGLCLEARPROC fptr = (PFNGLCLEARPROC) dasWglGetProcAddress("glClear");
-    (*fptr)(mask);
 }
 
 void glDepthRangef ( GLfloat n, GLfloat f ) {
@@ -4813,11 +4598,6 @@ GLint glGetFragDataIndex ( GLuint program, const GLchar * name ) {
     return (*fptr)(program, name);
 }
 
-void glGetTexParameteriv ( GLenum target, GLenum pname, GLint * params ) {
-    static PFNGLGETTEXPARAMETERIVPROC fptr = (PFNGLGETTEXPARAMETERIVPROC) dasWglGetProcAddress("glGetTexParameteriv");
-    (*fptr)(target, pname, params);
-}
-
 void glTexParameterIiv ( GLenum target, GLenum pname, const GLint * params ) {
     static PFNGLTEXPARAMETERIIVPROC fptr = (PFNGLTEXPARAMETERIIVPROC) dasWglGetProcAddress("glTexParameterIiv");
     (*fptr)(target, pname, params);
@@ -4831,16 +4611,6 @@ void glProgramUniform1ivEXT ( GLuint program, GLint location, GLsizei count, con
 void glQueryCounter ( GLuint id, GLenum target ) {
     static PFNGLQUERYCOUNTERPROC fptr = (PFNGLQUERYCOUNTERPROC) dasWglGetProcAddress("glQueryCounter");
     (*fptr)(id, target);
-}
-
-GLboolean glIsTexture ( GLuint texture ) {
-    static PFNGLISTEXTUREPROC fptr = (PFNGLISTEXTUREPROC) dasWglGetProcAddress("glIsTexture");
-    return (*fptr)(texture);
-}
-
-void glStencilOp ( GLenum fail, GLenum zfail, GLenum zpass ) {
-    static PFNGLSTENCILOPPROC fptr = (PFNGLSTENCILOPPROC) dasWglGetProcAddress("glStencilOp");
-    (*fptr)(fail, zfail, zpass);
 }
 
 GLint glGetSubroutineUniformLocation ( GLuint program, GLenum shadertype, const GLchar * name ) {
@@ -4918,16 +4688,6 @@ void glSamplerParameterf ( GLuint sampler, GLenum pname, GLfloat param ) {
     (*fptr)(sampler, pname, param);
 }
 
-void glFinish (  ) {
-    static PFNGLFINISHPROC fptr = (PFNGLFINISHPROC) dasWglGetProcAddress("glFinish");
-    (*fptr)();
-}
-
-void glDeleteTextures ( GLsizei n, const GLuint * textures ) {
-    static PFNGLDELETETEXTURESPROC fptr = (PFNGLDELETETEXTURESPROC) dasWglGetProcAddress("glDeleteTextures");
-    (*fptr)(n, textures);
-}
-
 void glVertexAttribL2i64NV ( GLuint index, GLint64EXT x, GLint64EXT y ) {
     static PFNGLVERTEXATTRIBL2I64NVPROC fptr = (PFNGLVERTEXATTRIBL2I64NVPROC) dasWglGetProcAddress("glVertexAttribL2i64NV");
     (*fptr)(index, x, y);
@@ -4958,19 +4718,9 @@ void glVertexAttribL3ui64NV ( GLuint index, GLuint64EXT x, GLuint64EXT y, GLuint
     (*fptr)(index, x, y, z);
 }
 
-void glTexParameteriv ( GLenum target, GLenum pname, const GLint * params ) {
-    static PFNGLTEXPARAMETERIVPROC fptr = (PFNGLTEXPARAMETERIVPROC) dasWglGetProcAddress("glTexParameteriv");
-    (*fptr)(target, pname, params);
-}
-
 void glMultiDrawArraysIndirectCountARB ( GLenum mode, const void * indirect, GLintptr drawcount, GLsizei maxdrawcount, GLsizei stride ) {
     static PFNGLMULTIDRAWARRAYSINDIRECTCOUNTARBPROC fptr = (PFNGLMULTIDRAWARRAYSINDIRECTCOUNTARBPROC) dasWglGetProcAddress("glMultiDrawArraysIndirectCountARB");
     (*fptr)(mode, indirect, drawcount, maxdrawcount, stride);
-}
-
-void glGetIntegerv ( GLenum pname, GLint * data ) {
-    static PFNGLGETINTEGERVPROC fptr = (PFNGLGETINTEGERVPROC) dasWglGetProcAddress("glGetIntegerv");
-    (*fptr)(pname, data);
 }
 
 void glReleaseShaderCompiler (  ) {
@@ -5058,11 +4808,6 @@ void glProgramUniform4uivEXT ( GLuint program, GLint location, GLsizei count, co
     (*fptr)(program, location, count, value);
 }
 
-void glReadPixels ( GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void * pixels ) {
-    static PFNGLREADPIXELSPROC fptr = (PFNGLREADPIXELSPROC) dasWglGetProcAddress("glReadPixels");
-    (*fptr)(x, y, width, height, format, type, pixels);
-}
-
 void glStencilFuncSeparate ( GLenum face, GLenum func, GLint ref, GLuint mask ) {
     static PFNGLSTENCILFUNCSEPARATEPROC fptr = (PFNGLSTENCILFUNCSEPARATEPROC) dasWglGetProcAddress("glStencilFuncSeparate");
     (*fptr)(face, func, ref, mask);
@@ -5136,11 +4881,6 @@ void glEnableVertexArrayEXT ( GLuint vaobj, GLenum array ) {
 void glAttachShader ( GLuint program, GLuint shader ) {
     static PFNGLATTACHSHADERPROC fptr = (PFNGLATTACHSHADERPROC) dasWglGetProcAddress("glAttachShader");
     (*fptr)(program, shader);
-}
-
-void glGetTexParameterfv ( GLenum target, GLenum pname, GLfloat * params ) {
-    static PFNGLGETTEXPARAMETERFVPROC fptr = (PFNGLGETTEXPARAMETERFVPROC) dasWglGetProcAddress("glGetTexParameterfv");
-    (*fptr)(target, pname, params);
 }
 
 void glGetMultiTexGenfvEXT ( GLenum texunit, GLenum coord, GLenum pname, GLfloat * params ) {
@@ -5218,11 +4958,6 @@ void glDeleteProgram ( GLuint program ) {
     (*fptr)(program);
 }
 
-void glClearDepth ( GLdouble depth ) {
-    static PFNGLCLEARDEPTHPROC fptr = (PFNGLCLEARDEPTHPROC) dasWglGetProcAddress("glClearDepth");
-    (*fptr)(depth);
-}
-
 void glGetFramebufferAttachmentParameteriv ( GLenum target, GLenum attachment, GLenum pname, GLint * params ) {
     static PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC fptr = (PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC) dasWglGetProcAddress("glGetFramebufferAttachmentParameteriv");
     (*fptr)(target, attachment, pname, params);
@@ -5268,11 +5003,6 @@ void glTextureRenderbufferEXT ( GLuint texture, GLenum target, GLuint renderbuff
     (*fptr)(texture, target, renderbuffer);
 }
 
-void glLineWidth ( GLfloat width ) {
-    static PFNGLLINEWIDTHPROC fptr = (PFNGLLINEWIDTHPROC) dasWglGetProcAddress("glLineWidth");
-    (*fptr)(width);
-}
-
 void glGetVertexAttribiv ( GLuint index, GLenum pname, GLint * params ) {
     static PFNGLGETVERTEXATTRIBIVPROC fptr = (PFNGLGETVERTEXATTRIBIVPROC) dasWglGetProcAddress("glGetVertexAttribiv");
     (*fptr)(index, pname, params);
@@ -5286,16 +5016,6 @@ void glGetInteger64v ( GLenum pname, GLint64 * data ) {
 void glGetIntegerIndexedvEXT ( GLenum target, GLuint index, GLint * data ) {
     static PFNGLGETINTEGERINDEXEDVEXTPROC fptr = (PFNGLGETINTEGERINDEXEDVEXTPROC) dasWglGetProcAddress("glGetIntegerIndexedvEXT");
     (*fptr)(target, index, data);
-}
-
-void glTexParameterfv ( GLenum target, GLenum pname, const GLfloat * params ) {
-    static PFNGLTEXPARAMETERFVPROC fptr = (PFNGLTEXPARAMETERFVPROC) dasWglGetProcAddress("glTexParameterfv");
-    (*fptr)(target, pname, params);
-}
-
-void glTexImage1D ( GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum type, const void * pixels ) {
-    static PFNGLTEXIMAGE1DPROC fptr = (PFNGLTEXIMAGE1DPROC) dasWglGetProcAddress("glTexImage1D");
-    (*fptr)(target, level, internalformat, width, border, format, type, pixels);
 }
 
 void glFramebufferDrawBufferEXT ( GLuint framebuffer, GLenum mode ) {
@@ -5333,11 +5053,6 @@ void glProgramUniform2i64ARB ( GLuint program, GLint location, GLint64 x, GLint6
     (*fptr)(program, location, x, y);
 }
 
-void glLogicOp ( GLenum opcode ) {
-    static PFNGLLOGICOPPROC fptr = (PFNGLLOGICOPPROC) dasWglGetProcAddress("glLogicOp");
-    (*fptr)(opcode);
-}
-
 void glVertexAttribI1iv ( GLuint index, const GLint * v ) {
     static PFNGLVERTEXATTRIBI1IVPROC fptr = (PFNGLVERTEXATTRIBI1IVPROC) dasWglGetProcAddress("glVertexAttribI1iv");
     (*fptr)(index, v);
@@ -5361,11 +5076,6 @@ void glGetProgramiv ( GLuint program, GLenum pname, GLint * params ) {
 void glGetCompressedTexImage ( GLenum target, GLint level, void * img ) {
     static PFNGLGETCOMPRESSEDTEXIMAGEPROC fptr = (PFNGLGETCOMPRESSEDTEXIMAGEPROC) dasWglGetProcAddress("glGetCompressedTexImage");
     (*fptr)(target, level, img);
-}
-
-void glGetDoublev ( GLenum pname, GLdouble * data ) {
-    static PFNGLGETDOUBLEVPROC fptr = (PFNGLGETDOUBLEVPROC) dasWglGetProcAddress("glGetDoublev");
-    (*fptr)(pname, data);
 }
 
 void glVertexAttribL2ui64NV ( GLuint index, GLuint64EXT x, GLuint64EXT y ) {
@@ -5461,11 +5171,6 @@ void glGetnUniformdvARB ( GLuint program, GLint location, GLsizei bufSize, GLdou
 void glUniformHandleui64ARB ( GLint location, GLuint64 value ) {
     static PFNGLUNIFORMHANDLEUI64ARBPROC fptr = (PFNGLUNIFORMHANDLEUI64ARBPROC) dasWglGetProcAddress("glUniformHandleui64ARB");
     (*fptr)(location, value);
-}
-
-void glCullFace ( GLenum mode ) {
-    static PFNGLCULLFACEPROC fptr = (PFNGLCULLFACEPROC) dasWglGetProcAddress("glCullFace");
-    (*fptr)(mode);
 }
 
 void glUniform2iv ( GLint location, GLsizei count, const GLint * value ) {
@@ -5601,11 +5306,6 @@ void glProgramUniform4uiv ( GLuint program, GLint location, GLsizei count, const
 void glMultiDrawElementsIndirect ( GLenum mode, GLenum type, const void * indirect, GLsizei drawcount, GLsizei stride ) {
     static PFNGLMULTIDRAWELEMENTSINDIRECTPROC fptr = (PFNGLMULTIDRAWELEMENTSINDIRECTPROC) dasWglGetProcAddress("glMultiDrawElementsIndirect");
     (*fptr)(mode, type, indirect, drawcount, stride);
-}
-
-void glDepthMask ( GLboolean flag ) {
-    static PFNGLDEPTHMASKPROC fptr = (PFNGLDEPTHMASKPROC) dasWglGetProcAddress("glDepthMask");
-    (*fptr)(flag);
 }
 
 void glScissorIndexed ( GLuint index, GLint left, GLint bottom, GLsizei width, GLsizei height ) {
@@ -5898,11 +5598,6 @@ void glMultiTexParameterfEXT ( GLenum texunit, GLenum target, GLenum pname, GLfl
     (*fptr)(texunit, target, pname, param);
 }
 
-void glTexImage2D ( GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const void * pixels ) {
-    static PFNGLTEXIMAGE2DPROC fptr = (PFNGLTEXIMAGE2DPROC) dasWglGetProcAddress("glTexImage2D");
-    (*fptr)(target, level, internalformat, width, height, border, format, type, pixels);
-}
-
 void glRenderbufferStorageMultisampleCoverageNV ( GLenum target, GLsizei coverageSamples, GLsizei colorSamples, GLenum internalformat, GLsizei width, GLsizei height ) {
     static PFNGLRENDERBUFFERSTORAGEMULTISAMPLECOVERAGENVPROC fptr = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLECOVERAGENVPROC) dasWglGetProcAddress("glRenderbufferStorageMultisampleCoverageNV");
     (*fptr)(target, coverageSamples, colorSamples, internalformat, width, height);
@@ -6006,11 +5701,6 @@ void glUniform1ui64ARB ( GLint location, GLuint64 x ) {
 void glStencilStrokePathInstancedNV ( GLsizei numPaths, GLenum pathNameType, const void * paths, GLuint pathBase, GLint reference, GLuint mask, GLenum transformType, const GLfloat * transformValues ) {
     static PFNGLSTENCILSTROKEPATHINSTANCEDNVPROC fptr = (PFNGLSTENCILSTROKEPATHINSTANCEDNVPROC) dasWglGetProcAddress("glStencilStrokePathInstancedNV");
     (*fptr)(numPaths, pathNameType, paths, pathBase, reference, mask, transformType, transformValues);
-}
-
-void glGetFloatv ( GLenum pname, GLfloat * data ) {
-    static PFNGLGETFLOATVPROC fptr = (PFNGLGETFLOATVPROC) dasWglGetProcAddress("glGetFloatv");
-    (*fptr)(pname, data);
 }
 
 void glGetMultiTexParameterfvEXT ( GLenum texunit, GLenum target, GLenum pname, GLfloat * params ) {

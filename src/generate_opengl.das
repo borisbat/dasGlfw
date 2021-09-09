@@ -2,6 +2,7 @@ require fio
 require strings
 require daslib/strings_boost
 require daslib/cpp_gen
+require ast
 
 def fnPtrType(fname)
     return "PFN" + to_upper(fname) + "PROC"
@@ -29,11 +30,16 @@ def main
     blocked_functions <- [{auto[]
         "operator delete";
         "operator new";
-        "glfwDestroyWindow";        // we overwrite with custom one
         "___report_gsfailure";      // straight up not necessary
         "__security_init_cookie";
         "__security_check_cookie"
     }]
+
+    for_each_function(get_module("glfw"),"") <| $ ( fnc )
+        blocked_functions |> push("{fnc.name}")
+
+    for_each_global(get_module("glfw")) <| $ ( gvar )
+        blocked_defines |> push("{gvar.name}")
 
     // generate
     allow_extern_c = true

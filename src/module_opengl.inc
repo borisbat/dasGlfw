@@ -163,11 +163,6 @@ addExtern<DAS_BIND_FUN(glGetVertexAttribIiv)>(*this, lib, "glGetVertexAttribIiv"
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glStencilMask)>(*this, lib, "glStencilMask",SideEffects::worstDefault, "glStencilMask")
-	->args({"mask"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glClearBufferData)>(*this, lib, "glClearBufferData",SideEffects::worstDefault, "glClearBufferData")
 	->args({"target","internalformat","format","type","data"})
 ;
@@ -328,11 +323,6 @@ addExtern<DAS_BIND_FUN(glDrawArraysInstancedARB)>(*this, lib, "glDrawArraysInsta
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glTexSubImage1D)>(*this, lib, "glTexSubImage1D",SideEffects::worstDefault, "glTexSubImage1D")
-	->args({"target","level","xoffset","width","format","type","pixels"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glProgramUniform3i64NV)>(*this, lib, "glProgramUniform3i64NV",SideEffects::worstDefault, "glProgramUniform3i64NV")
 	->args({"program","location","x","y","z"})
 ;
@@ -340,11 +330,6 @@ addExtern<DAS_BIND_FUN(glProgramUniform3i64NV)>(*this, lib, "glProgramUniform3i6
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glVertexAttribP3ui)>(*this, lib, "glVertexAttribP3ui",SideEffects::worstDefault, "glVertexAttribP3ui")
 	->args({"index","type","normalized","value"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glBindTexture)>(*this, lib, "glBindTexture",SideEffects::worstDefault, "glBindTexture")
-	->args({"target","texture"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -478,11 +463,6 @@ addExtern<DAS_BIND_FUN(glLinkProgram)>(*this, lib, "glLinkProgram",SideEffects::
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glDrawBuffer)>(*this, lib, "glDrawBuffer",SideEffects::worstDefault, "glDrawBuffer")
-	->args({"buf"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glGetMultiTexGenivEXT)>(*this, lib, "glGetMultiTexGenivEXT",SideEffects::worstDefault, "glGetMultiTexGenivEXT")
 	->args({"texunit","coord","pname","params"})
 ;
@@ -560,11 +540,6 @@ addExtern<DAS_BIND_FUN(glUniform4ui64NV)>(*this, lib, "glUniform4ui64NV",SideEff
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glCopyImageSubData)>(*this, lib, "glCopyImageSubData",SideEffects::worstDefault, "glCopyImageSubData")
 	->args({"srcName","srcTarget","srcLevel","srcX","srcY","srcZ","dstName","dstTarget","dstLevel","dstX","dstY","dstZ","srcWidth","srcHeight","srcDepth"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glPixelStorei)>(*this, lib, "glPixelStorei",SideEffects::worstDefault, "glPixelStorei")
-	->args({"pname","param"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -718,16 +693,6 @@ addExtern<DAS_BIND_FUN(glProgramUniform2fvEXT)>(*this, lib, "glProgramUniform2fv
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glEnable)>(*this, lib, "glEnable",SideEffects::worstDefault, "glEnable")
-	->args({"cap"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glIsEnabled)>(*this, lib, "glIsEnabled",SideEffects::worstDefault, "glIsEnabled")
-	->args({"cap"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glSampleMaski)>(*this, lib, "glSampleMaski",SideEffects::worstDefault, "glSampleMaski")
 	->args({"maskNumber","mask"})
 ;
@@ -765,11 +730,6 @@ addExtern<DAS_BIND_FUN(glUniform1ui64vNV)>(*this, lib, "glUniform1ui64vNV",SideE
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glDrawElementsInstancedARB)>(*this, lib, "glDrawElementsInstancedARB",SideEffects::worstDefault, "glDrawElementsInstancedARB")
 	->args({"mode","count","type","indices","primcount"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glHint)>(*this, lib, "glHint",SideEffects::worstDefault, "glHint")
-	->args({"target","mode"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -848,11 +808,6 @@ addExtern<DAS_BIND_FUN(glProgramUniform2dv)>(*this, lib, "glProgramUniform2dv",S
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glPixelStoref)>(*this, lib, "glPixelStoref",SideEffects::worstDefault, "glPixelStoref")
-	->args({"pname","param"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glCopyTextureSubImage1D)>(*this, lib, "glCopyTextureSubImage1D",SideEffects::worstDefault, "glCopyTextureSubImage1D")
 	->args({"texture","level","xoffset","x","y","width"})
 ;
@@ -870,11 +825,6 @@ addExtern<DAS_BIND_FUN(glGetnUniformui64vARB)>(*this, lib, "glGetnUniformui64vAR
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glVertexArrayFogCoordOffsetEXT)>(*this, lib, "glVertexArrayFogCoordOffsetEXT",SideEffects::worstDefault, "glVertexArrayFogCoordOffsetEXT")
 	->args({"vaobj","buffer","type","stride","offset"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glGetBooleanv)>(*this, lib, "glGetBooleanv",SideEffects::worstDefault, "glGetBooleanv")
-	->args({"pname","data"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -900,11 +850,6 @@ addExtern<DAS_BIND_FUN(glVertexAttrib1sv)>(*this, lib, "glVertexAttrib1sv",SideE
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glGetTextureLevelParameterfvEXT)>(*this, lib, "glGetTextureLevelParameterfvEXT",SideEffects::worstDefault, "glGetTextureLevelParameterfvEXT")
 	->args({"texture","target","level","pname","params"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glGetError)>(*this, lib, "glGetError",SideEffects::worstDefault, "glGetError")
-	->args({})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -1148,11 +1093,6 @@ addExtern<DAS_BIND_FUN(glBindProgramPipeline)>(*this, lib, "glBindProgramPipelin
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glPolygonMode)>(*this, lib, "glPolygonMode",SideEffects::worstDefault, "glPolygonMode")
-	->args({"face","mode"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glUniform1iv)>(*this, lib, "glUniform1iv",SideEffects::worstDefault, "glUniform1iv")
 	->args({"location","count","value"})
 ;
@@ -1160,16 +1100,6 @@ addExtern<DAS_BIND_FUN(glUniform1iv)>(*this, lib, "glUniform1iv",SideEffects::wo
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glGetUniformui64vARB)>(*this, lib, "glGetUniformui64vARB",SideEffects::worstDefault, "glGetUniformui64vARB")
 	->args({"program","location","params"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glClearColor)>(*this, lib, "glClearColor",SideEffects::worstDefault, "glClearColor")
-	->args({"red","green","blue","alpha"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glCopyTexImage2D)>(*this, lib, "glCopyTexImage2D",SideEffects::worstDefault, "glCopyTexImage2D")
-	->args({"target","level","internalformat","x","y","width","height","border"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -1295,11 +1225,6 @@ addExtern<DAS_BIND_FUN(glCopyTextureImage1DEXT)>(*this, lib, "glCopyTextureImage
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glProgramParameteri)>(*this, lib, "glProgramParameteri",SideEffects::worstDefault, "glProgramParameteri")
 	->args({"program","pname","value"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glDepthFunc)>(*this, lib, "glDepthFunc",SideEffects::worstDefault, "glDepthFunc")
-	->args({"func"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -1518,28 +1443,13 @@ addExtern<DAS_BIND_FUN(glPopGroupMarkerEXT)>(*this, lib, "glPopGroupMarkerEXT",S
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glTexSubImage2D)>(*this, lib, "glTexSubImage2D",SideEffects::worstDefault, "glTexSubImage2D")
-	->args({"target","level","xoffset","yoffset","width","height","format","type","pixels"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glGenSamplers)>(*this, lib, "glGenSamplers",SideEffects::worstDefault, "glGenSamplers")
 	->args({"count","samplers"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glPolygonOffset)>(*this, lib, "glPolygonOffset",SideEffects::worstDefault, "glPolygonOffset")
-	->args({"factor","units"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glGetNamedProgramLocalParameterfvEXT)>(*this, lib, "glGetNamedProgramLocalParameterfvEXT",SideEffects::worstDefault, "glGetNamedProgramLocalParameterfvEXT")
 	->args({"program","target","index","params"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glTexParameterf)>(*this, lib, "glTexParameterf",SideEffects::worstDefault, "glTexParameterf")
-	->args({"target","pname","param"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -1555,11 +1465,6 @@ addExtern<DAS_BIND_FUN(glMinSampleShading)>(*this, lib, "glMinSampleShading",Sid
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glDrawVkImageNV)>(*this, lib, "glDrawVkImageNV",SideEffects::worstDefault, "glDrawVkImageNV")
 	->args({"vkImage","sampler","x0","y0","x1","y1","z","s0","t0","s1","t1"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glCopyTexImage1D)>(*this, lib, "glCopyTexImage1D",SideEffects::worstDefault, "glCopyTexImage1D")
-	->args({"target","level","internalformat","x","y","width","border"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -1583,11 +1488,6 @@ addExtern<DAS_BIND_FUN(glGetQueryBufferObjecti64v)>(*this, lib, "glGetQueryBuffe
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glFrontFace)>(*this, lib, "glFrontFace",SideEffects::worstDefault, "glFrontFace")
-	->args({"mode"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glVertexAttrib1f)>(*this, lib, "glVertexAttrib1f",SideEffects::worstDefault, "glVertexAttrib1f")
 	->args({"index","x"})
 ;
@@ -1605,11 +1505,6 @@ addExtern<DAS_BIND_FUN(glCreateQueries)>(*this, lib, "glCreateQueries",SideEffec
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glGetBufferPointerv)>(*this, lib, "glGetBufferPointerv",SideEffects::worstDefault, "glGetBufferPointerv")
 	->args({"target","pname","params"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glScissor)>(*this, lib, "glScissor",SideEffects::worstDefault, "glScissor")
-	->args({"x","y","width","height"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -1690,11 +1585,6 @@ addExtern<DAS_BIND_FUN(glMultiDrawElements)>(*this, lib, "glMultiDrawElements",S
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glUniform3iv)>(*this, lib, "glUniform3iv",SideEffects::worstDefault, "glUniform3iv")
 	->args({"location","count","value"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glTexParameteri)>(*this, lib, "glTexParameteri",SideEffects::worstDefault, "glTexParameteri")
-	->args({"target","pname","param"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -1838,11 +1728,6 @@ addExtern<DAS_BIND_FUN(glUniform2i64ARB)>(*this, lib, "glUniform2i64ARB",SideEff
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glCopyTexSubImage2D)>(*this, lib, "glCopyTexSubImage2D",SideEffects::worstDefault, "glCopyTexSubImage2D")
-	->args({"target","level","xoffset","yoffset","x","y","width","height"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glUseShaderProgramEXT)>(*this, lib, "glUseShaderProgramEXT",SideEffects::worstDefault, "glUseShaderProgramEXT")
 	->args({"type","program"})
 ;
@@ -1958,11 +1843,6 @@ addExtern<DAS_BIND_FUN(glCompressedTextureSubImage3DEXT)>(*this, lib, "glCompres
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glReadBuffer)>(*this, lib, "glReadBuffer",SideEffects::worstDefault, "glReadBuffer")
-	->args({"src"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glUniform3uiv)>(*this, lib, "glUniform3uiv",SideEffects::worstDefault, "glUniform3uiv")
 	->args({"location","count","value"})
 ;
@@ -2000,11 +1880,6 @@ addExtern<DAS_BIND_FUN(glTexAttachMemoryNV)>(*this, lib, "glTexAttachMemoryNV",S
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glVertexAttribI1i)>(*this, lib, "glVertexAttribI1i",SideEffects::worstDefault, "glVertexAttribI1i")
 	->args({"index","x"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glDrawArrays)>(*this, lib, "glDrawArrays",SideEffects::worstDefault, "glDrawArrays")
-	->args({"mode","first","count"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -2090,11 +1965,6 @@ addExtern<DAS_BIND_FUN(glProgramUniform1i)>(*this, lib, "glProgramUniform1i",Sid
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glProgramUniform2i)>(*this, lib, "glProgramUniform2i",SideEffects::worstDefault, "glProgramUniform2i")
 	->args({"program","location","v0","v1"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glGetString)>(*this, lib, "glGetString",SideEffects::worstDefault, "glGetString")
-	->args({"name"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -2343,11 +2213,6 @@ addExtern<DAS_BIND_FUN(glEndConditionalRender)>(*this, lib, "glEndConditionalRen
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glBlendFunc)>(*this, lib, "glBlendFunc",SideEffects::worstDefault, "glBlendFunc")
-	->args({"sfactor","dfactor"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glProgramUniform2d)>(*this, lib, "glProgramUniform2d",SideEffects::worstDefault, "glProgramUniform2d")
 	->args({"program","location","v0","v1"})
 ;
@@ -2525,11 +2390,6 @@ addExtern<DAS_BIND_FUN(glVertexAttribL4ui64vNV)>(*this, lib, "glVertexAttribL4ui
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glCompressedTexImage1D)>(*this, lib, "glCompressedTexImage1D",SideEffects::worstDefault, "glCompressedTexImage1D")
 	->args({"target","level","internalformat","width","border","imageSize","data"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glClearStencil)>(*this, lib, "glClearStencil",SideEffects::worstDefault, "glClearStencil")
-	->args({"s"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -2943,11 +2803,6 @@ addExtern<DAS_BIND_FUN(glEndQuery)>(*this, lib, "glEndQuery",SideEffects::worstD
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glGetTexImage)>(*this, lib, "glGetTexImage",SideEffects::worstDefault, "glGetTexImage")
-	->args({"target","level","format","type","pixels"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glGetInternalformativ)>(*this, lib, "glGetInternalformativ",SideEffects::worstDefault, "glGetInternalformativ")
 	->args({"target","internalformat","pname","count","params"})
 ;
@@ -2958,23 +2813,8 @@ addExtern<DAS_BIND_FUN(glEnableVertexArrayAttribEXT)>(*this, lib, "glEnableVerte
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glDepthRange)>(*this, lib, "glDepthRange",SideEffects::worstDefault, "glDepthRange")
-	->args({"n","f"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glGetTexLevelParameteriv)>(*this, lib, "glGetTexLevelParameteriv",SideEffects::worstDefault, "glGetTexLevelParameteriv")
-	->args({"target","level","pname","params"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glIsStateNV)>(*this, lib, "glIsStateNV",SideEffects::worstDefault, "glIsStateNV")
 	->args({"state"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glCopyTexSubImage1D)>(*this, lib, "glCopyTexSubImage1D",SideEffects::worstDefault, "glCopyTexSubImage1D")
-	->args({"target","level","xoffset","x","y","width"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -3118,11 +2958,6 @@ addExtern<DAS_BIND_FUN(glProgramUniform1iv)>(*this, lib, "glProgramUniform1iv",S
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glDisable)>(*this, lib, "glDisable",SideEffects::worstDefault, "glDisable")
-	->args({"cap"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glSamplerParameterIiv)>(*this, lib, "glSamplerParameterIiv",SideEffects::worstDefault, "glSamplerParameterIiv")
 	->args({"sampler","pname","param"})
 ;
@@ -3135,11 +2970,6 @@ addExtern<DAS_BIND_FUN(glBlendEquationiARB)>(*this, lib, "glBlendEquationiARB",S
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glNamedFramebufferTexture)>(*this, lib, "glNamedFramebufferTexture",SideEffects::worstDefault, "glNamedFramebufferTexture")
 	->args({"framebuffer","attachment","texture","level"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glDrawElements)>(*this, lib, "glDrawElements",SideEffects::worstDefault, "glDrawElements")
-	->args({"mode","count","type","indices"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -3443,16 +3273,6 @@ addExtern<DAS_BIND_FUN(glUniform3ui64NV)>(*this, lib, "glUniform3ui64NV",SideEff
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glGetTexLevelParameterfv)>(*this, lib, "glGetTexLevelParameterfv",SideEffects::worstDefault, "glGetTexLevelParameterfv")
-	->args({"target","level","pname","params"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glColorMask)>(*this, lib, "glColorMask",SideEffects::worstDefault, "glColorMask")
-	->args({"red","green","blue","alpha"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glBeginQuery)>(*this, lib, "glBeginQuery",SideEffects::worstDefault, "glBeginQuery")
 	->args({"target","id"})
 ;
@@ -3555,11 +3375,6 @@ addExtern<DAS_BIND_FUN(glVertexAttribL2d)>(*this, lib, "glVertexAttribL2d",SideE
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glCompressedTexSubImage2D)>(*this, lib, "glCompressedTexSubImage2D",SideEffects::worstDefault, "glCompressedTexSubImage2D")
 	->args({"target","level","xoffset","yoffset","width","height","format","imageSize","data"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glPointSize)>(*this, lib, "glPointSize",SideEffects::worstDefault, "glPointSize")
-	->args({"size"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -3735,11 +3550,6 @@ addExtern<DAS_BIND_FUN(glIsProgram)>(*this, lib, "glIsProgram",SideEffects::wors
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glUniform1i64vNV)>(*this, lib, "glUniform1i64vNV",SideEffects::worstDefault, "glUniform1i64vNV")
 	->args({"location","count","value"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glStencilFunc)>(*this, lib, "glStencilFunc",SideEffects::worstDefault, "glStencilFunc")
-	->args({"func","ref","mask"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -4198,11 +4008,6 @@ addExtern<DAS_BIND_FUN(glBindBufferBase)>(*this, lib, "glBindBufferBase",SideEff
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glGenTextures)>(*this, lib, "glGenTextures",SideEffects::worstDefault, "glGenTextures")
-	->args({"n","textures"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glMemoryBarrierByRegion)>(*this, lib, "glMemoryBarrierByRegion",SideEffects::worstDefault, "glMemoryBarrierByRegion")
 	->args({"barriers"})
 ;
@@ -4295,16 +4100,6 @@ addExtern<DAS_BIND_FUN(glGetnTexImageARB)>(*this, lib, "glGetnTexImageARB",SideE
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glTexBuffer)>(*this, lib, "glTexBuffer",SideEffects::worstDefault, "glTexBuffer")
 	->args({"target","internalformat","buffer"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glViewport)>(*this, lib, "glViewport",SideEffects::worstDefault, "glViewport")
-	->args({"x","y","width","height"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glGetPointerv)>(*this, lib, "glGetPointerv",SideEffects::worstDefault, "glGetPointerv")
-	->args({"pname","params"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -4578,11 +4373,6 @@ addExtern<DAS_BIND_FUN(glFramebufferTexture)>(*this, lib, "glFramebufferTexture"
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glFlush)>(*this, lib, "glFlush",SideEffects::worstDefault, "glFlush")
-	->args({})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glProgramBinary)>(*this, lib, "glProgramBinary",SideEffects::worstDefault, "glProgramBinary")
 	->args({"program","binaryFormat","binary","length"})
 ;
@@ -4590,11 +4380,6 @@ addExtern<DAS_BIND_FUN(glProgramBinary)>(*this, lib, "glProgramBinary",SideEffec
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glGetTextureParameterfvEXT)>(*this, lib, "glGetTextureParameterfvEXT",SideEffects::worstDefault, "glGetTextureParameterfvEXT")
 	->args({"texture","target","pname","params"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glClear)>(*this, lib, "glClear",SideEffects::worstDefault, "glClear")
-	->args({"mask"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -4818,11 +4603,6 @@ addExtern<DAS_BIND_FUN(glGetFragDataIndex)>(*this, lib, "glGetFragDataIndex",Sid
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glGetTexParameteriv)>(*this, lib, "glGetTexParameteriv",SideEffects::worstDefault, "glGetTexParameteriv")
-	->args({"target","pname","params"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glTexParameterIiv)>(*this, lib, "glTexParameterIiv",SideEffects::worstDefault, "glTexParameterIiv")
 	->args({"target","pname","params"})
 ;
@@ -4835,16 +4615,6 @@ addExtern<DAS_BIND_FUN(glProgramUniform1ivEXT)>(*this, lib, "glProgramUniform1iv
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glQueryCounter)>(*this, lib, "glQueryCounter",SideEffects::worstDefault, "glQueryCounter")
 	->args({"id","target"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glIsTexture)>(*this, lib, "glIsTexture",SideEffects::worstDefault, "glIsTexture")
-	->args({"texture"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glStencilOp)>(*this, lib, "glStencilOp",SideEffects::worstDefault, "glStencilOp")
-	->args({"fail","zfail","zpass"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -4923,16 +4693,6 @@ addExtern<DAS_BIND_FUN(glSamplerParameterf)>(*this, lib, "glSamplerParameterf",S
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glFinish)>(*this, lib, "glFinish",SideEffects::worstDefault, "glFinish")
-	->args({})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glDeleteTextures)>(*this, lib, "glDeleteTextures",SideEffects::worstDefault, "glDeleteTextures")
-	->args({"n","textures"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glVertexAttribL2i64NV)>(*this, lib, "glVertexAttribL2i64NV",SideEffects::worstDefault, "glVertexAttribL2i64NV")
 	->args({"index","x","y"})
 ;
@@ -4963,18 +4723,8 @@ addExtern<DAS_BIND_FUN(glVertexAttribL3ui64NV)>(*this, lib, "glVertexAttribL3ui6
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glTexParameteriv)>(*this, lib, "glTexParameteriv",SideEffects::worstDefault, "glTexParameteriv")
-	->args({"target","pname","params"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glMultiDrawArraysIndirectCountARB)>(*this, lib, "glMultiDrawArraysIndirectCountARB",SideEffects::worstDefault, "glMultiDrawArraysIndirectCountARB")
 	->args({"mode","indirect","drawcount","maxdrawcount","stride"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glGetIntegerv)>(*this, lib, "glGetIntegerv",SideEffects::worstDefault, "glGetIntegerv")
-	->args({"pname","data"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -5063,11 +4813,6 @@ addExtern<DAS_BIND_FUN(glProgramUniform4uivEXT)>(*this, lib, "glProgramUniform4u
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glReadPixels)>(*this, lib, "glReadPixels",SideEffects::worstDefault, "glReadPixels")
-	->args({"x","y","width","height","format","type","pixels"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glStencilFuncSeparate)>(*this, lib, "glStencilFuncSeparate",SideEffects::worstDefault, "glStencilFuncSeparate")
 	->args({"face","func","ref","mask"})
 ;
@@ -5140,11 +4885,6 @@ addExtern<DAS_BIND_FUN(glEnableVertexArrayEXT)>(*this, lib, "glEnableVertexArray
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glAttachShader)>(*this, lib, "glAttachShader",SideEffects::worstDefault, "glAttachShader")
 	->args({"program","shader"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glGetTexParameterfv)>(*this, lib, "glGetTexParameterfv",SideEffects::worstDefault, "glGetTexParameterfv")
-	->args({"target","pname","params"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -5223,11 +4963,6 @@ addExtern<DAS_BIND_FUN(glDeleteProgram)>(*this, lib, "glDeleteProgram",SideEffec
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glClearDepth)>(*this, lib, "glClearDepth",SideEffects::worstDefault, "glClearDepth")
-	->args({"depth"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glGetFramebufferAttachmentParameteriv)>(*this, lib, "glGetFramebufferAttachmentParameteriv",SideEffects::worstDefault, "glGetFramebufferAttachmentParameteriv")
 	->args({"target","attachment","pname","params"})
 ;
@@ -5273,11 +5008,6 @@ addExtern<DAS_BIND_FUN(glTextureRenderbufferEXT)>(*this, lib, "glTextureRenderbu
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glLineWidth)>(*this, lib, "glLineWidth",SideEffects::worstDefault, "glLineWidth")
-	->args({"width"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glGetVertexAttribiv)>(*this, lib, "glGetVertexAttribiv",SideEffects::worstDefault, "glGetVertexAttribiv")
 	->args({"index","pname","params"})
 ;
@@ -5290,16 +5020,6 @@ addExtern<DAS_BIND_FUN(glGetInteger64v)>(*this, lib, "glGetInteger64v",SideEffec
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glGetIntegerIndexedvEXT)>(*this, lib, "glGetIntegerIndexedvEXT",SideEffects::worstDefault, "glGetIntegerIndexedvEXT")
 	->args({"target","index","data"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glTexParameterfv)>(*this, lib, "glTexParameterfv",SideEffects::worstDefault, "glTexParameterfv")
-	->args({"target","pname","params"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glTexImage1D)>(*this, lib, "glTexImage1D",SideEffects::worstDefault, "glTexImage1D")
-	->args({"target","level","internalformat","width","border","format","type","pixels"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -5338,11 +5058,6 @@ addExtern<DAS_BIND_FUN(glProgramUniform2i64ARB)>(*this, lib, "glProgramUniform2i
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glLogicOp)>(*this, lib, "glLogicOp",SideEffects::worstDefault, "glLogicOp")
-	->args({"opcode"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glVertexAttribI1iv)>(*this, lib, "glVertexAttribI1iv",SideEffects::worstDefault, "glVertexAttribI1iv")
 	->args({"index","v"})
 ;
@@ -5365,11 +5080,6 @@ addExtern<DAS_BIND_FUN(glGetProgramiv)>(*this, lib, "glGetProgramiv",SideEffects
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glGetCompressedTexImage)>(*this, lib, "glGetCompressedTexImage",SideEffects::worstDefault, "glGetCompressedTexImage")
 	->args({"target","level","img"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glGetDoublev)>(*this, lib, "glGetDoublev",SideEffects::worstDefault, "glGetDoublev")
-	->args({"pname","data"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -5465,11 +5175,6 @@ addExtern<DAS_BIND_FUN(glGetnUniformdvARB)>(*this, lib, "glGetnUniformdvARB",Sid
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glUniformHandleui64ARB)>(*this, lib, "glUniformHandleui64ARB",SideEffects::worstDefault, "glUniformHandleui64ARB")
 	->args({"location","value"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glCullFace)>(*this, lib, "glCullFace",SideEffects::worstDefault, "glCullFace")
-	->args({"mode"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -5605,11 +5310,6 @@ addExtern<DAS_BIND_FUN(glProgramUniform4uiv)>(*this, lib, "glProgramUniform4uiv"
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glMultiDrawElementsIndirect)>(*this, lib, "glMultiDrawElementsIndirect",SideEffects::worstDefault, "glMultiDrawElementsIndirect")
 	->args({"mode","type","indirect","drawcount","stride"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glDepthMask)>(*this, lib, "glDepthMask",SideEffects::worstDefault, "glDepthMask")
-	->args({"flag"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
@@ -5903,11 +5603,6 @@ addExtern<DAS_BIND_FUN(glMultiTexParameterfEXT)>(*this, lib, "glMultiTexParamete
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glTexImage2D)>(*this, lib, "glTexImage2D",SideEffects::worstDefault, "glTexImage2D")
-	->args({"target","level","internalformat","width","height","border","format","type","pixels"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glRenderbufferStorageMultisampleCoverageNV)>(*this, lib, "glRenderbufferStorageMultisampleCoverageNV",SideEffects::worstDefault, "glRenderbufferStorageMultisampleCoverageNV")
 	->args({"target","coverageSamples","colorSamples","internalformat","width","height"})
 ;
@@ -6010,11 +5705,6 @@ addExtern<DAS_BIND_FUN(glUniform1ui64ARB)>(*this, lib, "glUniform1ui64ARB",SideE
 #ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glStencilStrokePathInstancedNV)>(*this, lib, "glStencilStrokePathInstancedNV",SideEffects::worstDefault, "glStencilStrokePathInstancedNV")
 	->args({"numPaths","pathNameType","paths","pathBase","reference","mask","transformType","transformValues"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(glGetFloatv)>(*this, lib, "glGetFloatv",SideEffects::worstDefault, "glGetFloatv")
-	->args({"pname","data"})
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
