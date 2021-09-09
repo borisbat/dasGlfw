@@ -1,7 +1,8 @@
 require daslib/glfw_boost
+require daslib/opengl_boost
 require daslib/defer
 require math
-require opengl
+
 
 require daslib/safe_addr
 
@@ -27,72 +28,33 @@ void main()
 \}
 "
 
-def createShader ( src:string; shaderType:uint )
-    unsafe
-        let s = glCreateShader(shaderType)
-        glShaderSource(s, 1, addr(src), null)
-        glCompileShader(s)
-        var status:int
-        glGetShaderiv(s, GL_COMPILE_STATUS, addr(status))
-        if status==0
-            var log : uint8[512]
-            var slog = reinterpret<string> addr(log[0])
-            glGetShaderInfoLog(s, 512, null, slog)
-            print("FAILED TO CREATE SHADER ({status}):\n{slog}\n")
-            return 0u
-        return s
-
-def createShaderProgram(vertex,fragment:uint)
-    let program = glCreateProgram()
-    glAttachShader(program, vertex)
-    glAttachShader(program, fragment)
-    return program
-
-def linkShader(program:uint)
-    unsafe
-        glLinkProgram(program)
-        var status : int
-        glGetProgramiv(program, GL_LINK_STATUS, addr(status))
-        if status==0
-            var log : uint8[512]
-            var slog = reinterpret<string> addr(log[0])
-            glGetProgramInfoLog(program, 512, null, slog)
-            print("FAILED TO LINK SHADER PROGRAM ({status}):\n{slog}\n")
-            return false
-        return true
-
 var vertex : uint
 var fragment : uint
 var program : uint
 var vao : uint
 var vbo : uint
 
-let vertices = [[float
-        // x   y     r     g     b
-        -0.5f; 0.5f;  0.0f; 0.0f; 0.0f;
-        0.5f;  0.5f;  1.0f; 1.0f; 0.0f;
-        0.5f; -0.5f;  1.0f; 0.0f; 0.0f
+[vertex_buffer]
+struct Vertex
+    [[type=GL_FLOAT, size=2, normalized=false]] xy : float2
+    [[type=GL_FLOAT, size=3, normalized=false]] rgb : float3
+
+let vertices = [[Vertex
+        xy=float2(-0.5, 0.5), rgb=float3(0.0,0.0,0.0);
+        xy=float2( 0.5, 0.5), rgb=float3(1.0,1.0,0.0);
+        xy=float2( 0.5,-0.5), rgb=float3(1.0,0.0,0.0)
 ]]
 
 def create_gl_objects
-    vertex = createShader(VERTEX_SRC, GL_VERTEX_SHADER);
-    if vertex==0u
-        panic("can't create vertex shader")
-    fragment = createShader(FRAGMENT_SRC, GL_FRAGMENT_SHADER)
-    if fragment==0u
-        panic("can't create fragment shader")
-    program = createShaderProgram(vertex, fragment)
-    if program==0u
-        panic("can't create program")
-    let result = linkShader(program)
-    if !result
-        panic("can't link program")
+    vertex = create_shader(VERTEX_SRC, GL_VERTEX_SHADER)
+    fragment = create_shader(FRAGMENT_SRC, GL_FRAGMENT_SHADER)
+    program = create_shader_program(vertex, fragment)
+    let result = link_shader(program)
     glGenVertexArrays(1, safe_addr(vao))
     glBindVertexArray(vao);
     glGenBuffers(1, safe_addr(vbo))
     glBindBuffer(GL_ARRAY_BUFFER, vbo)
-    unsafe
-        glBufferData(GL_ARRAY_BUFFER, int64(length(vertices)*typeinfo(sizeof type<float>)), reinterpret<void?> addr(vertices[0]), GL_STATIC_DRAW)
+    glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW)
 
 def glfw_app ( title:string; blk : block<(w,h:int):void> )
     if glfwInit()==0
@@ -109,18 +71,6 @@ def glfw_app ( title:string; blk : block<(w,h:int):void> )
 		panic("can't create window")
     defer <|
         glfwDestroyWindow(window)
-    glfwSetKeyCallback(window) <| @ ( window, key, scancode, action, mods )
-        print("keyCB:  {window} {key} {scancode} {action} {mods}\n")
-    glfwSetCharCallback(window) <| @ ( window, ch )
-        print("charCB: {window} {ch}\n")
-    glfwSetCursorPosCallback(window) <| @ ( window, x, y )
-        print("cursCB: {window} {x} {y}\n")
-    glfwSetCursorEnterCallback(window) <| @ ( window, enter )
-        print("centCB: {window} {enter}\n")
-    glfwSetMouseButtonCallback(window) <| @ ( window, buttons, action, mods )
-        print("mbutCB:  {window} {buttons} {action} {mods}\n")
-    glfwSetScrollCallback(window) <| @ ( window, x, y )
-        print("scrlCB: {window} {x} {y}\n")
     glfwMakeContextCurrent(window)
     create_gl_objects()
     while glfwWindowShouldClose(window)==0
@@ -130,10 +80,6 @@ def glfw_app ( title:string; blk : block<(w,h:int):void> )
         invoke(blk, display_w, display_h)
         glfwMakeContextCurrent(window)
         glfwSwapBuffers(window)
-
-def to_ptr(offset:int)
-    unsafe
-        return reinterpret<void?> offset
 
 [export]
 def main
@@ -146,8 +92,11 @@ def main
         glDepthFunc(GL_LEQUAL)
         glUseProgram(program)
         glBindBuffer(GL_ARRAY_BUFFER, vbo)
+        /*
         glEnableVertexAttribArray(0u)
-        glVertexAttribPointer(0u, 2, GL_FLOAT, uint8(GL_FALSE), 5 * typeinfo(sizeof type<float>), to_ptr(0))
+        glVertexAttribPointer(0u, 2, GL_FLOAT, false, 5 * typeinfo(sizeof type<float>), 0)
         glEnableVertexAttribArray(1u)
-        glVertexAttribPointer(1u, 3, GL_FLOAT, uint8(GL_FALSE), 5 * typeinfo(sizeof type<float>), to_ptr(2 * typeinfo(sizeof type<float>)))
+        glVertexAttribPointer(1u, 3, GL_FLOAT, false, 5 * typeinfo(sizeof type<float>), 2 * typeinfo(sizeof type<float>))
+        */
+        bind_vertex_buffer(type<Vertex>)
         glDrawArrays(GL_TRIANGLES, 0, 3)

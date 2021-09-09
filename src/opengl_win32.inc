@@ -1,4 +1,4 @@
-void glProgramUniformMatrix3fv ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glProgramUniformMatrix3fv ( GLuint program, GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX3FVPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX3FVPROC) dasWglGetProcAddress("glProgramUniformMatrix3fv");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -13,7 +13,7 @@ void glVertexAttrib3dv ( GLuint index, const GLdouble * v ) {
     (*fptr)(index, v);
 }
 
-void glUniformMatrix4dv ( GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glUniformMatrix4dv ( GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLUNIFORMMATRIX4DVPROC fptr = (PFNGLUNIFORMMATRIX4DVPROC) dasWglGetProcAddress("glUniformMatrix4dv");
     (*fptr)(location, count, transpose, value);
 }
@@ -23,7 +23,7 @@ void glGenProgramPipelines ( GLsizei n, GLuint * pipelines ) {
     (*fptr)(n, pipelines);
 }
 
-void glProgramUniformMatrix3dv ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glProgramUniformMatrix3dv ( GLuint program, GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX3DVPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX3DVPROC) dasWglGetProcAddress("glProgramUniformMatrix3dv");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -63,7 +63,7 @@ void glDrawElementsInstanced ( GLenum mode, GLsizei count, GLenum type, const vo
     (*fptr)(mode, count, type, indices, instancecount);
 }
 
-void glProgramUniformMatrix3dvEXT ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glProgramUniformMatrix3dvEXT ( GLuint program, GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX3DVEXTPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX3DVEXTPROC) dasWglGetProcAddress("glProgramUniformMatrix3dvEXT");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -98,12 +98,12 @@ void glDisableVertexArrayAttrib ( GLuint vaobj, GLuint index ) {
     (*fptr)(vaobj, index);
 }
 
-void glTexStorage2DMultisample ( GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLboolean fixedsamplelocations ) {
+void glTexStorage2DMultisample ( GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, bool fixedsamplelocations ) {
     static PFNGLTEXSTORAGE2DMULTISAMPLEPROC fptr = (PFNGLTEXSTORAGE2DMULTISAMPLEPROC) dasWglGetProcAddress("glTexStorage2DMultisample");
     (*fptr)(target, samples, internalformat, width, height, fixedsamplelocations);
 }
 
-void glVertexArrayAttribFormat ( GLuint vaobj, GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint relativeoffset ) {
+void glVertexArrayAttribFormat ( GLuint vaobj, GLuint attribindex, GLint size, GLenum type, bool normalized, GLuint relativeoffset ) {
     static PFNGLVERTEXARRAYATTRIBFORMATPROC fptr = (PFNGLVERTEXARRAYATTRIBFORMATPROC) dasWglGetProcAddress("glVertexArrayAttribFormat");
     (*fptr)(vaobj, attribindex, size, type, normalized, relativeoffset);
 }
@@ -178,7 +178,7 @@ void glGetPerfMonitorGroupsAMD ( GLint * numGroups, GLsizei groupsSize, GLuint *
     (*fptr)(numGroups, groupsSize, groups);
 }
 
-void glVertexAttribP2uiv ( GLuint index, GLenum type, GLboolean normalized, const GLuint * value ) {
+void glVertexAttribP2uiv ( GLuint index, GLenum type, bool normalized, const GLuint * value ) {
     static PFNGLVERTEXATTRIBP2UIVPROC fptr = (PFNGLVERTEXATTRIBP2UIVPROC) dasWglGetProcAddress("glVertexAttribP2uiv");
     (*fptr)(index, type, normalized, value);
 }
@@ -253,7 +253,7 @@ GLint glGetProgramResourceLocation ( GLuint program, GLenum programInterface, co
     return (*fptr)(program, programInterface, name);
 }
 
-void glProgramUniformMatrix3x2dv ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glProgramUniformMatrix3x2dv ( GLuint program, GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX3X2DVPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX3X2DVPROC) dasWglGetProcAddress("glProgramUniformMatrix3x2dv");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -268,7 +268,7 @@ void glVertexBindingDivisor ( GLuint bindingindex, GLuint divisor ) {
     (*fptr)(bindingindex, divisor);
 }
 
-void glProgramUniformMatrix4x3dv ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glProgramUniformMatrix4x3dv ( GLuint program, GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX4X3DVPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX4X3DVPROC) dasWglGetProcAddress("glProgramUniformMatrix4x3dv");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -308,7 +308,7 @@ void glGetPathParameterivNV ( GLuint path, GLenum pname, GLint * value ) {
     (*fptr)(path, pname, value);
 }
 
-void glUniformMatrix2x3fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glUniformMatrix2x3fv ( GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLUNIFORMMATRIX2X3FVPROC fptr = (PFNGLUNIFORMMATRIX2X3FVPROC) dasWglGetProcAddress("glUniformMatrix2x3fv");
     (*fptr)(location, count, transpose, value);
 }
@@ -323,7 +323,7 @@ void glProgramUniform3i64NV ( GLuint program, GLint location, GLint64EXT x, GLin
     (*fptr)(program, location, x, y, z);
 }
 
-void glVertexAttribP3ui ( GLuint index, GLenum type, GLboolean normalized, GLuint value ) {
+void glVertexAttribP3ui ( GLuint index, GLenum type, bool normalized, GLuint value ) {
     static PFNGLVERTEXATTRIBP3UIPROC fptr = (PFNGLVERTEXATTRIBP3UIPROC) dasWglGetProcAddress("glVertexAttribP3ui");
     (*fptr)(index, type, normalized, value);
 }
@@ -383,7 +383,7 @@ void glBindBufferRange ( GLenum target, GLuint index, GLuint buffer, GLintptr of
     (*fptr)(target, index, buffer, offset, size);
 }
 
-void glVertexAttribP1ui ( GLuint index, GLenum type, GLboolean normalized, GLuint value ) {
+void glVertexAttribP1ui ( GLuint index, GLenum type, bool normalized, GLuint value ) {
     static PFNGLVERTEXATTRIBP1UIPROC fptr = (PFNGLVERTEXATTRIBP1UIPROC) dasWglGetProcAddress("glVertexAttribP1ui");
     (*fptr)(index, type, normalized, value);
 }
@@ -398,7 +398,7 @@ void glInvalidateFramebuffer ( GLenum target, GLsizei numAttachments, const GLen
     (*fptr)(target, numAttachments, attachments);
 }
 
-void glUniformMatrix4fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glUniformMatrix4fv ( GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLUNIFORMMATRIX4FVPROC fptr = (PFNGLUNIFORMMATRIX4FVPROC) dasWglGetProcAddress("glUniformMatrix4fv");
     (*fptr)(location, count, transpose, value);
 }
@@ -443,7 +443,7 @@ void glPathStringNV ( GLuint path, GLenum format, GLsizei length, const void * p
     (*fptr)(path, format, length, pathString);
 }
 
-void glTexImage3DMultisample ( GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedsamplelocations ) {
+void glTexImage3DMultisample ( GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, bool fixedsamplelocations ) {
     static PFNGLTEXIMAGE3DMULTISAMPLEPROC fptr = (PFNGLTEXIMAGE3DMULTISAMPLEPROC) dasWglGetProcAddress("glTexImage3DMultisample");
     (*fptr)(target, samples, internalformat, width, height, depth, fixedsamplelocations);
 }
@@ -548,7 +548,7 @@ void glCompressedTextureSubImage1D ( GLuint texture, GLint level, GLint xoffset,
     (*fptr)(texture, level, xoffset, width, format, imageSize, data);
 }
 
-void glProgramUniformMatrix4fvEXT ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glProgramUniformMatrix4fvEXT ( GLuint program, GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX4FVEXTPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX4FVEXTPROC) dasWglGetProcAddress("glProgramUniformMatrix4fvEXT");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -868,7 +868,7 @@ void glUniform3ui64ARB ( GLint location, GLuint64 x, GLuint64 y, GLuint64 z ) {
     (*fptr)(location, x, y, z);
 }
 
-void glUniformMatrix3x2fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glUniformMatrix3x2fv ( GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLUNIFORMMATRIX3X2FVPROC fptr = (PFNGLUNIFORMMATRIX3X2FVPROC) dasWglGetProcAddress("glUniformMatrix3x2fv");
     (*fptr)(location, count, transpose, value);
 }
@@ -883,12 +883,12 @@ void glCreateTransformFeedbacks ( GLsizei n, GLuint * ids ) {
     (*fptr)(n, ids);
 }
 
-void glUniformMatrix4x3fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glUniformMatrix4x3fv ( GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLUNIFORMMATRIX4X3FVPROC fptr = (PFNGLUNIFORMMATRIX4X3FVPROC) dasWglGetProcAddress("glUniformMatrix4x3fv");
     (*fptr)(location, count, transpose, value);
 }
 
-void glBindImageTexture ( GLuint unit, GLuint texture, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format ) {
+void glBindImageTexture ( GLuint unit, GLuint texture, GLint level, bool layered, GLint layer, GLenum access, GLenum format ) {
     static PFNGLBINDIMAGETEXTUREPROC fptr = (PFNGLBINDIMAGETEXTUREPROC) dasWglGetProcAddress("glBindImageTexture");
     (*fptr)(unit, texture, level, layered, layer, access, format);
 }
@@ -918,7 +918,7 @@ void glProgramUniform3ui64vNV ( GLuint program, GLint location, GLsizei count, c
     (*fptr)(program, location, count, value);
 }
 
-void glTexPageCommitmentMemNV ( GLenum target, GLint layer, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLuint memory, GLuint64 offset, GLboolean commit ) {
+void glTexPageCommitmentMemNV ( GLenum target, GLint layer, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLuint memory, GLuint64 offset, bool commit ) {
     static PFNGLTEXPAGECOMMITMENTMEMNVPROC fptr = (PFNGLTEXPAGECOMMITMENTMEMNVPROC) dasWglGetProcAddress("glTexPageCommitmentMemNV");
     (*fptr)(target, layer, level, xoffset, yoffset, zoffset, width, height, depth, memory, offset, commit);
 }
@@ -1113,7 +1113,7 @@ void glTextureParameterfv ( GLuint texture, GLenum pname, const GLfloat * param 
     (*fptr)(texture, pname, param);
 }
 
-void glProgramUniformMatrix4x2dvEXT ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glProgramUniformMatrix4x2dvEXT ( GLuint program, GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX4X2DVEXTPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX4X2DVEXTPROC) dasWglGetProcAddress("glProgramUniformMatrix4x2dvEXT");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -1248,7 +1248,7 @@ void glReadnPixelsARB ( GLint x, GLint y, GLsizei width, GLsizei height, GLenum 
     (*fptr)(x, y, width, height, format, type, bufSize, data);
 }
 
-void glUniformMatrix3x2dv ( GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glUniformMatrix3x2dv ( GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLUNIFORMMATRIX3X2DVPROC fptr = (PFNGLUNIFORMMATRIX3X2DVPROC) dasWglGetProcAddress("glUniformMatrix3x2dv");
     (*fptr)(location, count, transpose, value);
 }
@@ -1263,7 +1263,7 @@ void glUniform3ui64vNV ( GLint location, GLsizei count, const GLuint64EXT * valu
     (*fptr)(location, count, value);
 }
 
-void glUniformMatrix4x3dv ( GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glUniformMatrix4x3dv ( GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLUNIFORMMATRIX4X3DVPROC fptr = (PFNGLUNIFORMMATRIX4X3DVPROC) dasWglGetProcAddress("glUniformMatrix4x3dv");
     (*fptr)(location, count, transpose, value);
 }
@@ -1358,7 +1358,7 @@ void glProgramUniform3uiEXT ( GLuint program, GLint location, GLuint v0, GLuint 
     (*fptr)(program, location, v0, v1, v2);
 }
 
-void glTextureStorage2DMultisampleEXT ( GLuint texture, GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLboolean fixedsamplelocations ) {
+void glTextureStorage2DMultisampleEXT ( GLuint texture, GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, bool fixedsamplelocations ) {
     static PFNGLTEXTURESTORAGE2DMULTISAMPLEEXTPROC fptr = (PFNGLTEXTURESTORAGE2DMULTISAMPLEEXTPROC) dasWglGetProcAddress("glTextureStorage2DMultisampleEXT");
     (*fptr)(texture, target, samples, internalformat, width, height, fixedsamplelocations);
 }
@@ -1408,7 +1408,7 @@ void glProgramUniform2uivEXT ( GLuint program, GLint location, GLsizei count, co
     (*fptr)(program, location, count, value);
 }
 
-void glBufferPageCommitmentMemNV ( GLenum target, GLintptr offset, GLsizeiptr size, GLuint memory, GLuint64 memOffset, GLboolean commit ) {
+void glBufferPageCommitmentMemNV ( GLenum target, GLintptr offset, GLsizeiptr size, GLuint memory, GLuint64 memOffset, bool commit ) {
     static PFNGLBUFFERPAGECOMMITMENTMEMNVPROC fptr = (PFNGLBUFFERPAGECOMMITMENTMEMNVPROC) dasWglGetProcAddress("glBufferPageCommitmentMemNV");
     (*fptr)(target, offset, size, memory, memOffset, commit);
 }
@@ -1508,7 +1508,7 @@ void glBindVertexBuffers ( GLuint first, GLsizei count, const GLuint * buffers, 
     (*fptr)(first, count, buffers, offsets, strides);
 }
 
-void glDebugMessageControlARB ( GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint * ids, GLboolean enabled ) {
+void glDebugMessageControlARB ( GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint * ids, bool enabled ) {
     static PFNGLDEBUGMESSAGECONTROLARBPROC fptr = (PFNGLDEBUGMESSAGECONTROLARBPROC) dasWglGetProcAddress("glDebugMessageControlARB");
     (*fptr)(source, type, severity, count, ids, enabled);
 }
@@ -1533,7 +1533,7 @@ void glUniform1i64ARB ( GLint location, GLint64 x ) {
     (*fptr)(location, x);
 }
 
-void glVertexAttribP4uiv ( GLuint index, GLenum type, GLboolean normalized, const GLuint * value ) {
+void glVertexAttribP4uiv ( GLuint index, GLenum type, bool normalized, const GLuint * value ) {
     static PFNGLVERTEXATTRIBP4UIVPROC fptr = (PFNGLVERTEXATTRIBP4UIVPROC) dasWglGetProcAddress("glVertexAttribP4uiv");
     (*fptr)(index, type, normalized, value);
 }
@@ -1623,7 +1623,7 @@ void glVertexAttribL1ui64ARB ( GLuint index, GLuint64EXT x ) {
     (*fptr)(index, x);
 }
 
-void glVertexArrayVertexAttribFormatEXT ( GLuint vaobj, GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint relativeoffset ) {
+void glVertexArrayVertexAttribFormatEXT ( GLuint vaobj, GLuint attribindex, GLint size, GLenum type, bool normalized, GLuint relativeoffset ) {
     static PFNGLVERTEXARRAYVERTEXATTRIBFORMATEXTPROC fptr = (PFNGLVERTEXARRAYVERTEXATTRIBFORMATEXTPROC) dasWglGetProcAddress("glVertexArrayVertexAttribFormatEXT");
     (*fptr)(vaobj, attribindex, size, type, normalized, relativeoffset);
 }
@@ -1713,7 +1713,7 @@ void * glMapNamedBufferEXT ( GLuint buffer, GLenum access ) {
     return (*fptr)(buffer, access);
 }
 
-GLuint64 glGetImageHandleARB ( GLuint texture, GLint level, GLboolean layered, GLint layer, GLenum format ) {
+GLuint64 glGetImageHandleARB ( GLuint texture, GLint level, bool layered, GLint layer, GLenum format ) {
     static PFNGLGETIMAGEHANDLEARBPROC fptr = (PFNGLGETIMAGEHANDLEARBPROC) dasWglGetProcAddress("glGetImageHandleARB");
     return (*fptr)(texture, level, layered, layer, format);
 }
@@ -1888,7 +1888,7 @@ void glUniform4f ( GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v
     (*fptr)(location, v0, v1, v2, v3);
 }
 
-void glBufferPageCommitmentARB ( GLenum target, GLintptr offset, GLsizeiptr size, GLboolean commit ) {
+void glBufferPageCommitmentARB ( GLenum target, GLintptr offset, GLsizeiptr size, bool commit ) {
     static PFNGLBUFFERPAGECOMMITMENTARBPROC fptr = (PFNGLBUFFERPAGECOMMITMENTARBPROC) dasWglGetProcAddress("glBufferPageCommitmentARB");
     (*fptr)(target, offset, size, commit);
 }
@@ -1928,7 +1928,7 @@ void glProgramUniform1f ( GLuint program, GLint location, GLfloat v0 ) {
     (*fptr)(program, location, v0);
 }
 
-void glTexStorage3DMultisample ( GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedsamplelocations ) {
+void glTexStorage3DMultisample ( GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, bool fixedsamplelocations ) {
     static PFNGLTEXSTORAGE3DMULTISAMPLEPROC fptr = (PFNGLTEXSTORAGE3DMULTISAMPLEPROC) dasWglGetProcAddress("glTexStorage3DMultisample");
     (*fptr)(target, samples, internalformat, width, height, depth, fixedsamplelocations);
 }
@@ -2038,7 +2038,7 @@ void glMultiTexEnvfvEXT ( GLenum texunit, GLenum target, GLenum pname, const GLf
     (*fptr)(texunit, target, pname, params);
 }
 
-void glVertexAttribP4ui ( GLuint index, GLenum type, GLboolean normalized, GLuint value ) {
+void glVertexAttribP4ui ( GLuint index, GLenum type, bool normalized, GLuint value ) {
     static PFNGLVERTEXATTRIBP4UIPROC fptr = (PFNGLVERTEXATTRIBP4UIPROC) dasWglGetProcAddress("glVertexAttribP4ui");
     (*fptr)(index, type, normalized, value);
 }
@@ -2148,7 +2148,7 @@ void glProgramUniform2iEXT ( GLuint program, GLint location, GLint v0, GLint v1 
     (*fptr)(program, location, v0, v1);
 }
 
-void glTextureStorage3DMultisampleEXT ( GLuint texture, GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedsamplelocations ) {
+void glTextureStorage3DMultisampleEXT ( GLuint texture, GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, bool fixedsamplelocations ) {
     static PFNGLTEXTURESTORAGE3DMULTISAMPLEEXTPROC fptr = (PFNGLTEXTURESTORAGE3DMULTISAMPLEEXTPROC) dasWglGetProcAddress("glTextureStorage3DMultisampleEXT");
     (*fptr)(texture, target, samples, internalformat, width, height, depth, fixedsamplelocations);
 }
@@ -2228,7 +2228,7 @@ void glDeleteSamplers ( GLsizei count, const GLuint * samplers ) {
     (*fptr)(count, samplers);
 }
 
-void glProgramUniformMatrix2dv ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glProgramUniformMatrix2dv ( GLuint program, GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX2DVPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX2DVPROC) dasWglGetProcAddress("glProgramUniformMatrix2dv");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -2363,7 +2363,7 @@ void glDrawCommandsNV ( GLenum primitiveMode, GLuint buffer, const GLintptr * in
     (*fptr)(primitiveMode, buffer, indirects, sizes, count);
 }
 
-void glProgramUniformMatrix2dvEXT ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glProgramUniformMatrix2dvEXT ( GLuint program, GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX2DVEXTPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX2DVEXTPROC) dasWglGetProcAddress("glProgramUniformMatrix2dvEXT");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -2488,7 +2488,7 @@ void glEndConditionalRenderNV (  ) {
     (*fptr)();
 }
 
-void glVertexAttribPointer ( GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void * pointer ) {
+void glVertexAttribPointer ( GLuint index, GLint size, GLenum type, bool normalized, GLsizei stride, const void * pointer ) {
     static PFNGLVERTEXATTRIBPOINTERPROC fptr = (PFNGLVERTEXATTRIBPOINTERPROC) dasWglGetProcAddress("glVertexAttribPointer");
     (*fptr)(index, size, type, normalized, stride, pointer);
 }
@@ -2518,7 +2518,7 @@ void glDeleteVertexArrays ( GLsizei n, const GLuint * arrays ) {
     (*fptr)(n, arrays);
 }
 
-void glProgramUniformMatrix4x2dv ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glProgramUniformMatrix4x2dv ( GLuint program, GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX4X2DVPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX4X2DVPROC) dasWglGetProcAddress("glProgramUniformMatrix4x2dv");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -2603,12 +2603,12 @@ void glVertexAttribI2uiv ( GLuint index, const GLuint * v ) {
     (*fptr)(index, v);
 }
 
-void glTexImage2DMultisample ( GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLboolean fixedsamplelocations ) {
+void glTexImage2DMultisample ( GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, bool fixedsamplelocations ) {
     static PFNGLTEXIMAGE2DMULTISAMPLEPROC fptr = (PFNGLTEXIMAGE2DMULTISAMPLEPROC) dasWglGetProcAddress("glTexImage2DMultisample");
     (*fptr)(target, samples, internalformat, width, height, fixedsamplelocations);
 }
 
-void glProgramUniformMatrix2fv ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glProgramUniformMatrix2fv ( GLuint program, GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX2FVPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX2FVPROC) dasWglGetProcAddress("glProgramUniformMatrix2fv");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -2628,12 +2628,12 @@ void glProgramUniform1uivEXT ( GLuint program, GLint location, GLsizei count, co
     (*fptr)(program, location, count, value);
 }
 
-void glProgramUniformMatrix3x4dv ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glProgramUniformMatrix3x4dv ( GLuint program, GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX3X4DVPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX3X4DVPROC) dasWglGetProcAddress("glProgramUniformMatrix3x4dv");
     (*fptr)(program, location, count, transpose, value);
 }
 
-void glProgramUniformMatrix2x4dvEXT ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glProgramUniformMatrix2x4dvEXT ( GLuint program, GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX2X4DVEXTPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX2X4DVEXTPROC) dasWglGetProcAddress("glProgramUniformMatrix2x4dvEXT");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -2718,7 +2718,7 @@ void glVertexArrayVertexBuffer ( GLuint vaobj, GLuint bindingindex, GLuint buffe
     (*fptr)(vaobj, bindingindex, buffer, offset, stride);
 }
 
-void glShadingRateImageBarrierNV ( GLboolean synchronize ) {
+void glShadingRateImageBarrierNV ( bool synchronize ) {
     static PFNGLSHADINGRATEIMAGEBARRIERNVPROC fptr = (PFNGLSHADINGRATEIMAGEBARRIERNVPROC) dasWglGetProcAddress("glShadingRateImageBarrierNV");
     (*fptr)(synchronize);
 }
@@ -2833,7 +2833,7 @@ void glProgramUniform3dEXT ( GLuint program, GLint location, GLdouble x, GLdoubl
     (*fptr)(program, location, x, y, z);
 }
 
-void glProgramUniformMatrix4dvEXT ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glProgramUniformMatrix4dvEXT ( GLuint program, GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX4DVEXTPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX4DVEXTPROC) dasWglGetProcAddress("glProgramUniformMatrix4dvEXT");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -2878,7 +2878,7 @@ void glGetNextPerfQueryIdINTEL ( GLuint queryId, GLuint * nextQueryId ) {
     (*fptr)(queryId, nextQueryId);
 }
 
-void glVertexAttribP1uiv ( GLuint index, GLenum type, GLboolean normalized, const GLuint * value ) {
+void glVertexAttribP1uiv ( GLuint index, GLenum type, bool normalized, const GLuint * value ) {
     static PFNGLVERTEXATTRIBP1UIVPROC fptr = (PFNGLVERTEXATTRIBP1UIVPROC) dasWglGetProcAddress("glVertexAttribP1uiv");
     (*fptr)(index, type, normalized, value);
 }
@@ -2968,12 +2968,12 @@ void glNamedFramebufferTexture ( GLuint framebuffer, GLenum attachment, GLuint t
     (*fptr)(framebuffer, attachment, texture, level);
 }
 
-void glUniformMatrix3fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glUniformMatrix3fv ( GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLUNIFORMMATRIX3FVPROC fptr = (PFNGLUNIFORMMATRIX3FVPROC) dasWglGetProcAddress("glUniformMatrix3fv");
     (*fptr)(location, count, transpose, value);
 }
 
-void glUniformMatrix3dv ( GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glUniformMatrix3dv ( GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLUNIFORMMATRIX3DVPROC fptr = (PFNGLUNIFORMMATRIX3DVPROC) dasWglGetProcAddress("glUniformMatrix3dv");
     (*fptr)(location, count, transpose, value);
 }
@@ -2983,7 +2983,7 @@ void glBufferData ( GLenum target, GLsizeiptr size, const void * data, GLenum us
     (*fptr)(target, size, data, usage);
 }
 
-void glProgramUniformMatrix4x2fv ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glProgramUniformMatrix4x2fv ( GLuint program, GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX4X2FVPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX4X2FVPROC) dasWglGetProcAddress("glProgramUniformMatrix4x2fv");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -3018,7 +3018,7 @@ void glVertexAttrib4sv ( GLuint index, const GLshort * v ) {
     (*fptr)(index, v);
 }
 
-void glSelectPerfMonitorCountersAMD ( GLuint monitor, GLboolean enable, GLuint group, GLint numCounters, GLuint * counterList ) {
+void glSelectPerfMonitorCountersAMD ( GLuint monitor, bool enable, GLuint group, GLint numCounters, GLuint * counterList ) {
     static PFNGLSELECTPERFMONITORCOUNTERSAMDPROC fptr = (PFNGLSELECTPERFMONITORCOUNTERSAMDPROC) dasWglGetProcAddress("glSelectPerfMonitorCountersAMD");
     (*fptr)(monitor, enable, group, numCounters, counterList);
 }
@@ -3058,7 +3058,7 @@ void glCompressedMultiTexImage1DEXT ( GLenum texunit, GLenum target, GLint level
     (*fptr)(texunit, target, level, internalformat, width, border, imageSize, bits);
 }
 
-void glProgramUniformMatrix3fvEXT ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glProgramUniformMatrix3fvEXT ( GLuint program, GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX3FVEXTPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX3FVEXTPROC) dasWglGetProcAddress("glProgramUniformMatrix3fvEXT");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -3118,7 +3118,7 @@ void glProgramUniform4f ( GLuint program, GLint location, GLfloat v0, GLfloat v1
     (*fptr)(program, location, v0, v1, v2, v3);
 }
 
-void glProgramUniformMatrix3x4fv ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glProgramUniformMatrix3x4fv ( GLuint program, GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX3X4FVPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX3X4FVPROC) dasWglGetProcAddress("glProgramUniformMatrix3x4fv");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -3273,7 +3273,7 @@ void glBeginQuery ( GLenum target, GLuint id ) {
     (*fptr)(target, id);
 }
 
-void glTexturePageCommitmentMemNV ( GLuint texture, GLint layer, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLuint memory, GLuint64 offset, GLboolean commit ) {
+void glTexturePageCommitmentMemNV ( GLuint texture, GLint layer, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLuint memory, GLuint64 offset, bool commit ) {
     static PFNGLTEXTUREPAGECOMMITMENTMEMNVPROC fptr = (PFNGLTEXTUREPAGECOMMITMENTMEMNVPROC) dasWglGetProcAddress("glTexturePageCommitmentMemNV");
     (*fptr)(texture, layer, level, xoffset, yoffset, zoffset, width, height, depth, memory, offset, commit);
 }
@@ -3283,7 +3283,7 @@ void glClearBufferuiv ( GLenum buffer, GLint drawbuffer, const GLuint * value ) 
     (*fptr)(buffer, drawbuffer, value);
 }
 
-void glProgramUniformMatrix4dv ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glProgramUniformMatrix4dv ( GLuint program, GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX4DVPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX4DVPROC) dasWglGetProcAddress("glProgramUniformMatrix4dv");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -3493,7 +3493,7 @@ void glMultiDrawElementsIndirectBindlessCountNV ( GLenum mode, GLenum type, cons
     (*fptr)(mode, type, indirect, drawCount, maxDrawCount, stride, vertexBufferCount);
 }
 
-void glTextureStorage3DMultisample ( GLuint texture, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedsamplelocations ) {
+void glTextureStorage3DMultisample ( GLuint texture, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, bool fixedsamplelocations ) {
     static PFNGLTEXTURESTORAGE3DMULTISAMPLEPROC fptr = (PFNGLTEXTURESTORAGE3DMULTISAMPLEPROC) dasWglGetProcAddress("glTextureStorage3DMultisample");
     (*fptr)(texture, samples, internalformat, width, height, depth, fixedsamplelocations);
 }
@@ -3603,7 +3603,7 @@ void glGetNamedRenderbufferParameteriv ( GLuint renderbuffer, GLenum pname, GLin
     (*fptr)(renderbuffer, pname, params);
 }
 
-void glProgramUniformMatrix3x4fvEXT ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glProgramUniformMatrix3x4fvEXT ( GLuint program, GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX3X4FVEXTPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX3X4FVEXTPROC) dasWglGetProcAddress("glProgramUniformMatrix3x4fvEXT");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -3688,7 +3688,7 @@ void glTextureImage1DEXT ( GLuint texture, GLenum target, GLint level, GLint int
     (*fptr)(texture, target, level, internalformat, width, border, format, type, pixels);
 }
 
-void glProgramUniformMatrix4fv ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glProgramUniformMatrix4fv ( GLuint program, GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX4FVPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX4FVPROC) dasWglGetProcAddress("glProgramUniformMatrix4fv");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -3748,7 +3748,7 @@ void glGetTextureParameterIuiv ( GLuint texture, GLenum pname, GLuint * params )
     (*fptr)(texture, pname, params);
 }
 
-void glUniformMatrix4x2dv ( GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glUniformMatrix4x2dv ( GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLUNIFORMMATRIX4X2DVPROC fptr = (PFNGLUNIFORMMATRIX4X2DVPROC) dasWglGetProcAddress("glUniformMatrix4x2dv");
     (*fptr)(location, count, transpose, value);
 }
@@ -3768,7 +3768,7 @@ GLenum glPathGlyphIndexArrayNV ( GLuint firstPathName, GLenum fontTarget, const 
     return (*fptr)(firstPathName, fontTarget, fontName, fontStyle, firstGlyphIndex, numGlyphs, pathParameterTemplate, emScale);
 }
 
-void glSampleCoverage ( GLfloat value, GLboolean invert ) {
+void glSampleCoverage ( GLfloat value, bool invert ) {
     static PFNGLSAMPLECOVERAGEPROC fptr = (PFNGLSAMPLECOVERAGEPROC) dasWglGetProcAddress("glSampleCoverage");
     (*fptr)(value, invert);
 }
@@ -3793,7 +3793,7 @@ void glStencilThenCoverStrokePathInstancedNV ( GLsizei numPaths, GLenum pathName
     (*fptr)(numPaths, pathNameType, paths, pathBase, reference, mask, coverMode, transformType, transformValues);
 }
 
-void glVertexAttribP2ui ( GLuint index, GLenum type, GLboolean normalized, GLuint value ) {
+void glVertexAttribP2ui ( GLuint index, GLenum type, bool normalized, GLuint value ) {
     static PFNGLVERTEXATTRIBP2UIPROC fptr = (PFNGLVERTEXATTRIBP2UIPROC) dasWglGetProcAddress("glVertexAttribP2ui");
     (*fptr)(index, type, normalized, value);
 }
@@ -3838,7 +3838,7 @@ void glVertexAttribL1d ( GLuint index, GLdouble x ) {
     (*fptr)(index, x);
 }
 
-void glUniformMatrix3x4dv ( GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glUniformMatrix3x4dv ( GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLUNIFORMMATRIX3X4DVPROC fptr = (PFNGLUNIFORMMATRIX3X4DVPROC) dasWglGetProcAddress("glUniformMatrix3x4dv");
     (*fptr)(location, count, transpose, value);
 }
@@ -3878,7 +3878,7 @@ void glFramebufferSampleLocationsfvARB ( GLenum target, GLuint start, GLsizei co
     (*fptr)(target, start, count, v);
 }
 
-void glProgramUniformMatrix2x3fvEXT ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glProgramUniformMatrix2x3fvEXT ( GLuint program, GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX2X3FVEXTPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX2X3FVEXTPROC) dasWglGetProcAddress("glProgramUniformMatrix2x3fvEXT");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -4108,7 +4108,7 @@ void glVertexAttribDivisorARB ( GLuint index, GLuint divisor ) {
     (*fptr)(index, divisor);
 }
 
-void glProgramUniformMatrix2x4fvEXT ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glProgramUniformMatrix2x4fvEXT ( GLuint program, GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX2X4FVEXTPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX2X4FVEXTPROC) dasWglGetProcAddress("glProgramUniformMatrix2x4fvEXT");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -4163,7 +4163,7 @@ void glMatrixLoad3x3fNV ( GLenum matrixMode, const GLfloat * m ) {
     (*fptr)(matrixMode, m);
 }
 
-void glUniformMatrix4x2fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glUniformMatrix4x2fv ( GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLUNIFORMMATRIX4X2FVPROC fptr = (PFNGLUNIFORMMATRIX4X2FVPROC) dasWglGetProcAddress("glUniformMatrix4x2fv");
     (*fptr)(location, count, transpose, value);
 }
@@ -4193,7 +4193,7 @@ void glGetObjectLabelEXT ( GLenum type, GLuint object, GLsizei bufSize, GLsizei 
     (*fptr)(type, object, bufSize, length, label);
 }
 
-void glColorMaski ( GLuint index, GLboolean r, GLboolean g, GLboolean b, GLboolean a ) {
+void glColorMaski ( GLuint index, bool r, bool g, bool b, bool a ) {
     static PFNGLCOLORMASKIPROC fptr = (PFNGLCOLORMASKIPROC) dasWglGetProcAddress("glColorMaski");
     (*fptr)(index, r, g, b, a);
 }
@@ -4248,7 +4248,7 @@ void glProgramUniform2fEXT ( GLuint program, GLint location, GLfloat v0, GLfloat
     (*fptr)(program, location, v0, v1);
 }
 
-void glProgramUniformMatrix4x3dvEXT ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glProgramUniformMatrix4x3dvEXT ( GLuint program, GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX4X3DVEXTPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX4X3DVEXTPROC) dasWglGetProcAddress("glProgramUniformMatrix4x3dvEXT");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -4278,7 +4278,7 @@ GLuint glCreateShaderProgramv ( GLenum type, GLsizei count, const GLchar *const 
     return (*fptr)(type, count, strings);
 }
 
-void glUniformMatrix3x4fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glUniformMatrix3x4fv ( GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLUNIFORMMATRIX3X4FVPROC fptr = (PFNGLUNIFORMMATRIX3X4FVPROC) dasWglGetProcAddress("glUniformMatrix3x4fv");
     (*fptr)(location, count, transpose, value);
 }
@@ -4348,7 +4348,7 @@ void glVertexAttribL3i64NV ( GLuint index, GLint64EXT x, GLint64EXT y, GLint64EX
     (*fptr)(index, x, y, z);
 }
 
-void glTextureStorage2DMultisample ( GLuint texture, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLboolean fixedsamplelocations ) {
+void glTextureStorage2DMultisample ( GLuint texture, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, bool fixedsamplelocations ) {
     static PFNGLTEXTURESTORAGE2DMULTISAMPLEPROC fptr = (PFNGLTEXTURESTORAGE2DMULTISAMPLEPROC) dasWglGetProcAddress("glTextureStorage2DMultisample");
     (*fptr)(texture, samples, internalformat, width, height, fixedsamplelocations);
 }
@@ -4393,7 +4393,7 @@ void glNamedFramebufferTexture2DEXT ( GLuint framebuffer, GLenum attachment, GLe
     (*fptr)(framebuffer, attachment, textarget, texture, level);
 }
 
-void glNamedBufferPageCommitmentEXT ( GLuint buffer, GLintptr offset, GLsizeiptr size, GLboolean commit ) {
+void glNamedBufferPageCommitmentEXT ( GLuint buffer, GLintptr offset, GLsizeiptr size, bool commit ) {
     static PFNGLNAMEDBUFFERPAGECOMMITMENTEXTPROC fptr = (PFNGLNAMEDBUFFERPAGECOMMITMENTEXTPROC) dasWglGetProcAddress("glNamedBufferPageCommitmentEXT");
     (*fptr)(buffer, offset, size, commit);
 }
@@ -4473,7 +4473,7 @@ void glGetDoublei_vEXT ( GLenum pname, GLuint index, GLdouble * params ) {
     (*fptr)(pname, index, params);
 }
 
-void glProgramUniformMatrix2x4dv ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glProgramUniformMatrix2x4dv ( GLuint program, GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX2X4DVPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX2X4DVPROC) dasWglGetProcAddress("glProgramUniformMatrix2x4dv");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -4483,7 +4483,7 @@ void glTexStorage2D ( GLenum target, GLsizei levels, GLenum internalformat, GLsi
     (*fptr)(target, levels, internalformat, width, height);
 }
 
-void glVertexAttribP3uiv ( GLuint index, GLenum type, GLboolean normalized, const GLuint * value ) {
+void glVertexAttribP3uiv ( GLuint index, GLenum type, bool normalized, const GLuint * value ) {
     static PFNGLVERTEXATTRIBP3UIVPROC fptr = (PFNGLVERTEXATTRIBP3UIVPROC) dasWglGetProcAddress("glVertexAttribP3uiv");
     (*fptr)(index, type, normalized, value);
 }
@@ -4623,7 +4623,7 @@ void glGenerateMultiTexMipmapEXT ( GLenum texunit, GLenum target ) {
     (*fptr)(texunit, target);
 }
 
-void glProgramUniformMatrix2x3dvEXT ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glProgramUniformMatrix2x3dvEXT ( GLuint program, GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX2X3DVEXTPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX2X3DVEXTPROC) dasWglGetProcAddress("glProgramUniformMatrix2x3dvEXT");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -4708,7 +4708,7 @@ void glGetProgramBinary ( GLuint program, GLsizei bufSize, GLsizei * length, GLe
     (*fptr)(program, bufSize, length, binaryFormat, binary);
 }
 
-void glTexPageCommitmentARB ( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLboolean commit ) {
+void glTexPageCommitmentARB ( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, bool commit ) {
     static PFNGLTEXPAGECOMMITMENTARBPROC fptr = (PFNGLTEXPAGECOMMITMENTARBPROC) dasWglGetProcAddress("glTexPageCommitmentARB");
     (*fptr)(target, level, xoffset, yoffset, zoffset, width, height, depth, commit);
 }
@@ -4793,7 +4793,7 @@ void glVertexArrayTexCoordOffsetEXT ( GLuint vaobj, GLuint buffer, GLint size, G
     (*fptr)(vaobj, buffer, size, type, stride, offset);
 }
 
-void glProgramUniformMatrix2x4fv ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glProgramUniformMatrix2x4fv ( GLuint program, GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX2X4FVPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX2X4FVPROC) dasWglGetProcAddress("glProgramUniformMatrix2x4fv");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -4848,7 +4848,7 @@ void glFramebufferTextureLayerARB ( GLenum target, GLenum attachment, GLuint tex
     (*fptr)(target, attachment, texture, level, layer);
 }
 
-void glTexturePageCommitmentEXT ( GLuint texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLboolean commit ) {
+void glTexturePageCommitmentEXT ( GLuint texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, bool commit ) {
     static PFNGLTEXTUREPAGECOMMITMENTEXTPROC fptr = (PFNGLTEXTUREPAGECOMMITMENTEXTPROC) dasWglGetProcAddress("glTexturePageCommitmentEXT");
     (*fptr)(texture, level, xoffset, yoffset, zoffset, width, height, depth, commit);
 }
@@ -5043,7 +5043,7 @@ GLint glGetProgramResourceLocationIndex ( GLuint program, GLenum programInterfac
     return (*fptr)(program, programInterface, name);
 }
 
-void glProgramUniformMatrix2x3dv ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glProgramUniformMatrix2x3dv ( GLuint program, GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX2X3DVPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX2X3DVPROC) dasWglGetProcAddress("glProgramUniformMatrix2x3dv");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -5198,7 +5198,7 @@ void glConservativeRasterParameterfNV ( GLenum pname, GLfloat value ) {
     (*fptr)(pname, value);
 }
 
-void glProgramUniformMatrix2fvEXT ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glProgramUniformMatrix2fvEXT ( GLuint program, GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX2FVEXTPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX2FVEXTPROC) dasWglGetProcAddress("glProgramUniformMatrix2fvEXT");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -5233,7 +5233,7 @@ void glPatchParameterfv ( GLenum pname, const GLfloat * values ) {
     (*fptr)(pname, values);
 }
 
-void glUniformMatrix2dv ( GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glUniformMatrix2dv ( GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLUNIFORMMATRIX2DVPROC fptr = (PFNGLUNIFORMMATRIX2DVPROC) dasWglGetProcAddress("glUniformMatrix2dv");
     (*fptr)(location, count, transpose, value);
 }
@@ -5283,17 +5283,17 @@ void glCompressedTextureSubImage3D ( GLuint texture, GLint level, GLint xoffset,
     (*fptr)(texture, level, xoffset, yoffset, zoffset, width, height, depth, format, imageSize, data);
 }
 
-void glVertexArrayVertexAttribOffsetEXT ( GLuint vaobj, GLuint buffer, GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLintptr offset ) {
+void glVertexArrayVertexAttribOffsetEXT ( GLuint vaobj, GLuint buffer, GLuint index, GLint size, GLenum type, bool normalized, GLsizei stride, GLintptr offset ) {
     static PFNGLVERTEXARRAYVERTEXATTRIBOFFSETEXTPROC fptr = (PFNGLVERTEXARRAYVERTEXATTRIBOFFSETEXTPROC) dasWglGetProcAddress("glVertexArrayVertexAttribOffsetEXT");
     (*fptr)(vaobj, buffer, index, size, type, normalized, stride, offset);
 }
 
-void glNamedBufferPageCommitmentMemNV ( GLuint buffer, GLintptr offset, GLsizeiptr size, GLuint memory, GLuint64 memOffset, GLboolean commit ) {
+void glNamedBufferPageCommitmentMemNV ( GLuint buffer, GLintptr offset, GLsizeiptr size, GLuint memory, GLuint64 memOffset, bool commit ) {
     static PFNGLNAMEDBUFFERPAGECOMMITMENTMEMNVPROC fptr = (PFNGLNAMEDBUFFERPAGECOMMITMENTMEMNVPROC) dasWglGetProcAddress("glNamedBufferPageCommitmentMemNV");
     (*fptr)(buffer, offset, size, memory, memOffset, commit);
 }
 
-void glUniformMatrix2x4dv ( GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glUniformMatrix2x4dv ( GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLUNIFORMMATRIX2X4DVPROC fptr = (PFNGLUNIFORMMATRIX2X4DVPROC) dasWglGetProcAddress("glUniformMatrix2x4dv");
     (*fptr)(location, count, transpose, value);
 }
@@ -5353,12 +5353,12 @@ void glMakeBufferResidentNV ( GLenum target, GLenum access ) {
     (*fptr)(target, access);
 }
 
-void glRasterSamplesEXT ( GLuint samples, GLboolean fixedsamplelocations ) {
+void glRasterSamplesEXT ( GLuint samples, bool fixedsamplelocations ) {
     static PFNGLRASTERSAMPLESEXTPROC fptr = (PFNGLRASTERSAMPLESEXTPROC) dasWglGetProcAddress("glRasterSamplesEXT");
     (*fptr)(samples, fixedsamplelocations);
 }
 
-void glProgramUniformMatrix2x3fv ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glProgramUniformMatrix2x3fv ( GLuint program, GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX2X3FVPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX2X3FVPROC) dasWglGetProcAddress("glProgramUniformMatrix2x3fv");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -5433,7 +5433,7 @@ void glDepthRangedNV ( GLdouble zNear, GLdouble zFar ) {
     (*fptr)(zNear, zFar);
 }
 
-void glProgramUniformMatrix4x2fvEXT ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glProgramUniformMatrix4x2fvEXT ( GLuint program, GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX4X2FVEXTPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX4X2FVEXTPROC) dasWglGetProcAddress("glProgramUniformMatrix4x2fvEXT");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -5498,7 +5498,7 @@ void glStencilFillPathNV ( GLuint path, GLenum fillMode, GLuint mask ) {
     (*fptr)(path, fillMode, mask);
 }
 
-void glProgramUniformMatrix3x2fvEXT ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glProgramUniformMatrix3x2fvEXT ( GLuint program, GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX3X2FVEXTPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX3X2FVEXTPROC) dasWglGetProcAddress("glProgramUniformMatrix3x2fvEXT");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -5533,7 +5533,7 @@ void glGetTextureLevelParameterivEXT ( GLuint texture, GLenum target, GLint leve
     (*fptr)(texture, target, level, pname, params);
 }
 
-void glUniformMatrix2fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glUniformMatrix2fv ( GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLUNIFORMMATRIX2FVPROC fptr = (PFNGLUNIFORMMATRIX2FVPROC) dasWglGetProcAddress("glUniformMatrix2fv");
     (*fptr)(location, count, transpose, value);
 }
@@ -5588,7 +5588,7 @@ void glDrawCommandsStatesNV ( GLuint buffer, const GLintptr * indirects, const G
     (*fptr)(buffer, indirects, sizes, states, fbos, count);
 }
 
-void glNamedBufferPageCommitmentARB ( GLuint buffer, GLintptr offset, GLsizeiptr size, GLboolean commit ) {
+void glNamedBufferPageCommitmentARB ( GLuint buffer, GLintptr offset, GLsizeiptr size, bool commit ) {
     static PFNGLNAMEDBUFFERPAGECOMMITMENTARBPROC fptr = (PFNGLNAMEDBUFFERPAGECOMMITMENTARBPROC) dasWglGetProcAddress("glNamedBufferPageCommitmentARB");
     (*fptr)(buffer, offset, size, commit);
 }
@@ -5603,7 +5603,7 @@ void glRenderbufferStorageMultisampleCoverageNV ( GLenum target, GLsizei coverag
     (*fptr)(target, coverageSamples, colorSamples, internalformat, width, height);
 }
 
-void glUniformMatrix2x4fv ( GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glUniformMatrix2x4fv ( GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLUNIFORMMATRIX2X4FVPROC fptr = (PFNGLUNIFORMMATRIX2X4FVPROC) dasWglGetProcAddress("glUniformMatrix2x4fv");
     (*fptr)(location, count, transpose, value);
 }
@@ -5613,7 +5613,7 @@ void glMakeImageHandleResidentNV ( GLuint64 handle, GLenum access ) {
     (*fptr)(handle, access);
 }
 
-void glProgramUniformMatrix3x4dvEXT ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glProgramUniformMatrix3x4dvEXT ( GLuint program, GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX3X4DVEXTPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX3X4DVEXTPROC) dasWglGetProcAddress("glProgramUniformMatrix3x4dvEXT");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -5673,7 +5673,7 @@ void glVertexAttribI4uiv ( GLuint index, const GLuint * v ) {
     (*fptr)(index, v);
 }
 
-void glProgramUniformMatrix4x3fvEXT ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glProgramUniformMatrix4x3fvEXT ( GLuint program, GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX4X3FVEXTPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX4X3FVEXTPROC) dasWglGetProcAddress("glProgramUniformMatrix4x3fvEXT");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -5783,7 +5783,7 @@ void glVertexArrayAttribBinding ( GLuint vaobj, GLuint attribindex, GLuint bindi
     (*fptr)(vaobj, attribindex, bindingindex);
 }
 
-void glDebugMessageControl ( GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint * ids, GLboolean enabled ) {
+void glDebugMessageControl ( GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint * ids, bool enabled ) {
     static PFNGLDEBUGMESSAGECONTROLPROC fptr = (PFNGLDEBUGMESSAGECONTROLPROC) dasWglGetProcAddress("glDebugMessageControl");
     (*fptr)(source, type, severity, count, ids, enabled);
 }
@@ -5793,7 +5793,7 @@ void glCopyTextureSubImage3D ( GLuint texture, GLint level, GLint xoffset, GLint
     (*fptr)(texture, level, xoffset, yoffset, zoffset, x, y, width, height);
 }
 
-void glVertexAttribFormat ( GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint relativeoffset ) {
+void glVertexAttribFormat ( GLuint attribindex, GLint size, GLenum type, bool normalized, GLuint relativeoffset ) {
     static PFNGLVERTEXATTRIBFORMATPROC fptr = (PFNGLVERTEXATTRIBFORMATPROC) dasWglGetProcAddress("glVertexAttribFormat");
     (*fptr)(attribindex, size, type, normalized, relativeoffset);
 }
@@ -5898,7 +5898,7 @@ GLuint glCreateProgram (  ) {
     return (*fptr)();
 }
 
-void glProgramUniformMatrix3x2fv ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glProgramUniformMatrix3x2fv ( GLuint program, GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX3X2FVPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX3X2FVPROC) dasWglGetProcAddress("glProgramUniformMatrix3x2fv");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -5908,12 +5908,12 @@ void glBufferSubData ( GLenum target, GLintptr offset, GLsizeiptr size, const vo
     (*fptr)(target, offset, size, data);
 }
 
-void glVertexAttribFormatNV ( GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride ) {
+void glVertexAttribFormatNV ( GLuint index, GLint size, GLenum type, bool normalized, GLsizei stride ) {
     static PFNGLVERTEXATTRIBFORMATNVPROC fptr = (PFNGLVERTEXATTRIBFORMATNVPROC) dasWglGetProcAddress("glVertexAttribFormatNV");
     (*fptr)(index, size, type, normalized, stride);
 }
 
-void glProgramUniformMatrix4x3fv ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value ) {
+void glProgramUniformMatrix4x3fv ( GLuint program, GLint location, GLsizei count, bool transpose, const GLfloat * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX4X3FVPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX4X3FVPROC) dasWglGetProcAddress("glProgramUniformMatrix4x3fv");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -5968,7 +5968,7 @@ void glCopyBufferSubData ( GLenum readTarget, GLenum writeTarget, GLintptr readO
     (*fptr)(readTarget, writeTarget, readOffset, writeOffset, size);
 }
 
-void glUniformMatrix2x3dv ( GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glUniformMatrix2x3dv ( GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLUNIFORMMATRIX2X3DVPROC fptr = (PFNGLUNIFORMMATRIX2X3DVPROC) dasWglGetProcAddress("glUniformMatrix2x3dv");
     (*fptr)(location, count, transpose, value);
 }
@@ -6033,7 +6033,7 @@ void glShadingRateImagePaletteNV ( GLuint viewport, GLuint first, GLsizei count,
     (*fptr)(viewport, first, count, rates);
 }
 
-void glProgramUniformMatrix3x2dvEXT ( GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLdouble * value ) {
+void glProgramUniformMatrix3x2dvEXT ( GLuint program, GLint location, GLsizei count, bool transpose, const GLdouble * value ) {
     static PFNGLPROGRAMUNIFORMMATRIX3X2DVEXTPROC fptr = (PFNGLPROGRAMUNIFORMMATRIX3X2DVEXTPROC) dasWglGetProcAddress("glProgramUniformMatrix3x2dvEXT");
     (*fptr)(program, location, count, transpose, value);
 }
@@ -6048,7 +6048,7 @@ void glDeleteCommandListsNV ( GLsizei n, const GLuint * lists ) {
     (*fptr)(n, lists);
 }
 
-GLuint64 glGetImageHandleNV ( GLuint texture, GLint level, GLboolean layered, GLint layer, GLenum format ) {
+GLuint64 glGetImageHandleNV ( GLuint texture, GLint level, bool layered, GLint layer, GLenum format ) {
     static PFNGLGETIMAGEHANDLENVPROC fptr = (PFNGLGETIMAGEHANDLENVPROC) dasWglGetProcAddress("glGetImageHandleNV");
     return (*fptr)(texture, level, layered, layer, format);
 }

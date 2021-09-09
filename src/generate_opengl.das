@@ -53,7 +53,8 @@ def main
             for at,ai in fn.args,range(100500)
                 if ai!=0
                     fprint(fw, ", ")
-                fprint(fw, "{at.atype} {at.name}")
+                var art = at.atype=="GLboolean" ? "bool" : at.atype
+                fprint(fw, "{art} {at.name}")
             fprint(fw, " ) \{\n")
             fprint(fw, "    static {ptrtype} fptr = ({ptrtype}) dasWglGetProcAddress(\"{fn.name}\");\n")
             fprint(fw, "    ")
