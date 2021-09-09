@@ -55,5 +55,45 @@ ENDIF()
 			"${glfw_INCLUDE_DIR}"
 			"${DAS_GLFW_CONSTS}"
 		)
+
+		# libDasModuleOpenGL
+		SET(DAS_OPENGL_MODULE_SRC
+			${DAS_GLFW_DIR}/src/need_opengl.h
+			#${DAS_GLFW_DIR}/src/aot_glfw.h
+			${DAS_GLFW_DIR}/src/module_opengl.ann.cpp_inc
+			${DAS_GLFW_DIR}/src/module_opengl.ann.inc
+			${DAS_GLFW_DIR}/src/module_opengl.const_inc
+			${DAS_GLFW_DIR}/src/module_opengl.cpp
+			${DAS_GLFW_DIR}/src/module_opengl_ann.cpp
+			${DAS_GLFW_DIR}/src/module_opengl_const.cpp
+			${DAS_GLFW_DIR}/src/module_opengl_fun.cpp
+			${DAS_GLFW_DIR}/src/module_opengl.enum.cpp_inc
+			${DAS_GLFW_DIR}/src/module_opengl.enum.inc
+			${DAS_GLFW_DIR}/src/module_opengl.inc
+			${DAS_GLFW_DIR}/src/module_opengl.method.inc
+		)
+		ADD_MODULE_LIB(libDasModuleOpenGL)
+		ADD_MODULE_CPP(opengl)
+		#ADD_MODULE_NATIVE(glfw_boost)
+		ADD_LIBRARY(libDasModuleOpenGL ${DAS_OPENGL_MODULE_SRC})
+		#TARGET_LINK_LIBRARIES(libDasModuleGlfw ${glfw_LIBRARIES})
+		ADD_DEPENDENCIES(libDasModuleOpenGL libDaScript)
+IF(UNIX)
+		target_link_libraries(libDasModuleOpenGL ${OPENGL_gl_LIBRARY} GL)
+ENDIF()
+		TARGET_INCLUDE_DIRECTORIES(libDasModuleOpenGL PUBLIC ${glfw_INCLUDE_DIR})
+		SETUP_CPP11(libDasModuleOpenGL)
+
+		# GENERATE OPENGL
+
+		DAS_CPP_BIND_AST(
+			OPENGL_GENERATE
+			generate_opengl.das
+			${DAS_GLFW_DIR}/src/opengl_headers.h
+			${DAS_GLFW_DIR}/src/module_opengl
+			${DAS_GLFW_DIR}/src
+			"${glfw_INCLUDE_DIR}"
+			"./OpenGL/glcorearb.h"
+		)
 	ENDIF()
 ENDIF()

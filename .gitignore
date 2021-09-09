@@ -6,3 +6,5 @@ Findopengl_system.cmake
 graph_info.json
 src/glfw_headers.h.json*
 daslib/_aot_generated/glfw_boost.das.cpp
+src/opengl_headers.h.json
+src/opengl_headers.h.json.log
