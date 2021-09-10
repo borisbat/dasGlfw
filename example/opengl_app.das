@@ -1,32 +1,24 @@
 require daslib/glfw_boost
 require daslib/opengl_boost
+require daslib/glsl
 require daslib/defer
 require math
 
-
 require daslib/safe_addr
 
-let VERTEX_SRC = "
-#version 330 core
-layout(location=0) in vec2 position;
-layout(location=1) in vec3 color;
-out vec3 fColor;
-void main()
-\{
-    fColor = color;
-    gl_Position=vec4(position, 0.0, 1.0);
-\}
-"
+var [[in, location=0]] v_position : float2
+var [[in, location=1]] v_color : float3
+var [[inout]] f_color : float3
+var [[out]] f_outputColor : float4
 
-let FRAGMENT_SRC = "
-#version 330 core
-in vec3 fColor;
-out vec4 outputColor;
-void main()
-\{
-    outputColor = vec4(fColor, 1.0);
-\}
-"
+[vertex_program(name="VERTEX_SRC",version=330)]
+def vs_main
+    f_color = v_color
+    gl_Position = float4(v_position.x, v_position.y, 0.0, 1.0)
+
+[fragment_program(name="FRAGMENT_SRC",version=330)]
+def ps_main
+    f_outputColor = float4(f_color.x, f_color.y, f_color.z, 1.0)
 
 var vertex : uint
 var fragment : uint
@@ -56,7 +48,8 @@ def create_gl_objects
     glBindBuffer(GL_ARRAY_BUFFER, vbo)
     glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW)
 
-def glfw_app ( title:string; blk : block<(w,h:int):void> )
+[export]
+def main
     if glfwInit()==0
 		panic("can't init glfw")
     defer <|
@@ -66,7 +59,7 @@ def glfw_app ( title:string; blk : block<(w,h:int):void> )
     glfwWindowHint(int(GLFW_CONTEXT_VERSION_MINOR), 3)
     glfwWindowHint(int(GLFW_OPENGL_PROFILE), int(GLFW_OPENGL_COMPAT_PROFILE))
     glfwWindowHint(int(GLFW_OPENGL_FORWARD_COMPAT), int(GL_TRUE))
-    var window = glfwCreateWindow(1280, 720, title, null, null)
+    var window = glfwCreateWindow(1280, 720, "Testing OpenGL 3.3", null, null)
     if window==null
 		panic("can't create window")
     defer <|
@@ -77,13 +70,6 @@ def glfw_app ( title:string; blk : block<(w,h:int):void> )
         glfwPollEvents()
         var display_w, display_h : int
         glfwGetFramebufferSize(window, display_w, display_h)
-        invoke(blk, display_w, display_h)
-        glfwMakeContextCurrent(window)
-        glfwSwapBuffers(window)
-
-[export]
-def main
-    glfw_app("Testing OpenGL 3.3") <| $(display_w, display_h)
         glViewport(0, 0, display_w, display_h)
         glClearColor(0.2, 0.2, 0.2, 1.0)
         glClearDepth(1.0lf)
@@ -92,11 +78,9 @@ def main
         glDepthFunc(GL_LEQUAL)
         glUseProgram(program)
         glBindBuffer(GL_ARRAY_BUFFER, vbo)
-        /*
-        glEnableVertexAttribArray(0u)
-        glVertexAttribPointer(0u, 2, GL_FLOAT, false, 5 * typeinfo(sizeof type<float>), 0)
-        glEnableVertexAttribArray(1u)
-        glVertexAttribPointer(1u, 3, GL_FLOAT, false, 5 * typeinfo(sizeof type<float>), 2 * typeinfo(sizeof type<float>))
-        */
         bind_vertex_buffer(type<Vertex>)
         glDrawArrays(GL_TRIANGLES, 0, 3)
+        glfwMakeContextCurrent(window)
+        glfwSwapBuffers(window)
+
+

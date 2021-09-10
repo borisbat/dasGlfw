@@ -37,7 +37,7 @@ def create_shader ( src:string; shaderType:uint; canfail:bool = false )
                 var log : uint8[512]
                 var slog = reinterpret<string> addr(log[0])
                 glGetShaderInfoLog(s, 512, null, slog)
-                panic("FAILED TO CREATE SHADER ({status}):\n{slog}\n")
+                panic("{src}\n\nFAILED TO CREATE SHADER ({status}):\n{slog}\n")
         return 0u
     else
         return s
