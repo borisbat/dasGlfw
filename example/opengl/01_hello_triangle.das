@@ -59,7 +59,7 @@ def main
     glfwWindowHint(int(GLFW_CONTEXT_VERSION_MINOR), 3)
     glfwWindowHint(int(GLFW_OPENGL_PROFILE), int(GLFW_OPENGL_COMPAT_PROFILE))
     glfwWindowHint(int(GLFW_OPENGL_FORWARD_COMPAT), int(GL_TRUE))
-    var window = glfwCreateWindow(1280, 720, "Testing OpenGL 3.3", null, null)
+    var window = glfwCreateWindow(1280, 720, "Hello triangle", null, null)
     if window==null
 		panic("can't create window")
     defer <|

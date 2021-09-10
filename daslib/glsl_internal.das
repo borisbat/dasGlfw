@@ -289,6 +289,8 @@ class GlslExport : AstVisitor
     def override preVisitGlobalLetVariable(arg:VariablePtr;lastArg:bool)
         self->line(arg.at)
         if shaderType==ShaderType vertex
+            if find_arg("uniform", arg.annotation) is tBool
+                *writer |> write("uniform ")
             let argLoc = find_arg("location", arg.annotation)
             if argLoc is tInt
                 *writer |> write("layout(location={argLoc as tInt}) ")
@@ -297,6 +299,8 @@ class GlslExport : AstVisitor
             if find_arg("inout", arg.annotation) is tBool
                 *writer |> write("out ")
         elif shaderType==ShaderType fragment
+            if find_arg("uniform", arg.annotation) is tBool
+                *writer |> write("uniform ")
             if find_arg("in", arg.annotation) is tBool
                 *writer |> write("in ")
             if find_arg("out", arg.annotation) is tBool
