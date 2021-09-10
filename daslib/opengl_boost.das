@@ -14,8 +14,25 @@ require stbimage
 
 require daslib/glfw_boost
 
+require math
+
 typedef
     GLenum = uint
+
+def glUniformMatrix4fv ( location:int; value:float4x4 )
+    unsafe
+        glUniformMatrix4fv(location, 1, false, addr(value[0][0]))
+
+def perspective_opengl(fovy,aspect,zNear,zFar:float)
+	let tanHalfFovy = tan(fovy / 2.0);
+    var Result : float4x4
+    identity(Result)
+    Result[0][0] = 1.0 / (aspect * tanHalfFovy)
+    Result[1][1] = 1.0 / (tanHalfFovy)
+    Result[2][2] = - (zFar + zNear) / (zFar - zNear)
+    Result[2][3] = - 1.0
+    Result[3][2] = - ( 2.0 * zFar * zNear) / (zFar - zNear)
+    return Result
 
 [expect_any_array(arr)]
 def glBufferData(target:GLenum; arr; usage:GLenum)

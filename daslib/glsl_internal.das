@@ -72,6 +72,11 @@ let private glsl_types <- {{
     Type tVoid      => "void"
 }}
 
+let private glsl_handle_types <- {{
+    "float4x4"      => "mat4";
+    "float3x3"      => "mat3"
+}}
+
 let private glsl_functions <- {{
     "float2"    =>  "vec2";
     "float3"    =>  "vec3";
@@ -120,6 +125,9 @@ class GlslExport : AstVisitor
                 tw |> write("& ")
             if t.baseType==Type tStructure
                 tw |> write("{t.structType.name}")
+            elif t.baseType==Type tHandle
+                peek(t.annotation.name) <| $ ( aname )
+                    tw |> write(glsl_handle_types?[aname] ?? "error")
             elif glsl_types |> key_exists(t.baseType)
                 tw |> write(glsl_types?[t.baseType] ?? "error")
             else
