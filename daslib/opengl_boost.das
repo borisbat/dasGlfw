@@ -10,10 +10,12 @@ require daslib/ast_boost
 require daslib/templates
 require daslib/templates_boost
 
+require stbimage
+
+require daslib/glfw_boost
+
 typedef
     GLenum = uint
-
-// void glBufferData ( GLenum target, GLsizeiptr size, const void * data, GLenum usage ) {
 
 [expect_any_array(arr)]
 def glBufferData(target:GLenum; arr; usage:GLenum)
@@ -63,6 +65,23 @@ def link_shader ( program:uint; canfail:bool = false )
     else
         return true
 
+def load_image_from_file ( fname:string; canfail:bool=false )
+    var x, y, comp : int
+    let data = stbi_load(fname, safe_addr(x), safe_addr(y), safe_addr(comp), 4)
+    if data == null
+        if !canfail
+            let reason = stbi_failure_reason();
+            panic(reason)
+        return 0u
+    else
+        var texture_id : uint
+        glGenTextures(1, safe_addr(texture_id))
+        glBindTexture(GL_TEXTURE_2D, texture_id)
+        glTexImage2D(GL_TEXTURE_2D, 0, int(GL_RGBA), x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        stbi_image_free(data)
+        return texture_id
 
 [structure_macro(name="vertex_buffer")]
 class GlslVertexBuffer : AstStructureAnnotation

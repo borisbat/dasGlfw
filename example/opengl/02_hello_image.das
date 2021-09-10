@@ -6,26 +6,6 @@ require math
 
 require daslib/safe_addr
 
-require stbimage
-
-def load_image_from_file ( fname:string; canfail:bool=false )
-    var x, y, comp : int
-    let data = stbi_load(fname, safe_addr(x), safe_addr(y), safe_addr(comp), 4)
-    if data == null
-        if !canfail
-            let reason = stbi_failure_reason();
-            panic(reason)
-        return 0u
-    else
-        var texture_id : uint
-        glGenTextures(1, safe_addr(texture_id))
-        glBindTexture(GL_TEXTURE_2D, texture_id)
-        glTexImage2D(GL_TEXTURE_2D, 0, int(GL_RGBA), x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-        stbi_image_free(data)
-        return texture_id
-
 var [[in, location=0]] v_position : float2
 var [[in, location=1]] v_color : float3
 var [[in, location=2]] v_texcoord : float2
@@ -79,7 +59,7 @@ def create_gl_objects
     glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW)
     glGenBuffers(1, safe_addr(ebo))
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, int64(length(indices)*typeinfo(sizeof type<int>)), safe_addr(indices[0]), GL_STATIC_DRAW)
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW)
     texture = load_image_from_file("image.png")
 
 [export]
