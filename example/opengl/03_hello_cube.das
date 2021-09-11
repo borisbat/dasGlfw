@@ -115,10 +115,9 @@ def main
         glEnable(GL_DEPTH_TEST)
         glDepthFunc(GL_LEQUAL)
         let t = glfwGetTime()
-        let fps = 60.
-        if t > double(PI*fps)
-            glfwSetTime(t - double(PI*fps))
-        let rot = un_quat_from_unit_vec_ang(normalize(float3(1.,1.,0.)), radians(fps*float(t)))
+        if t > 1lf
+            glfwSetTime(t - 1lf)
+        let rot = un_quat_from_unit_vec_ang(normalize(float3(1.,1.,0.)), float(t)*PI*2.)
         v_model = compose(float4(0.0), rot, float4(1.0))
         v_projection = perspective_opengl( radians(45.0f), float(display_w)/float(display_h), 0.1f, 50.0f)
         glUseProgram(program)

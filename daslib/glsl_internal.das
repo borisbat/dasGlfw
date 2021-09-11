@@ -96,6 +96,9 @@ let private glsl_functions <- {{
     "float2"    =>  "vec2";
     "float3"    =>  "vec3";
     "float4"    =>  "vec4";
+
+    "floori"    =>  "floor";
+
     "_"         =>  "_"
 }}
 
@@ -236,19 +239,13 @@ class GlslExport : AstVisitor
         self->newLine(1)
         return fun
     def override preVisitFunctionArgument(fun:FunctionPtr;arg:VariablePtr;last:bool)
-        if arg.annotation.length != 0
-            *writer |> write("[{describe(arg.annotation)}] ")
-        if !arg._type.flags.constant
-            *writer |> write("var ")
-        if arg.isAccessUnused
-            *writer |> write(" /*unsued*/ ")
-        *writer |> write("{arg.name} : {self->describe_glsl_type(arg._type)}")
+        *writer |> write("{self->describe_glsl_type(arg._type)} {arg.name} ")
     def override visitFunctionArgument(fun:FunctionPtr;arg:VariablePtr;last:bool)
         if !last
-            *writer |> write("; ")
+            *writer |> write(", ")
         return arg
-    def override preVisitFunctionArgumentInit(fun:FunctionPtr;arg:VariablePtr;value:ExpressionPtr)
-        *writer |> write(" = ")
+    def override canVisitFunctionArgumentInit (fun:Function?; arg:VariablePtr;value:ExpressionPtr) : bool
+        return false
 // block
     def override preVisitExprBlock(blk:smart_ptr<ExprBlock>)
         if blk.blockFlags.isClosure
@@ -438,13 +435,23 @@ class GlslExport : AstVisitor
     def override preVisitExprIsType(expr:smart_ptr<ExprAt>;typeDecl:TypeDeclPtr)
         *writer |> write("is type<{describe([decl=typeDecl,extra=false,contracts=true])}>")
 // op2
+    def getReplaceOp2(expr:smart_ptr<ExprOp2>)
+        if "{expr.op}"=="%" && !expr._type.isInteger
+            return "mod"
+        else
+            return ""
     def override preVisitExprOp2(expr:smart_ptr<ExprOp2>)
-        *writer |> write("(")
+        let repl = self->getReplaceOp2(expr)
+        *writer |> write("{repl}(")
     def override visitExprOp2(expr:smart_ptr<ExprOp2>) : ExpressionPtr
         *writer |> write(")")
         return expr
     def override preVisitExprOp2Right(expr:smart_ptr<ExprOp2>;right:ExpressionPtr)
-        *writer |> write(" {expr.op} ")
+        let repl = self->getReplaceOp2(expr)
+        if repl != ""
+            *writer |> write(", ")
+        else
+            *writer |> write(" {expr.op} ")
 // op3
     def override preVisitExprOp3(expr:smart_ptr<ExprOp3>)
         *writer |> write("(")

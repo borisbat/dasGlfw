@@ -23,6 +23,9 @@ require math
 typedef
     GLenum = uint
 
+def glUniformAny ( location:int; value:float2 )
+    glUniform2fv(location, 1, safe_addr(value.x))
+
 def glUniformAny ( location:int; value:float4x4 )
     glUniformMatrix4fv(location, value)
 
