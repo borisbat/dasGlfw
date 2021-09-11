@@ -79,7 +79,7 @@ let vertices = [[Vertex
 def create_gl_objects
     program = create_shader_program(VERTEX_SRC,FRAGMENT_SRC)
     glGenVertexArrays(1, safe_addr(vao))
-    glBindVertexArray(vao);
+    glBindVertexArray(vao)
     glGenBuffers(1, safe_addr(vbo))
     glBindBuffer(GL_ARRAY_BUFFER, vbo)
     glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW)

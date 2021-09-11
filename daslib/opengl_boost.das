@@ -23,6 +23,16 @@ require math
 typedef
     GLenum = uint
 
+def bind_ffp()
+    glUseProgram(0u)
+    glBindBuffer(GL_ARRAY_BUFFER, 0u)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0u)
+    glBindVertexArray(0u)
+    var maxAttr = 16
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,safe_addr(maxAttr))
+    for va in range(maxAttr)
+        glDisableVertexAttribArray(uint(va))
+
 def glUniformAny ( location:int; value:float2 )
     glUniform2fv(location, 1, safe_addr(value.x))
 

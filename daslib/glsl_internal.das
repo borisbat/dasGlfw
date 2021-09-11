@@ -59,7 +59,6 @@ class GlslShader : AstFunctionAnnotation
                                 glob.init := null
                             else
                                 glob._type.flags |= TypeDeclFlags constant
-                                glob.flags |= VariableFlags global_shared
         if !err |> empty()
             errors := join(err, "\n")
             return false
