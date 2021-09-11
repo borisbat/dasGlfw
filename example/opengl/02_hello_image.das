@@ -60,7 +60,7 @@ def create_gl_objects
     glGenBuffers(1, safe_addr(ebo))
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW)
-    texture = load_image_from_file("image.png")
+    texture = load_image_from_file("{get_das_root()}/modules/dasGlfw/example/opengl/image.png")
 
 [export]
 def main

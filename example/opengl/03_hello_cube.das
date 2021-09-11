@@ -89,7 +89,7 @@ def create_gl_objects
     glGenBuffers(1, safe_addr(vbo))
     glBindBuffer(GL_ARRAY_BUFFER, vbo)
     glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW)
-    texture = load_image_from_file("image.png")
+    texture = load_image_from_file("{get_das_root()}/modules/dasGlfw/example/opengl/image.png")
 
 def radians(f:float)
     return f * PI / 180.0

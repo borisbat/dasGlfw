@@ -77,8 +77,3 @@ def main
         glDrawArrays(GL_TRIANGLES, 0, 3)
         glfwMakeContextCurrent(window)
         glfwSwapBuffers(window)
-
-
-options debugger
-require daslib/debug
-
