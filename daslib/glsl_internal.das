@@ -29,6 +29,13 @@ class GlslShader : AstFunctionAnnotation
         generate_bind_uniform_dummy(func)
         return true
     def override patch ( var func:FunctionPtr; var group:ModuleGroup; args,progArgs:AnnotationArgumentList; var errors : das_string; var astChanged:bool& ) : bool
+        for_each_function(compiling_module(), bind_uniform_function_name(func)) <| $ ( bfun )
+            if bfun.flags.exports
+                bfun.flags &= ~FunctionFlags exports
+                generate_bind_uniform(func, bfun)
+                astChanged = true
+        return true
+    def override fixup ( var func:FunctionPtr; var group:ModuleGroup; args,progArgs:AnnotationArgumentList; var errors : das_string ) : bool
         let argName = find_arg("name", args)
         if !(argName is tString)
             errors := "name must be string constant"
@@ -39,7 +46,6 @@ class GlslShader : AstFunctionAnnotation
             version = argVersion as tInt
         // TODO: 'find_global(name)'
         var err : array<string>
-        var changed = false
         for_each_global(compiling_module()) <| $ ( var glob )
             if err |> empty()
                 if glob.init == null
@@ -53,14 +59,10 @@ class GlslShader : AstFunctionAnnotation
                                 glob.init := null
                             else
                                 glob._type.flags |= TypeDeclFlags constant
-                                changed = true
+                                glob.flags |= VariableFlags global_shared
         if !err |> empty()
             errors := join(err, "\n")
             return false
-        if changed
-            for_each_function(compiling_module(), bind_uniform_function_name(func)) <| $ ( bfun )
-                generate_bind_uniform(func, bfun)
-        astChanged ||= changed
         return true
 
 [function_macro(name="vertex_program")]
