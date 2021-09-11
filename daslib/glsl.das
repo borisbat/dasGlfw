@@ -5,7 +5,7 @@ module glsl shared public
 require glsl_internal public
 
 struct sampler2D
-    width, height : int
+    tex: uint
 
 def texture(sampler:sampler2D;uv:float2)
     assert(false,"we should not be here\n")

@@ -4,6 +4,8 @@ module opengl_boost shared
 
 require opengl public
 
+require daslib/opengl_state
+
 require daslib/safe_addr
 require daslib/contracts
 require daslib/ast_boost
@@ -160,3 +162,5 @@ class GlslVertexBuffer : AstStructureAnnotation
         if !(compiling_module() |> add_function(fn))
             panic("can't setup")
         return true
+
+

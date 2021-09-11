@@ -100,11 +100,7 @@ def main
 		panic("can't init glfw")
     defer <|
         glfwTerminate()
-    // NOTE: opengl 3.3
-    glfwWindowHint(int(GLFW_CONTEXT_VERSION_MAJOR), 3)
-    glfwWindowHint(int(GLFW_CONTEXT_VERSION_MINOR), 3)
-    glfwWindowHint(int(GLFW_OPENGL_PROFILE), int(GLFW_OPENGL_COMPAT_PROFILE))
-    glfwWindowHint(int(GLFW_OPENGL_FORWARD_COMPAT), int(GL_TRUE))
+    glfwInitOpenGL(3,3)
     var window = glfwCreateWindow(1280, 720, "Hello image", null, null)
     if window==null
 		panic("can't create window")
@@ -143,5 +139,3 @@ def main
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glfwMakeContextCurrent(window)
         glfwSwapBuffers(window)
-
-

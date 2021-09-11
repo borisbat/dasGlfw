@@ -54,11 +54,7 @@ def main
 		panic("can't init glfw")
     defer <|
         glfwTerminate()
-    // NOTE: opengl 3.3
-    glfwWindowHint(int(GLFW_CONTEXT_VERSION_MAJOR), 3)
-    glfwWindowHint(int(GLFW_CONTEXT_VERSION_MINOR), 3)
-    glfwWindowHint(int(GLFW_OPENGL_PROFILE), int(GLFW_OPENGL_COMPAT_PROFILE))
-    glfwWindowHint(int(GLFW_OPENGL_FORWARD_COMPAT), int(GL_TRUE))
+    glfwInitOpenGL(3,3)
     var window = glfwCreateWindow(1280, 720, "Hello triangle", null, null)
     if window==null
 		panic("can't create window")
@@ -74,7 +70,6 @@ def main
         glClearColor(0.2, 0.2, 0.2, 1.0)
         glClearDepth(1.0lf)
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-        glEnable(GL_DEPTH_TEST)
         glDepthFunc(GL_LEQUAL)
         glUseProgram(program)
         glBindBuffer(GL_ARRAY_BUFFER, vbo)
@@ -83,4 +78,7 @@ def main
         glfwMakeContextCurrent(window)
         glfwSwapBuffers(window)
 
+
+options debugger
+require daslib/debug
 
