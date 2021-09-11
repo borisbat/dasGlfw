@@ -135,7 +135,7 @@ def main
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
         glBindTexture(GL_TEXTURE_2D, target_texture)
         vs_effect_bind_uniform(display_program)
-        ps_effect_bind_uniform(display_program)
+        ps_display_bind_uniform(display_program)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, null)
 
         glfwMakeContextCurrent(window)
