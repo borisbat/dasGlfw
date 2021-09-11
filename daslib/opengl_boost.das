@@ -12,6 +12,8 @@ require daslib/ast_boost
 require daslib/templates
 require daslib/templates_boost
 
+require daslib/glsl public
+
 require stbimage
 
 require daslib/glfw_boost
@@ -20,6 +22,12 @@ require math
 
 typedef
     GLenum = uint
+
+def glUniformAny ( location:int; value:float4x4 )
+    glUniformMatrix4fv(location, value)
+
+def glUniformAny ( location:int; smp:sampler2D )
+    glUniform1i(location, smp.texture)
 
 def glUniformMatrix4fv ( location:int; value:float4x4 )
     unsafe
@@ -83,6 +91,15 @@ def link_shader ( program:uint; canfail:bool = false )
         return false
     else
         return true
+
+def create_shader_program ( vsrc,fsrc:string )
+    let vertex = create_shader(vsrc, GL_VERTEX_SHADER)
+    let fragment = create_shader(fsrc, GL_FRAGMENT_SHADER)
+    let program = create_shader_program(vertex, fragment)
+    link_shader(program)
+    glDeleteShader(vertex)
+    glDeleteShader(fragment)
+    return program
 
 def load_image_from_file ( fname:string; canfail:bool=false )
     var x, y, comp : int

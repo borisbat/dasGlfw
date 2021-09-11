@@ -26,8 +26,9 @@ class GlslShader : AstFunctionAnnotation
             errors := "name must be string constant"
             return false
         add_global_var(compiling_module(),"{argName as tString}", new [[TypeDecl() at=func.at, baseType=Type tString]], func.at, false)
+        generate_bind_uniform_dummy(func)
         return true
-    def override patch ( var func:FunctionPtr; var group:ModuleGroup; args,progArgs:AnnotationArgumentList; var errors : das_string ) : bool
+    def override patch ( var func:FunctionPtr; var group:ModuleGroup; args,progArgs:AnnotationArgumentList; var errors : das_string; var astChanged:bool& ) : bool
         let argName = find_arg("name", args)
         if !(argName is tString)
             errors := "name must be string constant"
@@ -38,16 +39,28 @@ class GlslShader : AstFunctionAnnotation
             version = argVersion as tInt
         // TODO: 'find_global(name)'
         var err : array<string>
+        var changed = false
         for_each_global(compiling_module()) <| $ ( var glob )
-            peek(glob.name) <| $ ( gname )
-                if gname == argName as tString
-                    glob.init <- new [[ExprConstString() at=func.at,
-                        value:=generate_glsl(func, err, shaderType, version),
-                        _type <- new [[TypeDecl() at=func.at, baseType=Type tString]]
-                    ]]
+            if err |> empty()
+                if glob.init == null
+                    peek(glob.name) <| $ ( gname )
+                        if gname == argName as tString
+                            glob.init <- new [[ExprConstString() at=func.at,
+                                value:=generate_glsl(func, err, shaderType, version),
+                                _type <- new [[TypeDecl() at=func.at, baseType=Type tString]]
+                            ]]
+                            if ! err |> empty()
+                                glob.init := null
+                            else
+                                glob._type.flags |= TypeDeclFlags constant
+                                changed = true
         if !err |> empty()
             errors := join(err, "\n")
             return false
+        if changed
+            for_each_function(compiling_module(), bind_uniform_function_name(func)) <| $ ( bfun )
+                generate_bind_uniform(func, bfun)
+        astChanged ||= changed
         return true
 
 [function_macro(name="vertex_program")]
@@ -793,4 +806,38 @@ def generate_glsl(fnMain:FunctionPtr; var errors:array<string>; shaderType:Shade
         unsafe
             delete astVisitor
     return st
+
+def bind_uniform_function_name(fnMain:FunctionPtr)
+    return "{fnMain.name}_bind_uniform"
+
+def generate_bind_uniform_dummy(fnMain:FunctionPtr)
+    var fn <- new [[Function() at = fnMain.at, atDecl = fnMain.at, name := bind_uniform_function_name(fnMain)]]
+    fn.flags |= FunctionFlags generated
+    fn.flags |= FunctionFlags exports   // note: this is temporary, until we are done with dependency collecting etc
+    fn.result <- new [[TypeDecl() baseType=Type tVoid, at=fnMain.at]]
+    fn.arguments |> emplace_new() <| new [[Variable() at=fnMain.at,
+        name := "__program",
+        _type <- new [[TypeDecl() at=fnMain.at, baseType=Type tUInt]]
+    ]]
+    fn.body <- new [[ExprBlock() at=fnMain.at]]
+    if !(compiling_module() |> add_function(fn))
+        panic("can't setup")
+    return true
+
+def generate_bind_uniform(fnMain:FunctionPtr; var fn:FunctionPtr)
+    var blk <- new [[ExprBlock() at=fn.at]]
+    collect_dependencies(fnMain) <| $ ( vfun, vvar )
+        for vv in vvar
+            if find_arg("uniform", vv.annotation) is tBool
+                var cll_gul <- new [[ExprCall() at=vv.at, name:="glGetUniformLocation"]]
+                cll_gul.arguments |> emplace_new() <| new [[ExprVar() at=vv.at, name:="__program"]]
+                cll_gul.arguments |> emplace_new() <| new [[ExprConstString() at=vv.at, value:=vv.name]]
+                var cll_uni <- new [[ExprCall() at=vv.at, name:="glUniformAny"]]
+                cll_uni.arguments |> emplace(cll_gul)
+                cll_uni.arguments |> emplace_new() <| new [[ExprVar() at=vv.at, name:=vv.name]]
+                blk.list |>emplace(cll_uni)
+    fn.body := blk
+
+
+
 

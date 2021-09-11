@@ -24,8 +24,6 @@ def vs_main
 def ps_main
     f_outputColor = texture(f_tex,f_texcoord) * float4(f_color.x, f_color.y, f_color.z, 1.0)
 
-var vertex : uint
-var fragment : uint
 var program : uint
 var vao : uint
 var vbo : uint
@@ -48,10 +46,7 @@ let vertices = [[Vertex
 let indices = [[int 0; 1; 2; 2; 3; 0]]
 
 def create_gl_objects
-    vertex = create_shader(VERTEX_SRC, GL_VERTEX_SHADER)
-    fragment = create_shader(FRAGMENT_SRC, GL_FRAGMENT_SHADER)
-    program = create_shader_program(vertex, fragment)
-    link_shader(program)
+    program = create_shader_program(VERTEX_SRC,FRAGMENT_SRC)
     glGenVertexArrays(1, safe_addr(vao))
     glBindVertexArray(vao);
     glGenBuffers(1, safe_addr(vbo))
@@ -76,6 +71,7 @@ def main
         glfwDestroyWindow(window)
     glfwMakeContextCurrent(window)
     create_gl_objects()
+    f_tex.texture = 0
     while glfwWindowShouldClose(window)==0
         glfwPollEvents()
         var display_w, display_h : int
@@ -91,7 +87,8 @@ def main
         bind_vertex_buffer(type<Vertex>)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
         glBindTexture(GL_TEXTURE_2D, texture)
-        glUniform1i(glGetUniformLocation(program, "f_tex"), 0)  // TODO: uniform binding
+        vs_main_bind_uniform(program)
+        ps_main_bind_uniform(program)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, null)
         glfwMakeContextCurrent(window)
         glfwSwapBuffers(window)

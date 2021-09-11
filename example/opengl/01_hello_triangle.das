@@ -1,6 +1,5 @@
 require daslib/glfw_boost
 require daslib/opengl_boost
-require daslib/glsl
 require daslib/defer
 require math
 
@@ -20,8 +19,6 @@ def vs_main
 def ps_main
     f_outputColor = float4(f_color.x, f_color.y, f_color.z, 1.0)
 
-var vertex : uint
-var fragment : uint
 var program : uint
 var vao : uint
 var vbo : uint
@@ -38,10 +35,7 @@ let vertices = [[Vertex
 ]]
 
 def create_gl_objects
-    vertex = create_shader(VERTEX_SRC, GL_VERTEX_SHADER)
-    fragment = create_shader(FRAGMENT_SRC, GL_FRAGMENT_SHADER)
-    program = create_shader_program(vertex, fragment)
-    link_shader(program)
+    program = create_shader_program(VERTEX_SRC,FRAGMENT_SRC)
     glGenVertexArrays(1, safe_addr(vao))
     glBindVertexArray(vao);
     glGenBuffers(1, safe_addr(vbo))
@@ -74,6 +68,8 @@ def main
         glUseProgram(program)
         glBindBuffer(GL_ARRAY_BUFFER, vbo)
         bind_vertex_buffer(type<Vertex>)
+        vs_main_bind_uniform(program)
+        ps_main_bind_uniform(program)
         glDrawArrays(GL_TRIANGLES, 0, 3)
         glfwMakeContextCurrent(window)
         glfwSwapBuffers(window)
