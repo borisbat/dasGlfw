@@ -101,10 +101,9 @@ let opengl_logic_op <- {{
     GL_OR_REVERSE => "GL_OR_REVERSE";
     GL_OR_INVERTED => "GL_OR_INVERTED"
 }}
-
 def report_to_debugger ( var ctx:Context; category,name:string; value:auto(TT) )
     unsafe
-        let tinfo = typeinfo(rtti_typeinfo type<TT>)
+        let tinfo = typeinfo(rtti_typeinfo value)
         let pdata = addr(value)
         report_context_state(ctx, category, name, addr(tinfo), pdata)
 
@@ -117,11 +116,11 @@ def report_bool ( var ctx:Context; what:uint; category,name:string )
     return any_test
 
 def report_bool4 ( var ctx:Context; what:uint; category,name:string )
-    var any_test : array<bool>
+    var any_test : bool[4]
     var d8 : uint8[4]
     glGetBooleanv(what, safe_addr(d8))
-    for d in d8
-        any_test |> push(int(d)!=0)
+    for a,d in any_test, d8
+        a = int(d)!=0
     report_to_debugger(ctx, category, name, any_test)
     return <- any_test
 
