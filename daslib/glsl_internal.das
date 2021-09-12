@@ -98,6 +98,8 @@ let private glsl_functions <- {{
 
     "floori"    =>  "floor";
 
+    "lerp"      =>  "mix";
+
     "_"         =>  "_"
 }}
 
@@ -224,6 +226,8 @@ class GlslExport : AstVisitor
             peek(ann.annotation.name) <| $ ( aname )
                 if aname=="vertex_program" || aname=="fragment_program"
                     fnName = "main"
+                    if !fun.result.isVoid
+                        self->error("shader function must be void", fun.at)
         *writer |> write("{fnName} ( ")
     def override preVisitFunctionBody(fun:FunctionPtr)
         *writer |> write(" )")

@@ -16,7 +16,8 @@ require daslib/glsl public
 
 require stbimage
 
-require daslib/glfw_boost
+require daslib/glfw_boost public
+require daslib/glfw public
 
 require math
 
@@ -28,13 +29,23 @@ def bind_ffp()
     glBindBuffer(GL_ARRAY_BUFFER, 0u)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0u)
     glBindVertexArray(0u)
+    glActiveTexture(GL_TEXTURE0)
     var maxAttr = 16
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,safe_addr(maxAttr))
     for va in range(maxAttr)
         glDisableVertexAttribArray(uint(va))
 
+def glUniformAny ( location:int; value:float )
+    glUniform1f(location, value)
+
 def glUniformAny ( location:int; value:float2 )
     glUniform2fv(location, 1, safe_addr(value.x))
+
+def glUniformAny ( location:int; value:float3 )
+    glUniform3fv(location, 1, safe_addr(value.x))
+
+def glUniformAny ( location:int; value:float4 )
+    glUniform4fv(location, 1, safe_addr(value.x))
 
 def glUniformAny ( location:int; value:float4x4 )
     glUniformMatrix4fv(location, value)
