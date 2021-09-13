@@ -101,6 +101,18 @@ let opengl_logic_op <- {{
     GL_OR_REVERSE => "GL_OR_REVERSE";
     GL_OR_INVERTED => "GL_OR_INVERTED"
 }}
+
+let opengl_last_error <- {{
+    uint(GL_NO_ERROR) => "GL_NO_ERROR";
+    GL_INVALID_ENUM => "GL_INVALID_ENUM";
+    GL_INVALID_VALUE => "GL_INVALID_VALUE";
+    GL_INVALID_OPERATION => "GL_INVALID_OPERATION";
+    GL_INVALID_FRAMEBUFFER_OPERATION => "GL_INVALID_FRAMEBUFFER_OPERATION";
+    GL_OUT_OF_MEMORY => "GL_OUT_OF_MEMORY";
+    GL_STACK_UNDERFLOW => "GL_STACK_UNDERFLOW";
+    GL_STACK_OVERFLOW => "GL_STACK_OVERFLOW"
+}}
+
 def report_to_debugger ( var ctx:Context; category,name:string; value:auto(TT) )
     unsafe
         let tinfo = typeinfo(rtti_typeinfo value)
@@ -161,6 +173,13 @@ class ContextStateAgent : DapiDebugAgent
     def override onCollect(var ctx:Context)
         if !ctx.category.opengl
             return
+        // error
+        var err = glGetLastError()
+        opengl_last_error |> find(err) <| $ ( pname )
+            if pname!=null
+                report_to_debugger(ctx, "OPENGL", "last error", *pname)
+            else
+                report_to_debugger(ctx, "OPENGL", "last error", err)
         // program
         report_uint(ctx, GL_CURRENT_PROGRAM, "OPENGL program", "GL_CURRENT_PROGRAM")
         // array

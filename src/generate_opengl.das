@@ -45,6 +45,8 @@ def main
     allow_extern_c = true
     var args <- get_command_line_arguments()
 
+    extra_args = "\"context\", \"lineinfo\""
+
     fopen("opengl_win32.inc","wb") <| $ ( fw )
         gen_fn_callback <- @ <| ( fn:ClangFunc )
             let fntype = getFunRetType(fn)
@@ -55,8 +57,13 @@ def main
                     fprint(fw, ", ")
                 var art = at.atype=="GLboolean" ? "bool" : at.atype
                 fprint(fw, "{art} {at.name}")
-            fprint(fw, " ) \{\n")
+            if length(fn.args) > 0
+                fprint(fw, ", ")
+            fprint(fw, "Context * __context__, LineInfoArg * __at__ ) \{\n")
             fprint(fw, "    static {ptrtype} fptr = ({ptrtype}) dasWglGetProcAddress(\"{fn.name}\");\n")
+            fprint(fw, "    if (!fptr) __context__->throw_error_at(*__at__,\"OpenGL: method {fn.name} is NULL\");\n")
+            if fn.name!="glGetError"
+                fprint(fw, "    checkOpenGLError(__context__,__at__);\n")
             fprint(fw, "    ")
             if fntype!="void"
                 fprint(fw, "return ")

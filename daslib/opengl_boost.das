@@ -16,13 +16,13 @@ require daslib/glsl public
 
 require stbimage
 
-require daslib/glfw_boost public
-require daslib/glfw public
-
 require math
 
 typedef
     GLenum = uint
+
+def glTexParameteri ( target : uint; pname : uint; param : uint )
+    glTexParameteri(target,pname,int(param))
 
 def bind_ffp()
     glUseProgram(0u)

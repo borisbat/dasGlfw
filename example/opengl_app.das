@@ -53,21 +53,19 @@ def main
 		panic("can't init glfw")
     defer <|
         glfwTerminate()
-    // NOTE: opengl 3.3
-    glfwWindowHint(int(GLFW_CONTEXT_VERSION_MAJOR), 3)
-    glfwWindowHint(int(GLFW_CONTEXT_VERSION_MINOR), 3)
-    glfwWindowHint(int(GLFW_OPENGL_PROFILE), int(GLFW_OPENGL_COMPAT_PROFILE))
-    glfwWindowHint(int(GLFW_OPENGL_FORWARD_COMPAT), int(GL_TRUE))
+    glfwInitOpenGL(3,3)
     var window = glfwCreateWindow(1280, 720, "Testing OpenGL 3.3", null, null)
     if window==null
 		panic("can't create window")
     defer <|
         glfwDestroyWindow(window)
     glfwMakeContextCurrent(window)
+    // glSetBreakOnOpenGLError(true)    // this is here to enable breakpoint on OpenGL exception
     create_gl_objects()
     while glfwWindowShouldClose(window)==0
         glfwPollEvents()
         var display_w, display_h : int
+        // glEnable(123456u)    // this is here to test OpenGL exception breakpoints
         glfwGetFramebufferSize(window, display_w, display_h)
         glViewport(0, 0, display_w, display_h)
         glClearColor(0.2, 0.2, 0.2, 1.0)
@@ -81,5 +79,3 @@ def main
         glDrawArrays(GL_TRIANGLES, 0, 3)
         glfwMakeContextCurrent(window)
         glfwSwapBuffers(window)
-
-

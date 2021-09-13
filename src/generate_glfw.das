@@ -38,10 +38,23 @@ def main
         "ImGui_ImplVulkanH_SelectSurfaceFormat"
     }]
 */
+
+    is_function_blocked <- @ <| ( fn:string ) : bool
+        if fn |> starts_with("glfw")
+            return false
+        if fn |> starts_with("gl")
+            return true
+        return false
+
     // generate
     allow_extern_c = true
     var args <- get_command_line_arguments()
     bindHeaders(args[3], args[4])
+
+    is_const_blocked <- @ <| ( defn:string ) : bool
+        if defn |> starts_with("GL_")
+            return true
+        return false
 
     print("consts headers to bind: ${args[5]}\n")
     genDefineConstants(split(args[5], ";"), args[4])
