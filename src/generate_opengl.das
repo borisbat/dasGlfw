@@ -62,17 +62,19 @@ def main
             fprint(fw, "Context * __context__, LineInfoArg * __at__ ) \{\n")
             fprint(fw, "    static {ptrtype} fptr = ({ptrtype}) dasWglGetProcAddress(\"{fn.name}\");\n")
             fprint(fw, "    if (!fptr) __context__->throw_error_at(*__at__,\"OpenGL: method {fn.name} is NULL\");\n")
-            if fn.name!="glGetError"
-                fprint(fw, "    checkOpenGLError(__context__,__at__);\n")
             fprint(fw, "    ")
             if fntype!="void"
-                fprint(fw, "return ")
+                fprint(fw, "auto result = ")
             fprint(fw, "(*fptr)(")
             for at,ai in fn.args,range(100500)
                 if ai!=0
                     fprint(fw, ", ")
                 fprint(fw, "{at.name}")
             fprint(fw, ");\n")
+            if fn.name!="glGetError"
+                fprint(fw, "    checkOpenGLError(__context__,__at__);\n")
+            if fntype!="void"
+                fprint(fw, "    return result;\n")
             fprint(fw, "\}\n\n")
         bindHeaders(args[3], args[4])
 

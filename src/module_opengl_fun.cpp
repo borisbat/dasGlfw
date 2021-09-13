@@ -51,18 +51,26 @@ void checkOpenGLError ( Context * __context__, LineInfoArg * __at__) {
                     break;
                 }
             }
+            TextPrinter tp;
+            tp << __at__->describe() << ": " << tw.str() << "\n";
             __context__->breakPoint(*__at__,"exception", tw.str().c_str());
         }
     }
 }
 
-void glSetBreakOnOpenGLError ( bool on ) {
+bool glSetBreakOnOpenGLError ( bool on ) {
+    auto old = g_breakOnOpenGLError;
     g_breakOnOpenGLError = on;
+    return old;
 }
 
 GLenum glGetLastError ( Context * __context__, LineInfoArg * __at__) {
     if ( !g_breakOnOpenGLError ) g_glLastError = glGetError(__context__,__at__);
     return g_glLastError;
+}
+
+void glSetLastError ( GLenum err ) {
+    g_glLastError = err;
 }
 
 }
@@ -78,6 +86,8 @@ void Module_opengl::initFunctions ( ) {
     addExtern<DAS_BIND_FUN(glGetLastError)>(*this, lib, "glGetLastError",
         SideEffects::modifyExternal,"glGetLastError")
             ->args({"context","lineinfo"});
+    addExtern<DAS_BIND_FUN(glSetLastError)>(*this, lib, "glSetLastError",
+        SideEffects::modifyExternal,"glSetLastError");
     #include "module_opengl.inc"
 #endif
 }

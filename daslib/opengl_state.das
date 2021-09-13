@@ -180,6 +180,7 @@ class ContextStateAgent : DapiDebugAgent
                 report_to_debugger(ctx, "OPENGL", "last error", *pname)
             else
                 report_to_debugger(ctx, "OPENGL", "last error", err)
+        var state = glSetBreakOnOpenGLError(false)
         // program
         report_uint(ctx, GL_CURRENT_PROGRAM, "OPENGL program", "GL_CURRENT_PROGRAM")
         // array
@@ -226,6 +227,8 @@ class ContextStateAgent : DapiDebugAgent
         report_uint(ctx, GL_TEXTURE_BINDING_CUBE_MAP, "OPENGL texture", "GL_TEXTURE_BINDING_CUBE_MAP")
         report_uint(ctx, GL_TEXTURE_BINDING_RECTANGLE, "OPENGL texture", "GL_TEXTURE_BINDING_RECTANGLE")
         report_uint(ctx, GL_TEXTURE_BINDING_BUFFER, "OPENGL texture", "GL_TEXTURE_BINDING_BUFFER")
+        // restore state
+        glSetBreakOnOpenGLError(state)
 
 
 
