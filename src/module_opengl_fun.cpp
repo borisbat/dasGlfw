@@ -20,6 +20,16 @@ namespace das {
 
 void * dasWglGetProcAddress ( const char * );
 
+___noinline void * dasGetProcAddress ( const char * name, Context * __context__, LineInfoArg * __at__) {
+    auto res = dasWglGetProcAddress(name);
+    if ( !res ) {
+        TextWriter tw;
+        tw << "OpenGL: " << name << " is NULL";
+        __context__->throw_error_at(*__at__,tw.str().c_str());
+    }
+    return res;
+}
+
 void checkOpenGLError ( Context * __context__, LineInfoArg * __at__);
 
 #include "opengl_win32.inc"
@@ -39,7 +49,7 @@ static struct GlError { GLenum code; const char * name; } g_glErrors[8] = {
 
 static GLenum g_glLastError = GL_NO_ERROR;
 
-void checkOpenGLError ( Context * __context__, LineInfoArg * __at__) {
+___noinline void checkOpenGLError ( Context * __context__, LineInfoArg * __at__) {
     if ( g_breakOnOpenGLError ) {
         g_glLastError = glGetError(__context__,__at__);
         if ( g_glLastError != GL_NO_ERROR ) {

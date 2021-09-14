@@ -60,8 +60,7 @@ def main
             if length(fn.args) > 0
                 fprint(fw, ", ")
             fprint(fw, "Context * __context__, LineInfoArg * __at__ ) \{\n")
-            fprint(fw, "    static {ptrtype} fptr = ({ptrtype}) dasWglGetProcAddress(\"{fn.name}\");\n")
-            fprint(fw, "    if (!fptr) __context__->throw_error_at(*__at__,\"OpenGL: method {fn.name} is NULL\");\n")
+            fprint(fw, "    static {ptrtype} fptr = ({ptrtype}) dasGetProcAddress(\"{fn.name}\",__context__,__at__);\n")
             fprint(fw, "    ")
             if fntype!="void"
                 fprint(fw, "auto result = ")
