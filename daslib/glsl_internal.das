@@ -125,7 +125,7 @@ class GlslExport : AstVisitor
         trackLine += count
     def error ( txt:string; at:LineInfo )
         let fname = at.fileInfo!=null ? "{at.fileInfo.name} " : ""
-        errors |> push("\tHLSL: {txt} at {fname}line {int(at.line)}")
+        errors |> push("\tGLSL: {txt} at {fname}line {int(at.line)}")
     def line(at:LineInfo)
         pass
         // TODO: add option to output lines
@@ -168,7 +168,7 @@ class GlslExport : AstVisitor
         return typ
 // alias
     def override preVisitAlias(typ:TypeDeclPtr;name:das_string)
-        *writer |> write("typedef\n\t{name} = {self->describe_glsl_type(typ)}")
+        *writer |> write("// typedef\n\t{name} = {self->describe_glsl_type(typ)}")
         self->newLine(2)
 // enumeration
     def override preVisitEnumeration(enu:EnumerationPtr)
@@ -252,20 +252,7 @@ class GlslExport : AstVisitor
 // block
     def override preVisitExprBlock(blk:smart_ptr<ExprBlock>)
         if blk.blockFlags.isClosure
-            if blk.returnType!=null || blk.arguments.length!=0
-                *writer |> write("$(")
-                for arg,argIndex in blk.arguments,range(blk.arguments.length)
-                    if arg.annotation.length != 0
-                        *writer |> write("[{describe(arg.annotation)}] ")
-                    if arg._type.flags.constant
-                        *writer |> write("var ")
-                    *writer |> write("{arg.name} : {self->describe_glsl_type(arg._type)}")
-                    if argIndex != blk.arguments.length-1
-                        *writer |> write("; ")
-                *writer |> write(")")
-                if blk.returnType!=null
-                    *writer |> write(":{self->describe_glsl_type(blk.returnType)}")
-                self->newLine(1)
+            self->error ("closure is not supported", blk.at)
         *writer |> write("{repeat("\t",tab)}\{")
         self->newLine(1)
         tab ++
@@ -282,14 +269,7 @@ class GlslExport : AstVisitor
         self->newLine(1)
         return expr
     def override visitExprBlockFinal(blk:smart_ptr<ExprBlock>)
-        *writer |> write("{repeat("\t",tab-1)}\} finally \{")
-        self->newLine(1)
-    def override preVisitExprBlockFinalExpression(blk:smart_ptr<ExprBlock>;expr:ExpressionPtr)
-        *writer |> write("{repeat("\t",tab)}")
-    def override visitExprBlockFinalExpression(blk:smart_ptr<ExprBlock>;expr:ExpressionPtr)
-        *writer |> write(";")
-        self->newLine(1)
-        return expr
+        self->error ("finally is not supported", blk.at)
 // let
     def override preVisitExprLetVariable(expr:smart_ptr<ExprLet>;arg:VariablePtr;lastArg:bool)
         self->line(arg.at)
@@ -344,39 +324,13 @@ class GlslExport : AstVisitor
         *writer |> write(" = ")
 // string builder
     def override preVisitExprStringBuilder(expr:smart_ptr<ExprStringBuilder>)
-        *writer |> write("string_builder(")
-    def override visitExprStringBuilder(expr:smart_ptr<ExprStringBuilder>) : ExpressionPtr
-        *writer |> write(")")
-        return expr
-    def override visitExprStringBuilderElement(expr:smart_ptr<ExprStringBuilder>;elem:ExpressionPtr;last:bool)
-        if !last
-            *writer |> write(",")
-        return elem
+        self->error ("string builder is not supported", expr.at)
 // new
     def override preVisitExprNew(expr:smart_ptr<ExprNew>)
-        *writer |> write("new {self->describe_glsl_type(expr.typeexpr)}")
-        if expr.initializer
-            *writer |> write("(")
-    def override visitExprNew(expr:smart_ptr<ExprNew>) : ExpressionPtr
-        if expr.initializer
-            *writer |> write(")")
-        return expr
-    def override visitExprNewArgument(expr:smart_ptr<ExprNew>;arg:ExpressionPtr;last:bool)
-        if !last
-            *writer |> write(",")
-        return arg
+        self->error ("new is not supported", expr.at)
 // named call
     def override preVisitExprNamedCall(expr:smart_ptr<ExprNamedCall>)
-        *writer |> write("{expr.name}([")
-    def override visitExprNamedCall(expr:smart_ptr<ExprNamedCall>) : ExpressionPtr
-        *writer |> write("])")
-        return expr
-    def override preVisitExprNamedCallArgument(expr:smart_ptr<ExprNamedCall>;arg:MakeFieldDeclPtr;last:bool)
-        *writer |> write("{arg.name}{arg.flags.moveSemantics ? "<-" : "="}")
-    def override visitExprNamedCallArgument(expr:smart_ptr<ExprNamedCall>;arg:MakeFieldDeclPtr;last:bool)
-        if !last
-            *writer |> write(",")
-        return arg
+        self->error ("named call is not supported", expr.at)
 // looks like call (debug,assert,verify,erase,find,key_exists,keys,values,invoke,memzero etc)
     def isInvokeMethod(expr:smart_ptr<ExprLooksLikeCall>)
         if expr is ExprInvoke
@@ -420,8 +374,8 @@ class GlslExport : AstVisitor
             *writer |> write(",")
         return arg
 // null coaelescing
-    def override preVisitExprNullCoalescingDefault(expr:smart_ptr<ExprNullCoalescing>;defval:ExpressionPtr)
-        *writer |> write(" ?? ")
+    def override preVisitExprNullCoalescing(expr:smart_ptr<ExprNullCoalescing>): void
+        self->error ("null coaelescing is not supported", expr.at)
 // at
     def override visitExprAt(expr:smart_ptr<ExprAt>) : ExpressionPtr
         *writer |> write("]")
@@ -429,14 +383,11 @@ class GlslExport : AstVisitor
     def override preVisitExprAtIndex(expr:smart_ptr<ExprAt>;index:ExpressionPtr)
         *writer |> write("[")
 // safe at
-    def override visitExprSafeAt(expr:smart_ptr<ExprSafeAt>) : ExpressionPtr
-        *writer |> write("]")
-        return expr
-    def override preVisitExprSafeAtIndex(expr:smart_ptr<ExprAt>;index:ExpressionPtr)
-        *writer |> write("?[")
+    def override preVisitExprSafeAt(expr:smart_ptr<ExprSafeAt>): void
+        self->error ("safe index is not supported", expr.at)
 // is
     def override preVisitExprIsType(expr:smart_ptr<ExprAt>;typeDecl:TypeDeclPtr)
-        *writer |> write("is type<{describe([decl=typeDecl,extra=false,contracts=true])}>")
+        self->error ("is type is not supported", expr.at)
 // op2
     def getReplaceOp2(expr:smart_ptr<ExprOp2>)
         if "{expr.op}"=="%" && !expr._type.isInteger
@@ -470,31 +421,27 @@ class GlslExport : AstVisitor
         *writer |> write(" = ")
 // move
     def override preVisitExprMoveRight(expr:smart_ptr<ExprMove>;right:ExpressionPtr)
-        *writer |> write(" <- ")
+        self->error ("move is not supported", expr.at)
 // clone
     def override preVisitExprCloneRight(expr:smart_ptr<ExprClone>;right:ExpressionPtr)
-        *writer |> write(" := ")
+        self->error ("clone is not supported", expr.at)
 // with
     def override preVisitExprWith(expr:smart_ptr<ExprWith>)
-        *writer |> write("with ")
-    def override preVisitExprWithBody(expr:smart_ptr<ExprWith>;right:ExpressionPtr)
-        self->newLine(1)
+        self->error ("with is not supported", expr.at)
 // while
     def override preVisitExprWhile(expr:smart_ptr<ExprWhile>)
-        *writer |> write("while ")
+        *writer |> write("while ( ")
     def override preVisitExprWhileBody(expr:smart_ptr<ExprWhile>;right:ExpressionPtr)
+        *writer |> write(") ")
         self->newLine(1)
 // try-catch
     def override preVisitExprTryCatch(expr:smart_ptr<ExprTryCatch>)
-        *writer |> write("try")
-        self->newLine(1)
-    def override preVisitExprTryCatchCatch(expr:smart_ptr<ExprTryCatch>;right:ExpressionPtr)
-        *writer |> write("{repeat("\t",tab)}recover")
-        self->newLine(1)
+        self->error ("try-recover is not supported", expr.at)
 // if-then-else
     def override preVisitExprIfThenElse(expr:smart_ptr<ExprIfThenElse>)
-        *writer |> write("if ")
+        *writer |> write("if (")
     def override preVisitExprIfThenElseIfBlock(expr:smart_ptr<ExprIfThenElse>;ifBlock:ExpressionPtr)
+        *writer |> write(")")
         self->newLine(1)
     def override preVisitExprIfThenElseElseBlock(expr:smart_ptr<ExprIfThenElse>;elseBlock:ExpressionPtr)
         *writer |> write("{repeat("\t",tab)}")
@@ -516,136 +463,78 @@ class GlslExport : AstVisitor
         self->newLine(1)
 // make variant
     def override preVisitExprMakeVariant(expr:smart_ptr<ExprMakeVariant>)
-        *writer |> write("[[")
-        if expr._type != null
-            *writer |> write("{describe(expr._type)} ")
-    def override visitExprMakeVariant(expr:smart_ptr<ExprMakeVariant>) : ExpressionPtr
-        *writer |> write("]]")
-        return expr
-    def override preVisitExprMakeVariantField(expr:smart_ptr<ExprMakeVariant>;index:int;decl:MakeFieldDeclPtr;last:bool)
-        *writer |> write("{decl.name} {decl.flags.moveSemantics ? "<-" : "=" } ")
-    def override visitExprMakeVariantField(expr:smart_ptr<ExprMakeVariant>;index:int;decl:MakeFieldDeclPtr;last:bool)
-        if !last
-            *writer |> write("; ")
-        return decl
+        self->error ("variant is not supported", expr.at)
 // make structure
     def override preVisitExprMakeStruct(expr:smart_ptr<ExprMakeStruct>)
-        *writer |> write("[[")
-        if expr._type != null
-            *writer |> write("{describe(expr._type)}{expr.makeStructFlags.useInitializer ? "()" : ""} ")
-    def override visitExprMakeStruct(expr:smart_ptr<ExprMakeStruct>) : ExpressionPtr
-        *writer |> write("]]")
-        return expr
-    def override visitExprMakeStructIndex(expr:smart_ptr<ExprMakeStruct>;index:int;last:bool)
-        if !last
-            *writer |> write("; ")
-    def override preVisitExprMakeStructField(expr:smart_ptr<ExprMakeStruct>;index:int;decl:MakeFieldDeclPtr;last:bool)
-        *writer |> write("{decl.name} {decl.flags.moveSemantics ? "<-" : "=" } ")
-    def override visitExprMakeStructField(expr:smart_ptr<ExprMakeStruct>;index:int;decl:MakeFieldDeclPtr;last:bool)
-        if !last
-            *writer |> write(", ")
-        return decl
+        self->error ("structure initialization is not supported YET", expr.at)
 // make array
     def override preVisitExprMakeArray(expr:smart_ptr<ExprMakeArray>)
-        *writer |> write("[[")
-        if expr._type != null
-            *writer |> write("{describe(expr._type)} ")
-    def override visitExprMakeArray(expr:smart_ptr<ExprMakeArray>) : ExpressionPtr
-        *writer |> write("]]")
-        return expr
-    def override visitExprMakeArrayIndex(expr:smart_ptr<ExprMakeArray>;index:int;init:ExpressionPtr;last:bool) : ExpressionPtr
-        if !last
-            *writer |> write("; ")
-        return init
+        // TODO: support array initialization
+        self->error ("array initialization is not supported YET", expr.at)
 // make tuple
     def override preVisitExprMakeTuple(expr:smart_ptr<ExprMakeTuple>)
-        *writer |> write("[[")
-        if expr._type != null
-            *writer |> write("{describe(expr._type)} ")
-    def override visitExprMakeTuple(expr:smart_ptr<ExprMakeTuple>) : ExpressionPtr
-        *writer |> write("]]")
-        return expr
-    def override visitExprMakeTupleIndex(expr:smart_ptr<ExprMakeTuple>;index:int;init:ExpressionPtr;last:bool) : ExpressionPtr
-        if !last
-            *writer |> write(", ")
-        return init
+        // TODO: support nameless structure
+        self->error ("tuple is not supported YET", expr.at)
 // array comprehension
     def override preVisitExprArrayComprehension(expr:smart_ptr<ExprArrayComprehension>)
-        *writer |> write("{expr.generatorSyntax ? "[[" : "[\{"}")
-    def override visitExprArrayComprehension(expr:smart_ptr<ExprArrayComprehension>) : ExpressionPtr
-        *writer |> write("{expr.generatorSyntax ? "]]" : "\}]"}")
-        return expr
-    def override preVisitExprArrayComprehensionSubexpr(expr:smart_ptr<ExprArrayComprehension>;subexrp:ExpressionPtr)
-        *writer |> write("; ")
-    def override preVisitExprArrayComprehensionWhere(expr:smart_ptr<ExprArrayComprehension>;filter:ExpressionPtr)
-        *writer |> write("; where ")
+        self->error ("array comprehension is not supported", expr.at)
 // type info
     def override preVisitExprTypeInfo(expr:smart_ptr<ExprTypeInfo>)
-        *writer |> write("typeinfo({expr.trait}")
-        if !empty(expr.subtrait)
-            *writer |> write("<{expr.subtrait}")
-            if !empty(expr.extratrait)
-                *writer |> write(";{expr.extratrait}")
-        *writer |> write(">")
-        if expr.subexpr == null
-            *writer |> write("type<{describe(expr.typeexpr)}>")
-    def override visitExprTypeInfo(expr:smart_ptr<ExprTypeInfo>) : ExpressionPtr
-        *writer |> write(")")
-        return expr
+        self->error ("typeinfo is not supported", expr.at)
 // ptr to ref
     def override preVisitExprPtr2Ref(expr:smart_ptr<ExprPtr2Ref>)
-        *writer |> write("deref(")
-    def override visitExprPtr2Ref(expr:smart_ptr<ExprPtr2Ref>) : ExpressionPtr
-        *writer |> write(")")
-        return expr
+        self->error ("deref is not supported", expr.at)
 // label
     def override preVisitExprLabel(expr:smart_ptr<ExprLabel>)
-        *writer |> write("label {expr.labelName}:")
-        if !empty(expr.comment)
-            *writer |> write("/*{expr.comment}*/")
+        self->error ("label is not supported", expr.at)
 // goto
     def override preVisitExprGoto(expr:smart_ptr<ExprGoto>)
-        *writer |> write("goto ")
-        if expr.subexpr==null
-            *writer |> write("label {expr.labelName}")
+        self->error ("goto is not supported", expr.at)
+// ref 2 ptr
+    def override preVisitExprRef2Ptr(expr:smart_ptr<ExprRef2Ptr>)
+        self->error ("addr is not supported", expr.at)
 // ref to value
     def override preVisitExprRef2Value(expr:smart_ptr<ExprRef2Value>)
         *writer |> write("/*r2v*/ (")
     def override visitExprRef2Value(expr:smart_ptr<ExprRef2Value>) : ExpressionPtr
         *writer |> write(")")
         return expr
-// ref 2 ptr
-    def override preVisitExprRef2Ptr(expr:smart_ptr<ExprRef2Ptr>)
-        *writer |> write("addr(")
-    def override visitExprRef2Ptr(expr:smart_ptr<ExprRef2Ptr>) : ExpressionPtr
-        *writer |> write(")")
-        return expr
 // @@
     def override preVisitExprAddr(expr:smart_ptr<ExprAddr>)
-        *writer |> write("@@")
-        if expr.funcType != null
-            *writer |> write("<{describe(expr.funcType)}>")
-        *writer |> write("{expr.target}")
+        self->error ("function addr is not supported", expr.at)
+// assert / verify
+    def override preVisitExprAssert(expr:smart_ptr<ExprAssert>) : void
+        self->error ("assert is not supported", expr.at)
+// static_assert
+    def override preVisitExprStaticAssert(expr:smart_ptr<ExprStaticAssert>) : void
+        self->error ("static_assert is not supported", expr.at)
+// quote
+    def override preVisitExprQuote(expr:smart_ptr<ExprQuote>) : void
+        self->error ("quote is not supported", expr.at)
+// debug
+    def override preVisitExprDebug(expr:smart_ptr<ExprDebug>) : void
+        self->error ("debug is not supported", expr.at)
+// invoke
+    def override preVisitExprInvoke(expr:smart_ptr<ExprInvoke>) : void
+        self->error ("invoke is not supported", expr.at)
+// erase
+    def override preVisitExprErase(expr:smart_ptr<ExprErase>) : void
+        self->error ("erase is not supported", expr.at)
+// find
+    def override preVisitExprFind(expr:smart_ptr<ExprFind>) : void
+        self->error ("find is not supported", expr.at)
+// key exists
+    def override preVisitExprKeyExists(expr:smart_ptr<ExprKeyExists>) : void
+        self->error ("keyexists is not supported", expr.at)
 // ascend
     def override preVisitExprAscend(expr:smart_ptr<ExprAscend>)
-        if expr.ascType != null
-            *writer |> write("new<{describe(expr.ascType)}> ")
-        else
-            *writer |> write("new ")
+        self->error ("new is not supported", expr.at)
 // cast
     def override preVisitExprCast(expr:smart_ptr<ExprCast>)
-        if expr.castFlags.reinterpretCast
-            *writer |> write("reinterpret")
-        elif expr.castFlags.upcastCast
-            *writer |> write("upcast")
-        else
-            *writer |> write("cast")
-        *writer |> write("<{describe(expr.castType)}> ")
+        self->error ("cast is not supported", expr.at)
 // delete
     def override preVisitExprDelete(expr:smart_ptr<ExprDelete>)
-        *writer |> write("delete ")
-        if expr.native
-            *writer |> write("/*native*/ ")
+        self->error ("delete is not supported", expr.at)
 // var
     def override preVisitExprVar(expr:smart_ptr<ExprVar>)
         *writer |> write("{expr.name}")
@@ -654,9 +543,8 @@ class GlslExport : AstVisitor
         *writer |> write(".{expr.name}")
         return expr
 // safe field
-    def override visitExprSafeField(expr:smart_ptr<ExprSafeField>) : ExpressionPtr
-        *writer |> write("?.{expr.name}")
-        return expr
+    def override preVisitExprSafeField(expr:smart_ptr<ExprSafeField>) : void
+        self->error ("'?.' is not supported", expr.at)
 // swizzle
     def override visitExprSwizzle(expr:smart_ptr<ExprSwizzle>) : ExpressionPtr
         *writer |> write(".")
@@ -666,17 +554,14 @@ class GlslExport : AstVisitor
             *writer |> write("{f>=0 && f<=3 ? f2name[f] : "?"}")
         return expr
 // is variant
-    def override visitExprIsVariant(expr:smart_ptr<ExprIsVariant>) : ExpressionPtr
-        *writer |> write(" is {expr.name}")
-        return expr
+    def override preVisitExprIsVariant(expr:smart_ptr<ExprIsVariant>) : void
+        self->error ("'is' is not supported", expr.at)
 // as variant
-    def override visitExprAsVariant(expr:smart_ptr<ExprAsVariant>) : ExpressionPtr
-        *writer |> write(" as {expr.name}")
-        return expr
+    def override preVisitExprAsVariant(expr:smart_ptr<ExprAsVariant>) : void
+        self->error ("'as' is not supported", expr.at)
 // safe as variant
-    def override visitExprSafeAsVariant(expr:smart_ptr<ExprSafeAsVariant>) : ExpressionPtr
-        *writer |> write(" ?as {expr.name}")
-        return expr
+    def override preVisitExprSafeAsVariant(expr:smart_ptr<ExprSafeAsVariant>) : void
+        self->error ("'?as' is not supported", expr.at)
 // op1
     def override preVisitExprOp1(expr:smart_ptr<ExprOp1>) : void
         let op = "{expr.op}"
@@ -692,23 +577,32 @@ class GlslExport : AstVisitor
 // return
     def override preVisitExprReturn(expr:smart_ptr<ExprReturn>) : void
         *writer |> write("return ")
-        if expr.returnFlags.fromYield
-            *writer |> write("/* from yield */ ")
-        if expr.returnFlags.moveSemantics
-            *writer |> write("<- ")
 // yield
     def override preVisitExprYield(expr:smart_ptr<ExprYield>) : void
-        *writer |> write("yield ")
-        if expr.returnFlags.moveSemantics
-            *writer |> write("<- ")
+        self->error ("yield is not supported", expr.at)
 // break
     def override preVisitExprBreak(expr:smart_ptr<ExprBreak>) : void
         *writer |> write("break")
 // continue
     def override preVisitExprContinue(expr:smart_ptr<ExprContinue>) : void
         *writer |> write("continue")
+// make block
+    def override preVisitExprMakeBlock(expr:smart_ptr<ExprMakeBlock>) : void
+        self->error ("'make block' is not supported", expr.at)
+// make generator
+    def override preVisitExprMakeGenerator(expr:smart_ptr<ExprMakeGenerator>) : void
+        self->error ("'make generator' is not supported", expr.at)
+// memzero
+    def override preVisitExprMemZero(expr:smart_ptr<ExprMemZero>) : void
+        self->error ("memzero is not supported", expr.at)
 // const ptr
     def override preVisitExprConstPtr(expr:smart_ptr<ExprConstPtr>) : void
+        self->error ("pointer is not supported", expr.at)
+// const enumeraiton
+    def override preVisitExprConstEnumeration(expr:smart_ptr<ExprConstEnumeration>) : void
+        self->error ("enumeration is not supported", expr.at)
+// const bitfield
+    def override preVisitExprConstBitfield(expr:smart_ptr<ExprConstBitfield>) : void
         *writer |> write("{expr.value}")
 // const int 8
     def override preVisitExprConstInt8(expr:smart_ptr<ExprConstInt8>) : void
@@ -745,19 +639,19 @@ class GlslExport : AstVisitor
         *writer |> write("{expr.value}")
 // const uint2
     def override preVisitExprConstUInt2(expr:smart_ptr<ExprConstUInt2>) : void
-        *writer |> write("uint2({expr.value})")
+        *writer |> write("uvec2({expr.value})")
 // const uint3
     def override preVisitExprConstUInt3(expr:smart_ptr<ExprConstUInt3>) : void
-        *writer |> write("uint3({expr.value})")
+        *writer |> write("uvec3({expr.value})")
 // const uint4
     def override preVisitExprConstUInt4(expr:smart_ptr<ExprConstUInt4>) : void
-        *writer |> write("uint4({expr.value})")
+        *writer |> write("uvec4({expr.value})")
 // const range
     def override preVisitExprConstRange(expr:smart_ptr<ExprConstRange>) : void
-        *writer |> write("range({expr.value})")
+        self->error ("range is not supported", expr.at)
 // const urnage
     def override preVisitExprConstURange(expr:smart_ptr<ExprConstURange>) : void
-        *writer |> write("urange({expr.value})")
+        self->error ("urange is not supported", expr.at)
 // const bool
     def override preVisitExprConstBool(expr:smart_ptr<ExprConstBool>) : void
         *writer |> write("{expr.value}")
@@ -773,34 +667,24 @@ class GlslExport : AstVisitor
 // const float4
     def override preVisitExprConstFloat4(expr:smart_ptr<ExprConstFloat4>) : void
         *writer |> write("vec4({expr.value})")
-// const double
-    def override preVisitExprConstDouble(expr:smart_ptr<ExprConstDouble>) : void
-        *writer |> write("{expr.value}lf")
-// fake context
-    def override preVisitExprFakeContext(expr:smart_ptr<ExprFakeContext>) : void
-        *writer |> write("__context__")
-// fake line info
-    def override preVisitExprFakeLineInfo(expr:smart_ptr<ExprFakeLineInfo>) : void
-        *writer |> write("__lineinfo__")
 // string
     def override preVisitExprConstString(expr:smart_ptr<ExprConstString>) : void
-        peek(expr.value) <| $(str)
-            *writer |> write("\"{escape(str)}\"")
-// const enumeraiton
-    def override preVisitExprConstEnumeration(expr:smart_ptr<ExprConstEnumeration>) : void
-        let enumModule = expr.enumType._module
-        if enumModule!=null && !empty(enumModule.name)
-            *writer |> write("{enumModule.name}::")
-        *writer |> write("{expr.enumType.name} {expr.value}")
-// const bitfield
-    def override preVisitExprConstBitfield(expr:smart_ptr<ExprConstBitfield>) : void
-        var name : string
-        if expr.bitfieldType!=null && !empty(expr.bitfieldType.alias)
-            name = find_bitfield_name(expr.bitfieldType,expr.value)
-        if !empty(name)
-            *writer |> write("{expr.bitfieldType.alias} {name}")
-        else
-            *writer |> write("bitfield({expr.value})")
+        self->error ("string constant is not supported", expr.at)
+// const double
+    def override preVisitExprConstDouble(expr:smart_ptr<ExprConstDouble>) : void
+        *writer |> write("{expr.value}")
+// fake context
+    def override preVisitExprFakeContext(expr:smart_ptr<ExprFakeContext>) : void
+        self->error ("__context__ is not supported", expr.at)
+// fake line info
+    def override preVisitExprFakeLineInfo(expr:smart_ptr<ExprFakeLineInfo>) : void
+        self->error ("__lineinfo__ is not supported", expr.at)
+// reader
+    def override preVisitExprReader(expr:smart_ptr<ExprReader>) : void
+        self->error ("call macro is not supported", expr.at)
+// call macro
+    def override preVisitExprCallMacro(expr:smart_ptr<ExprCallMacro>) : void
+        self->error ("call macro is not supported", expr.at)
 
 
 def generate_glsl(fnMain:FunctionPtr; var errors:array<string>; shaderType:ShaderType; version:int )
@@ -849,7 +733,3 @@ def generate_bind_uniform(fnMain:FunctionPtr; var fn:FunctionPtr)
                 cll_uni.arguments |> emplace_new() <| new [[ExprVar() at=vv.at, name:=vv.name]]
                 blk.list |>emplace(cll_uni)
     fn.body := blk
-
-
-
-
