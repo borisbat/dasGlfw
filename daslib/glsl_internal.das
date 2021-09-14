@@ -115,6 +115,8 @@ class GlslExport : AstVisitor
     trackFile : string
     shaderType : ShaderType
     version : int = 0
+    renames : array<tuple<name:string;repl:string>>
+    astVisitorAdapter : smart_ptr<ast::VisitorAdapter>
     def GlslExport ( var w : StringBuilderWriter; sht:ShaderType; ver:int )
         unsafe
             writer = addr(w)
@@ -454,44 +456,81 @@ class GlslExport : AstVisitor
             *writer |> write("else")
             self->newLine(1)
 // for
+    def isDimFor(expr:smart_ptr<ExprFor>)
+        if length(expr.sources)==0
+            return false
+        if length(expr.sources[0]._type.dim)>0
+            return true
+        return false
+    def isRangeFor(expr:smart_ptr<ExprFor>)
+        if length(expr.sources)==0
+            return false
+        let bt = expr.sources[0]._type.baseType
+        if bt==Type tRange || bt==Type tURange
+            return true
+        return false
     def override preVisitExprFor(expr:smart_ptr<ExprFor>)
         if length(expr.sources) != 1
             self->error("only one soure is supported for now", expr.at)
             return
-        let bt = expr.sources[0]._type.baseType
-        if !(bt==Type tRange || bt==Type tURange)
-            self->error("only range for is supported for now", expr.at)
+        if !self->isRangeFor(expr) && !self->isDimFor(expr)
+            self->error("only range for or dim for are supported for now", expr.at)
             return
         *writer |> write("\{")
-    def override visitExprFor(expr:smart_ptr<ExprFor>) : ExpressionPtr
-        if length(expr.sources) != 1
-            return expr
-        *writer |> write("{repeat("\t",tab)}{expr.iteratorVariables[0].name}++;")
-        self->newLine(1)
-        *writer |> write("{repeat("\t",tab)}\}\}")
-        return expr
     def override preVisitExprForVariable(expr:smart_ptr<ExprFor>;svar:VariablePtr;last:bool)
         self->newLine(1)
-        let svtype = "{self->describe_glsl_type(expr.sources[0]._type)}"
-        *writer |> write("{repeat("\t",tab)}{svtype} _for_range_{svar.name} = ")
+        if self->isDimFor(expr)
+            *writer |> write("{repeat("\t",tab)}int {svar.name} = 0; // ")
+        elif self->isRangeFor(expr)
+            let svtype = "{self->describe_glsl_type(expr.sources[0]._type)}"
+            *writer |> write("{repeat("\t",tab)}{svtype} _for_range_{svar.name} = ")
     def override visitExprForSource(expr:smart_ptr<ExprFor>;source:ExpressionPtr;last:bool) : ExpressionPtr
         if length(expr.sources) != 1
             return source
-        *writer |> write(";")
-        self->newLine(1)
-        let stype = "{self->describe_glsl_type(expr.iteratorVariables[0]._type)}"
-        let sname = "{expr.iteratorVariables[0].name}"
-        *writer |> write("{repeat("\t",tab)}{stype} {sname} = _for_range_{sname}.x;")
+        if self->isDimFor(expr)
+            pass
+        elif self->isRangeFor(expr)
+            *writer |> write(";")
+            self->newLine(1)
+            let sname = "{expr.iteratorVariables[0].name}"
+            let stype = "{self->describe_glsl_type(expr.iteratorVariables[0]._type)}"
+            *writer |> write("{repeat("\t",tab)}{stype} {sname} = _for_range_{sname}.x;")
         return source
+    def describe_subexpression(expr:ExpressionPtr)
+        let oldWriter = writer
+        var st = build_string() <| $ (var newWriter)
+            unsafe
+                writer = addr(newWriter)
+            visit(expr, astVisitorAdapter)
+        writer = oldWriter
+        return st
     def override preVisitExprForBody(expr:smart_ptr<ExprFor>)
         if length(expr.sources) != 1
             return
         self->newLine(1)
         *writer |> write("{repeat("\t",tab)}while ( ")
-        *writer |> write("{expr.iteratorVariables[0].name}!=_for_range_{expr.iteratorVariables[0].name}.y")
+        if self->isDimFor(expr)
+            let sdim = expr.sources[0]._type.dim[length(expr.sources[0]._type.dim)-1]
+            *writer |> write("{expr.iteratorVariables[0].name}!={sdim}")
+            let newsrc = "{self->describe_subexpression(expr.sources[0])}[{expr.iteratorVariables[0].name}]"
+            renames |> push([[auto "{expr.iterators[0]}", newsrc]])
+        elif self->isRangeFor(expr)
+            *writer |> write("{expr.iteratorVariables[0].name}!=_for_range_{expr.iteratorVariables[0].name}.y")
         *writer |> write(" ) \{")
         self->newLine(1)
         *writer |> write("{repeat("\t",tab-1)}")
+    def override visitExprFor(expr:smart_ptr<ExprFor>) : ExpressionPtr
+        if length(expr.sources) != 1
+            return expr
+        *writer |> write("{repeat("\t",tab)}")
+        if self->isDimFor(expr)
+            renames |> pop()
+            *writer |> write("{expr.iteratorVariables[0].name}++;")
+        elif self->isRangeFor(expr)
+            *writer |> write("{expr.iteratorVariables[0].name}++;")
+        self->newLine(1)
+        *writer |> write("{repeat("\t",tab)}\}\}")
+        return expr
 // make variant
     def override preVisitExprMakeVariant(expr:smart_ptr<ExprMakeVariant>)
         self->error ("variant is not supported", expr.at)
@@ -568,6 +607,13 @@ class GlslExport : AstVisitor
         self->error ("delete is not supported", expr.at)
 // var
     def override preVisitExprVar(expr:smart_ptr<ExprVar>)
+        let l = length(renames)
+        let en = "{expr.name}"
+        for i in range(l)
+            let ri = l - i - 1
+            if renames[ri].name == en
+                *writer |> write(renames[ri].repl)
+                return
         *writer |> write("{expr.name}")
 // field
     def override visitExprField(expr:smart_ptr<ExprField>) : ExpressionPtr
@@ -721,15 +767,16 @@ class GlslExport : AstVisitor
 def generate_glsl(fnMain:FunctionPtr; var errors:array<string>; shaderType:ShaderType; version:int )
     var st = build_string() <| $ (var writer)
         var astVisitor = new GlslExport(writer,shaderType,version)
-        var astVisitorAdapter <- make_visitor(*astVisitor)
+        unsafe
+            astVisitor.astVisitorAdapter <- make_visitor(*astVisitor)
         collect_dependencies(fnMain) <| $ ( vfun, vvar )
             for f in vfun
                 astVisitor.depFun[intptr(f)] = true
             for v in vvar
                 astVisitor.depVar[intptr(v)] = true
-            visit(compiling_program(), astVisitorAdapter)
+            visit(compiling_program(), astVisitor.astVisitorAdapter)
         errors <- astVisitor.errors
-        astVisitorAdapter := null
+        astVisitor.astVisitorAdapter := null
         unsafe
             delete astVisitor
     return st
