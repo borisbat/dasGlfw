@@ -24,6 +24,14 @@ typedef
 def glTexParameteri ( target : uint; pname : uint; param : uint )
     glTexParameteri(target,pname,int(param))
 
+
+def getTexture2DSize(tex:uint; mipLevel:int = 0)
+    var w, h : int
+    glBindTexture(GL_TEXTURE_2D, tex)
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, mipLevel, GL_TEXTURE_WIDTH, safe_addr(w))
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, mipLevel, GL_TEXTURE_HEIGHT, safe_addr(h))
+    return int2(w,h)
+
 def bind_ffp()
     glUseProgram(0u)
     glBindBuffer(GL_ARRAY_BUFFER, 0u)
