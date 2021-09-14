@@ -83,6 +83,8 @@ let private glsl_types <- {{
     Type tInt3      => "ivec3";
     Type tInt4      => "ivec4";
     Type tBool      => "bool";
+    Type tRange     => "ivec2";
+    Type tURange    => "uvec2";
     Type tVoid      => "void"
 }}
 
@@ -453,15 +455,43 @@ class GlslExport : AstVisitor
             self->newLine(1)
 // for
     def override preVisitExprFor(expr:smart_ptr<ExprFor>)
-        *writer |> write("for ")
+        if length(expr.sources) != 1
+            self->error("only one soure is supported for now", expr.at)
+            return
+        let bt = expr.sources[0]._type.baseType
+        if !(bt==Type tRange || bt==Type tURange)
+            self->error("only range for is supported for now", expr.at)
+            return
+        *writer |> write("\{")
+    def override visitExprFor(expr:smart_ptr<ExprFor>) : ExpressionPtr
+        if length(expr.sources) != 1
+            return expr
+        *writer |> write("{repeat("\t",tab)}{expr.iteratorVariables[0].name}++;")
+        self->newLine(1)
+        *writer |> write("{repeat("\t",tab)}\}\}")
+        return expr
     def override preVisitExprForVariable(expr:smart_ptr<ExprFor>;svar:VariablePtr;last:bool)
-        *writer |> write("{svar.name}{last ? " in " : ","}")
+        self->newLine(1)
+        let svtype = "{self->describe_glsl_type(expr.sources[0]._type)}"
+        *writer |> write("{repeat("\t",tab)}{svtype} _for_range_{svar.name} = ")
     def override visitExprForSource(expr:smart_ptr<ExprFor>;source:ExpressionPtr;last:bool) : ExpressionPtr
-        if !last
-            *writer |> write(",")
+        if length(expr.sources) != 1
+            return source
+        *writer |> write(";")
+        self->newLine(1)
+        let stype = "{self->describe_glsl_type(expr.iteratorVariables[0]._type)}"
+        let sname = "{expr.iteratorVariables[0].name}"
+        *writer |> write("{repeat("\t",tab)}{stype} {sname} = _for_range_{sname}.x;")
         return source
     def override preVisitExprForBody(expr:smart_ptr<ExprFor>)
+        if length(expr.sources) != 1
+            return
         self->newLine(1)
+        *writer |> write("{repeat("\t",tab)}while ( ")
+        *writer |> write("{expr.iteratorVariables[0].name}!=_for_range_{expr.iteratorVariables[0].name}.y")
+        *writer |> write(" ) \{")
+        self->newLine(1)
+        *writer |> write("{repeat("\t",tab-1)}")
 // make variant
     def override preVisitExprMakeVariant(expr:smart_ptr<ExprMakeVariant>)
         self->error ("variant is not supported", expr.at)
@@ -649,10 +679,10 @@ class GlslExport : AstVisitor
         *writer |> write("uvec4({expr.value})")
 // const range
     def override preVisitExprConstRange(expr:smart_ptr<ExprConstRange>) : void
-        self->error ("range is not supported", expr.at)
+        *writer |> write("ivec2({expr.value})")
 // const urnage
     def override preVisitExprConstURange(expr:smart_ptr<ExprConstURange>) : void
-        self->error ("urange is not supported", expr.at)
+        *writer |> write("uvec2({expr.value})")
 // const bool
     def override preVisitExprConstBool(expr:smart_ptr<ExprConstBool>) : void
         *writer |> write("{expr.value}")
