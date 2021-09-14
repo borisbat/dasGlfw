@@ -222,7 +222,6 @@ class ContextStateAgent : DapiDebugAgent
                 addr(msg_lengths[0]),
                 reinterpret<string> addr(msg_logs[0])
             )
-        print("total messages {msg_count}\n")
         var offset = 0
         for source, tpe, id, severitie, len in msg_sources, msg_types, msg_ids, msg_severities, msg_lengths
             var mtext : string
