@@ -128,16 +128,13 @@ class GlslExport : AstVisitor
         errors |> push("\tGLSL: {txt} at {fname}line {int(at.line)}")
     def line(at:LineInfo)
         pass
-        // TODO: add option to output lines
-        /*
         if at.fileInfo!=null
             peek(at.fileInfo.name) <| $ ( atname )
                 if trackLine!=int(at.line) || trackFile!=atname
                     trackLine = int(at.line)
                     trackFile := atname
                     *writer |> write("#line {trackLine} \"{trackFile}\"\n")
-        */
-// HLSL TYPE
+// GLSL TYPE
     def describe_glsl_type ( t : TypeDeclPtr )
         let st = build_string() <| $ ( var tw )
             if t.flags.ref
@@ -152,6 +149,8 @@ class GlslExport : AstVisitor
             else
                 self->error ("unsupported type {t.baseType}", t.at)
                 tw |> write("error")
+            for d in t.dim
+                tw |> write("[{d}]")
         return st
 // program
     def override preVisitProgram(prog:ProgramPtr) : void
@@ -242,6 +241,8 @@ class GlslExport : AstVisitor
         self->newLine(1)
         return fun
     def override preVisitFunctionArgument(fun:FunctionPtr;arg:VariablePtr;last:bool)
+        if arg._type.isRef && !arg._type.flags.constant
+            *writer |> write("inout ")
         *writer |> write("{self->describe_glsl_type(arg._type)} {arg.name} ")
     def override visitFunctionArgument(fun:FunctionPtr;arg:VariablePtr;last:bool)
         if !last
