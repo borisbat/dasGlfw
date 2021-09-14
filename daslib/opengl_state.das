@@ -113,6 +113,34 @@ let opengl_last_error <- {{
     GL_STACK_OVERFLOW => "GL_STACK_OVERFLOW"
 }}
 
+let opengl_debug_source <- {{
+    GL_DEBUG_SOURCE_API => "GL_DEBUG_SOURCE_API";
+    GL_DEBUG_SOURCE_WINDOW_SYSTEM => "GL_DEBUG_SOURCE_WINDOW_SYSTEM";
+    GL_DEBUG_SOURCE_SHADER_COMPILER => "GL_DEBUG_SOURCE_SHADER_COMPILER";
+    GL_DEBUG_SOURCE_THIRD_PARTY => "GL_DEBUG_SOURCE_THIRD_PARTY";
+    GL_DEBUG_SOURCE_APPLICATION => "GL_DEBUG_SOURCE_APPLICATION";
+    GL_DEBUG_SOURCE_OTHER => "GL_DEBUG_SOURCE_OTHER"
+}}
+
+let opengl_debug_type <- {{
+    GL_DEBUG_TYPE_ERROR => "GL_DEBUG_TYPE_ERROR";
+    GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR => "GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR";
+    GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR => "GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR";
+    GL_DEBUG_TYPE_PORTABILITY => "GL_DEBUG_TYPE_PORTABILITY";
+    GL_DEBUG_TYPE_PERFORMANCE => "GL_DEBUG_TYPE_PERFORMANCE";
+    GL_DEBUG_TYPE_MARKER => "GL_DEBUG_TYPE_MARKER";
+    GL_DEBUG_TYPE_PUSH_GROUP => "GL_DEBUG_TYPE_PUSH_GROUP";
+    GL_DEBUG_TYPE_POP_GROUP => "GL_DEBUG_TYPE_POP_GROUP";
+    GL_DEBUG_TYPE_OTHER => "GL_DEBUG_TYPE_OTHER"
+}}
+
+let opengl_debug_severity <- {{
+    GL_DEBUG_SEVERITY_HIGH => "GL_DEBUG_SEVERITY_HIGH";
+    GL_DEBUG_SEVERITY_MEDIUM => "GL_DEBUG_SEVERITY_MEDIUM";
+    GL_DEBUG_SEVERITY_LOW => "GL_DEBUG_SEVERITY_LOW";
+    GL_DEBUG_SEVERITY_NOTIFICATION => "GL_DEBUG_SEVERITY_NOTIFICATION"
+}}
+
 def report_to_debugger ( var ctx:Context; category,name:string; value:auto(TT) )
     unsafe
         let tinfo = typeinfo(rtti_typeinfo value)
@@ -170,6 +198,51 @@ def report_enum ( var ctx:Context; what:uint; category,name:string; en:table<uin
             report_to_debugger(ctx, category, name, uint(d32))
 
 class ContextStateAgent : DapiDebugAgent
+    def logDebugMessages(var ctx:Context)
+        var msg_maxlen, msg_count : int
+        glGetIntegerv(GL_MAX_DEBUG_MESSAGE_LENGTH, safe_addr(msg_maxlen))
+        glGetIntegerv(GL_MAX_DEBUG_LOGGED_MESSAGES, safe_addr(msg_count))
+        var msg_sources, msg_types, msg_ids,msg_severities : array<uint>
+        resize(msg_sources, msg_count)
+        resize(msg_types, msg_count)
+        resize(msg_ids, msg_count)
+        resize(msg_severities,msg_count)
+        var msg_lengths : array<int>
+        resize(msg_lengths, msg_count)
+        var msg_logs : array<uint8>
+        resize(msg_logs, msg_count * msg_maxlen)
+        unsafe
+            glGetDebugMessageLog(
+                uint(msg_count),
+                msg_maxlen,
+                addr(msg_sources[0]),
+                addr(msg_types[0]),
+                addr(msg_ids[0]),
+                addr(msg_severities[0]),
+                addr(msg_lengths[0]),
+                reinterpret<string> addr(msg_logs[0])
+            )
+        print("total messages {msg_count}\n")
+        var offset = 0
+        for source, tpe, id, severitie, len in msg_sources, msg_types, msg_ids, msg_severities, msg_lengths
+            var mtext : string
+            unsafe
+                mtext = reinterpret<string> addr(msg_logs[offset])
+            offset += len
+            if source != 0u
+                let msrc = opengl_debug_source?[source] ?? "{source}"
+                let mtpe = opengl_debug_type?[tpe] ?? "{tpe}"
+                let msev = opengl_debug_severity?[severitie] ?? "{severitie}"
+                var dmsg = [[auto mtext, msrc, mtpe, msev]]
+                report_to_debugger(ctx, "OPENGL", "debug({id})", dmsg)
+        delete msg_sources
+        delete msg_types
+        delete msg_ids
+        delete msg_severities
+        delete msg_lengths
+        delete msg_logs
+
+
     def override onCollect(var ctx:Context)
         if !ctx.category.opengl
             return
@@ -181,6 +254,10 @@ class ContextStateAgent : DapiDebugAgent
             else
                 report_to_debugger(ctx, "OPENGL", "last error", err)
         var state = glSetBreakOnOpenGLError(false)
+        var flags : int
+        glGetIntegerv(GL_CONTEXT_FLAGS, safe_addr(flags))
+        if (uint(flags) & GL_CONTEXT_FLAG_DEBUG_BIT)!=0u
+            self->logDebugMessages(ctx)
         // program
         report_uint(ctx, GL_CURRENT_PROGRAM, "OPENGL program", "GL_CURRENT_PROGRAM")
         // array
