@@ -135,8 +135,9 @@ class GlslExport : AstVisitor
             peek(at.fileInfo.name) <| $ ( atname )
                 if trackLine!=int(at.line) || trackFile!=atname
                     trackLine = int(at.line)
-                    trackFile = atname |> replace("\\","/")
-                    *writer |> write("#line {trackLine} \"{trackFile}\"\n")
+                    trackFile := atname
+                    let trackFileText = trackFile |> replace("\\","/")
+                    *writer |> write("#line {trackLine} \"{trackFileText}\"\n")
 // GLSL TYPE
     def describe_glsl_type ( t : TypeDeclPtr )
         let st = build_string() <| $ ( var tw )

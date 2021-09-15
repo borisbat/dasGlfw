@@ -46,6 +46,9 @@ def bind_ffp()
 def glUniformAny ( location:int; value:float )
     glUniform1f(location, value)
 
+def glUniformAny ( location:int; value:float[] )
+    glUniform1fv(location, length(value), safe_addr(value[0]))
+
 def glUniformAny ( location:int; value:float2 )
     glUniform2fv(location, 1, safe_addr(value.x))
 
