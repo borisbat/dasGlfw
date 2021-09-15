@@ -122,7 +122,7 @@ class GlslExport : AstVisitor
             writer = addr(w)
         shaderType = sht
         version = ver
-    // TODO: fixme
+// TODO: fixme (egyptian braces)
     def newLine(count:int)
         for t in range(count)
             *writer |> write("\n")
@@ -131,12 +131,11 @@ class GlslExport : AstVisitor
         let fname = at.fileInfo!=null ? "{at.fileInfo.name} " : ""
         errors |> push("\tGLSL: {txt} at {fname}line {int(at.line)}")
     def line(at:LineInfo)
-        pass
         if at.fileInfo!=null
             peek(at.fileInfo.name) <| $ ( atname )
                 if trackLine!=int(at.line) || trackFile!=atname
                     trackLine = int(at.line)
-                    trackFile := atname
+                    trackFile = atname |> replace("\\","/")
                     *writer |> write("#line {trackLine} \"{trackFile}\"\n")
 // GLSL TYPE
     def describe_glsl_type ( t : TypeDeclPtr )
@@ -155,6 +154,15 @@ class GlslExport : AstVisitor
                 tw |> write("error")
             for d in t.dim
                 tw |> write("[{d}]")
+        return st
+// any subexpression to string in current context
+    def describe_subexpression(expr:ExpressionPtr)
+        let oldWriter = writer
+        var st = build_string() <| $ (var newWriter)
+            unsafe
+                writer = addr(newWriter)
+            visit(expr, astVisitorAdapter)
+        writer = oldWriter
         return st
 // program
     def override preVisitProgram(prog:ProgramPtr) : void
@@ -456,79 +464,67 @@ class GlslExport : AstVisitor
             *writer |> write("else")
             self->newLine(1)
 // for
-    def isDimFor(expr:smart_ptr<ExprFor>)
-        if length(expr.sources)==0
-            return false
-        if length(expr.sources[0]._type.dim)>0
+    def isDimFor(svar:ExpressionPtr)
+        if length(svar._type.dim)>0
             return true
         return false
-    def isRangeFor(expr:smart_ptr<ExprFor>)
-        if length(expr.sources)==0
-            return false
-        let bt = expr.sources[0]._type.baseType
+    def isRangeFor(svar:ExpressionPtr)
+        let bt = svar._type.baseType
         if bt==Type tRange || bt==Type tURange
             return true
         return false
     def override preVisitExprFor(expr:smart_ptr<ExprFor>)
-        if length(expr.sources) != 1
-            self->error("only one soure is supported for now", expr.at)
-            return
-        if !self->isRangeFor(expr) && !self->isDimFor(expr)
-            self->error("only range for or dim for are supported for now", expr.at)
-            return
+        for source in expr.sources
+            if !self->isRangeFor(source) && !self->isDimFor(source)
+                self->error("only range for or dim for are supported for now {describe(source._type)}", source.at)
+                return
         *writer |> write("\{")
-    def override preVisitExprForVariable(expr:smart_ptr<ExprFor>;svar:VariablePtr;last:bool)
+    def override preVisitExprForSource(expr:smart_ptr<ExprFor>;source:ExpressionPtr;last:bool) : void
         self->newLine(1)
-        if self->isDimFor(expr)
-            *writer |> write("{repeat("\t",tab)}int {svar.name} = 0; // ")
-        elif self->isRangeFor(expr)
-            let svtype = "{self->describe_glsl_type(expr.sources[0]._type)}"
-            *writer |> write("{repeat("\t",tab)}{svtype} _for_range_{svar.name} = ")
+        let index = get_for_source_index(expr, source)
+        if self->isDimFor(source)
+            *writer |> write("{repeat("\t",tab)}int {expr.iteratorVariables[index].name} = 0; //")
+        elif self->isRangeFor(source)
+            let svtype = "{self->describe_glsl_type(source._type)}"
+            *writer |> write("{repeat("\t",tab)}{svtype} _for_range_{expr.iteratorVariables[index].name} = ")
     def override visitExprForSource(expr:smart_ptr<ExprFor>;source:ExpressionPtr;last:bool) : ExpressionPtr
-        if length(expr.sources) != 1
-            return source
-        if self->isDimFor(expr)
+        var index = get_for_source_index(expr,source)
+        if self->isDimFor(source)
             pass
-        elif self->isRangeFor(expr)
+        elif self->isRangeFor(source)
             *writer |> write(";")
             self->newLine(1)
-            let sname = "{expr.iteratorVariables[0].name}"
-            let stype = "{self->describe_glsl_type(expr.iteratorVariables[0]._type)}"
+            let sname = "{expr.iteratorVariables[index].name}"
+            let stype = "{self->describe_glsl_type(expr.iteratorVariables[index]._type)}"
             *writer |> write("{repeat("\t",tab)}{stype} {sname} = _for_range_{sname}.x;")
         return source
-    def describe_subexpression(expr:ExpressionPtr)
-        let oldWriter = writer
-        var st = build_string() <| $ (var newWriter)
-            unsafe
-                writer = addr(newWriter)
-            visit(expr, astVisitorAdapter)
-        writer = oldWriter
-        return st
     def override preVisitExprForBody(expr:smart_ptr<ExprFor>)
-        if length(expr.sources) != 1
-            return
         self->newLine(1)
         *writer |> write("{repeat("\t",tab)}while ( ")
-        if self->isDimFor(expr)
-            let sdim = expr.sources[0]._type.dim[length(expr.sources[0]._type.dim)-1]
-            *writer |> write("{expr.iteratorVariables[0].name}!={sdim}")
-            let newsrc = "{self->describe_subexpression(expr.sources[0])}[{expr.iteratorVariables[0].name}]"
-            renames |> push([[auto "{expr.iterators[0]}", newsrc]])
-        elif self->isRangeFor(expr)
-            *writer |> write("{expr.iteratorVariables[0].name}!=_for_range_{expr.iteratorVariables[0].name}.y")
-        *writer |> write(" ) \{")
+        for source,svar,iter in expr.sources,expr.iteratorVariables,expr.iterators
+            if iter != expr.iterators[0]
+                *writer |> write(" && ")
+            if self->isDimFor(source)
+                let sdim = source._type.dim[length(source._type.dim)-1]
+                *writer |> write("{svar.name}!={sdim}")
+                let newsrc = "{self->describe_subexpression(source)}[{svar.name}]"
+                renames |> push([[auto "{iter}", newsrc]])
+            elif self->isRangeFor(source)
+                *writer |> write("{svar.name}!=_for_range_{svar.name}.y")
+        *writer |> write(" )")
+        self->newLine(1)
+        *writer |> write("{repeat("\t",tab)}\{")
         self->newLine(1)
         *writer |> write("{repeat("\t",tab-1)}")
     def override visitExprFor(expr:smart_ptr<ExprFor>) : ExpressionPtr
-        if length(expr.sources) != 1
-            return expr
-        *writer |> write("{repeat("\t",tab)}")
-        if self->isDimFor(expr)
-            renames |> pop()
-            *writer |> write("{expr.iteratorVariables[0].name}++;")
-        elif self->isRangeFor(expr)
-            *writer |> write("{expr.iteratorVariables[0].name}++;")
-        self->newLine(1)
+        for svar,source in expr.iteratorVariables,expr.sources
+            *writer |> write("{repeat("\t",tab)}")
+            if self->isDimFor(source)
+                renames |> pop()
+                *writer |> write("{svar.name}++;")
+            elif self->isRangeFor(source)
+                *writer |> write("{svar.name}++;")
+            self->newLine(1)
         *writer |> write("{repeat("\t",tab)}\}\}")
         return expr
 // make variant
