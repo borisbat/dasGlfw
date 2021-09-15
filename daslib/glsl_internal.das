@@ -13,6 +13,7 @@ require daslib/strings_boost
 enum ShaderType
     vertex
     fragment
+    compute
 
 [structure_macro(name="glsl_structure")]
 class GlslStructureAnnotation : AstStructureAnnotation {}
@@ -44,6 +45,20 @@ class GlslShader : AstFunctionAnnotation
         let argVersion = find_arg("version", args)
         if argVersion is tInt
             version = argVersion as tInt
+        var compute_local_size : int3
+        if shaderType==ShaderType compute
+            let arg_local_size_x = find_arg("local_size_x", args)
+            if arg_local_size_x is tInt
+                compute_local_size.x = arg_local_size_x as tInt
+            else
+                errors := "missing local_size_x"
+                return false
+            let arg_local_size_y = find_arg("local_size_y", args)
+            if arg_local_size_y is tInt
+                compute_local_size.y = arg_local_size_y as tInt
+            let arg_local_size_z = find_arg("local_size_z", args)
+            if arg_local_size_z is tInt
+                compute_local_size.y = arg_local_size_z as tInt
         // TODO: 'find_global(name)'
         var err : array<string>
         for_each_global(compiling_module()) <| $ ( var glob )
@@ -52,7 +67,7 @@ class GlslShader : AstFunctionAnnotation
                     peek(glob.name) <| $ ( gname )
                         if gname == argName as tString
                             glob.init <- new [[ExprConstString() at=func.at,
-                                value:=generate_glsl(func, err, shaderType, version),
+                                value:=generate_glsl(func, err, shaderType, version, compute_local_size),
                                 _type <- new [[TypeDecl() at=func.at, baseType=Type tString]]
                             ]]
                             if ! err |> empty()
@@ -71,6 +86,10 @@ class GlslVertexProgram : GlslShader
 [function_macro(name="fragment_program")]
 class GlslPixelProgram : GlslShader
     override shaderType = ShaderType fragment
+
+[function_macro(name="compute_program")]
+class GlslComputeProgram : GlslShader
+    override shaderType = ShaderType compute
 
 let private glsl_types <- {{
     Type tString    => "string";    // NOTE - this is temporary until we remove non glsl-related goo
@@ -120,11 +139,13 @@ class GlslExport : AstVisitor
     version : int = 0
     renames : array<tuple<name:string;repl:string>>
     astVisitorAdapter : smart_ptr<ast::VisitorAdapter>
-    def GlslExport ( var w : StringBuilderWriter; sht:ShaderType; ver:int )
+    compute_local_size : int3
+    def GlslExport ( var w : StringBuilderWriter; sht:ShaderType; ver:int; cls:int3 )
         unsafe
             writer = addr(w)
         shaderType = sht
         version = ver
+        compute_local_size = cls
 // TODO: fixme (egyptian braces)
     def newLine(count:int)
         for t in range(count)
@@ -171,6 +192,13 @@ class GlslExport : AstVisitor
 // program
     def override preVisitProgram(prog:ProgramPtr) : void
         *writer |> write("#version {version} core\n\n")
+        if shaderType==ShaderType compute
+            if compute_local_size.z != 0
+                *writer |> write("layout (local_size_x={compute_local_size.x}, local_size_y={compute_local_size.y}, local_size_z={compute_local_size.z}) in;\n")
+            elif compute_local_size.y != 0
+                *writer |> write("layout (local_size_x={compute_local_size.x}, local_size_y={compute_local_size.y}) in;\n")
+            else
+                *writer |> write("layout (local_size_x={compute_local_size.x}) in;\n")
 // type
     ET : bool = false
     def override preVisitTypeDecl(typ:TypeDeclPtr)
@@ -239,7 +267,7 @@ class GlslExport : AstVisitor
         var fnName = "{fun.name}"
         for ann in fun.annotations
             peek(ann.annotation.name) <| $ ( aname )
-                if aname=="vertex_program" || aname=="fragment_program"
+                if aname=="vertex_program" || aname=="fragment_program" || aname=="compute_program"
                     fnName = "main"
                     if !fun.result.isVoid
                         self->error("shader function must be void", fun.at)
@@ -327,6 +355,31 @@ class GlslExport : AstVisitor
                 *writer |> write("out ")
             if find_arg("inout", arg.annotation) is tBool
                 *writer |> write("in ")
+        elif shaderType==ShaderType compute
+            if find_arg("uniform", arg.annotation) is tBool
+                *writer |> write("uniform ")
+            if find_arg("in", arg.annotation) is tBool
+                *writer |> write("in ")
+            if find_arg("out", arg.annotation) is tBool
+                *writer |> write("out ")
+            if find_arg("inout", arg.annotation) is tBool
+                *writer |> write("in ")
+            if arg._type.baseType==Type tStructure
+                let sname = "{arg._type.structType.name}"
+                if sname=="image2D"
+                    var layouts : array<string>
+                    let i_writeonly = find_arg("writeonly", arg.annotation)
+                    if (i_writeonly is tBool) && (i_writeonly as tBool)
+                        *writer |> write("writeonly ")
+                    let s_format = find_arg("format", arg.annotation)
+                    if s_format is tString
+                        layouts |> push(s_format as tString)
+                    let i_binding = find_arg("binding", arg.annotation)
+                    if i_binding is tInt
+                        layouts |> push("binding={i_binding as tInt}")
+                    if !empty(layouts)
+                        let lstr = join(layouts,",")
+                        *writer |> write("layout({lstr}) ")
         *writer |> write("{self->describe_glsl_type(arg._type)} {arg.name}")
     def override visitGlobalLetVariable(arg:VariablePtr;lastArg:bool)
         let reg = find_arg("register", arg.annotation)
@@ -775,9 +828,9 @@ class GlslExport : AstVisitor
         self->error ("call macro is not supported", expr.at)
 
 
-def generate_glsl(fnMain:FunctionPtr; var errors:array<string>; shaderType:ShaderType; version:int )
+def generate_glsl(fnMain:FunctionPtr; var errors:array<string>; shaderType:ShaderType; version:int; comp_loc_size:int3 )
     var st = build_string() <| $ (var writer)
-        var astVisitor = new GlslExport(writer,shaderType,version)
+        var astVisitor = new GlslExport(writer,shaderType,version,comp_loc_size)
         unsafe
             astVisitor.astVisitorAdapter <- make_visitor(*astVisitor)
         collect_dependencies(fnMain) <| $ ( vfun, vvar )

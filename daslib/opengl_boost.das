@@ -24,13 +24,17 @@ typedef
 def glTexParameteri ( target : uint; pname : uint; param : uint )
     glTexParameteri(target,pname,int(param))
 
-
 def getTexture2DSize(tex:uint; mipLevel:int = 0)
     var w, h : int
     glBindTexture(GL_TEXTURE_2D, tex)
     glGetTexLevelParameteriv(GL_TEXTURE_2D, mipLevel, GL_TEXTURE_WIDTH, safe_addr(w))
     glGetTexLevelParameteriv(GL_TEXTURE_2D, mipLevel, GL_TEXTURE_HEIGHT, safe_addr(h))
     return int2(w,h)
+
+def bind_texture_2d ( unit:int; tex:uint )
+    glActiveTexture(GL_TEXTURE0 + uint(unit))
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, tex)
 
 def bind_ffp()
     glUseProgram(0u)
@@ -70,6 +74,9 @@ def glUniformAny ( location:int; value:float4x4 )
 def glUniformAny ( location:int; smp:sampler2D )
     glUniform1i(location, smp.texture)
 
+def glUniformAny ( location:int; smp:image2D )
+    glUniform1i(location, smp.texture)
+
 def glUniformMatrix4fv ( location:int; value:float4x4 )
     unsafe
         glUniformMatrix4fv(location, 1, false, addr(value[0][0]))
@@ -104,10 +111,12 @@ def create_shader ( src:string; shaderType:uint; canfail:bool = false )
     if status==0
         if !canfail
             unsafe
-                var log : uint8[512]
+                var log : array<uint>
+                resize(log, 4096)
                 var slog = reinterpret<string> addr(log[0])
                 glGetShaderInfoLog(s, 512, null, slog)
                 panic("{src}\n\nFAILED TO CREATE SHADER ({status}):\n{slog}\n")
+                delete log
         return 0u
     else
         return s
@@ -116,6 +125,11 @@ def create_shader_program ( vertex,fragment:uint )
     let program = glCreateProgram()
     glAttachShader(program, vertex)
     glAttachShader(program, fragment)
+    return program
+
+def create_shader_program ( compute:uint )
+    let program = glCreateProgram()
+    glAttachShader(program, compute)
     return program
 
 def link_shader ( program:uint; canfail:bool = false )
@@ -140,6 +154,13 @@ def create_shader_program ( vsrc,fsrc:string )
     link_shader(program)
     glDeleteShader(vertex)
     glDeleteShader(fragment)
+    return program
+
+def create_compute_shader_program ( csrc:string )
+    let compute = create_shader(csrc, GL_COMPUTE_SHADER)
+    let program = create_shader_program(compute)
+    link_shader(program)
+    glDeleteShader(compute)
     return program
 
 def load_image_from_file ( fname:string; canfail:bool=false )
