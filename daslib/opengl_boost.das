@@ -43,6 +43,12 @@ def bind_ffp()
     for va in range(maxAttr)
         glDisableVertexAttribArray(uint(va))
 
+def glUniformAny ( location:int; value:int )
+    glUniform1i(location, value)
+
+def glUniformAny ( location:int; value:int[] )
+    glUniform1iv(location, length(value), safe_addr(value[0]))
+
 def glUniformAny ( location:int; value:float )
     glUniform1f(location, value)
 

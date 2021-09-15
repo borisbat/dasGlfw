@@ -97,11 +97,14 @@ let private glsl_functions <- {{
     "float2"    =>  "vec2";
     "float3"    =>  "vec3";
     "float4"    =>  "vec4";
-
+    "int2"    =>  "ivec2";
+    "int3"    =>  "ivec3";
+    "int4"    =>  "ivec4";
+    "uint2"    =>  "uvec2";
+    "uint3"    =>  "uvec3";
+    "uint4"    =>  "uvec4";
     "floori"    =>  "floor";
-
     "lerp"      =>  "mix";
-
     "_"         =>  "_"
 }}
 
