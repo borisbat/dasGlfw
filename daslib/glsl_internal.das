@@ -535,8 +535,19 @@ class GlslExport : AstVisitor
         self->error ("structure initialization is not supported YET", expr.at)
 // make array
     def override preVisitExprMakeArray(expr:smart_ptr<ExprMakeArray>)
-        // TODO: support array initialization
-        self->error ("array initialization is not supported YET", expr.at)
+        let atype = self->describe_glsl_type(expr._type)
+        *writer |> write("({atype}(")
+    def override visitExprMakeArray(expr:smart_ptr<ExprMakeArray>) : ExpressionPtr
+        *writer |> write("))")
+        return expr
+    def override preVisitExprMakeArrayIndex(expr:smart_ptr<ExprMakeArray>;index:int;init:ExpressionPtr;last:bool) : void
+        *writer |> write("(")
+    def override visitExprMakeArrayIndex(expr:smart_ptr<ExprMakeArray>;index:int;init:ExpressionPtr;last:bool) : ExpressionPtr
+        *writer |> write(")")
+        if !last
+            *writer |> write(",")
+        return init
+
 // make tuple
     def override preVisitExprMakeTuple(expr:smart_ptr<ExprMakeTuple>)
         // TODO: support nameless structure
