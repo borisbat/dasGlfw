@@ -9,14 +9,14 @@ require strings
 require daslib/ast_boost
 require daslib/templates_boost
 require daslib/strings_boost
+require daslib/ast_used
+
+let DEBUG_SHADER_TEXT = false
 
 enum ShaderType
     vertex
     fragment
     compute
-
-[structure_macro(name="glsl_structure")]
-class GlslStructureAnnotation : AstStructureAnnotation {}
 
 class GlslShader : AstFunctionAnnotation
     shaderType = ShaderType vertex
@@ -92,7 +92,6 @@ class GlslComputeProgram : GlslShader
     override shaderType = ShaderType compute
 
 let private glsl_types <- {{
-    Type tString    => "string";    // NOTE - this is temporary until we remove non glsl-related goo
     Type tFloat     => "float";
     Type tFloat2    => "vec2";
     Type tFloat3    => "vec3";
@@ -131,8 +130,10 @@ class GlslExport : AstVisitor
     errors : array<string>
     writer : StringBuilderWriter?
     tab : int = 0
-    depFun : table<uint64;bool>
-    depVar : table<uint64;bool>
+    depFun    : table<uint64;bool>
+    depVar    : table<uint64;bool>
+    depStruct : table<uint64;bool>
+    depEnum   : table<uint64;bool>
     trackLine : int = 0
     trackFile : string
     shaderType : ShaderType
@@ -180,6 +181,59 @@ class GlslExport : AstVisitor
             for d in t.dim
                 tw |> write("[{d}]")
         return st
+    def produce_zero ( t : TypeDeclPtr )
+        if length(t.dim) > 0
+            *writer |> write("{self->describe_glsl_type(t)}(")
+            var ct <- clone_type(t)
+            ct.dim |> pop()
+            for d in range(t.dim[length(t.dim)-1])
+                if d!=0
+                    *writer |> write(",")
+                self->produce_zero(ct)
+            ct := null
+            *writer |> write(")")
+        elif t.baseType==Type tStructure
+            *writer |> write("{t.structType.name}(")
+            for fld,i in t.structType.fields,range(100500)
+                if i!=0
+                    *writer |> write(",")
+                self->produce_zero(fld._type)
+            *writer |> write(")")
+        elif t.baseType==Type tHandle
+            if eq(t.annotation.name,"float3x3")
+                *writer |> write("mat3(vec3(0),vec3(0),vec3(0))")
+            elif eq(t.annotation.name,"float4x4")
+                *writer |> write("mat4(vec4(0),vec4(0),vec4(0),vec4(0))")
+            else
+                self->error("unsupported zero for handled type {describe(t)}", t.at)
+        elif t.baseType==Type tInt
+            *writer |> write("0")
+        elif t.baseType==Type tInt2 || t.baseType==Type tRange
+            *writer |> write("ivec2(0)")
+        elif t.baseType==Type tInt3
+            *writer |> write("ivec3(0)")
+        elif t.baseType==Type tInt4
+            *writer |> write("ivec4(0)")
+        elif t.baseType==Type tUInt || t.baseType==Type tURange
+            *writer |> write("0")
+        elif t.baseType==Type tUInt2
+            *writer |> write("uvec2(0)")
+        elif t.baseType==Type tUInt3
+            *writer |> write("uvec3(0)")
+        elif t.baseType==Type tUInt4
+            *writer |> write("uvec4(0)")
+        elif t.baseType==Type tFloat
+            *writer |> write("0.0")
+        elif t.baseType==Type tFloat2
+            *writer |> write("vec2(0.0)")
+        elif t.baseType==Type tFloat3
+            *writer |> write("vec3(0.0)")
+        elif t.baseType==Type tFloat4
+            *writer |> write("vec4(0.0)")
+        elif t.baseType==Type tBool
+            *writer |> write("false")
+        else
+            self->error("unsupported zero for type {describe(t)}", t.at)
 // any subexpression to string in current context
     def describe_subexpression(expr:ExpressionPtr)
         let oldWriter = writer
@@ -209,30 +263,33 @@ class GlslExport : AstVisitor
         if ET
             *writer |> write("]*/")
         return typ
-// alias
-    def override preVisitAlias(typ:TypeDeclPtr;name:das_string)
-        *writer |> write("// typedef\n\t{name} = {self->describe_glsl_type(typ)}")
-        self->newLine(2)
 // enumeration
+    def override canVisitEnumeration(enu:Enumeration?)
+        if !(depStruct |> key_exists(intptr(enu)))
+            return false
+        if eq(enu._module.name,"glsl")
+            return false
+        return true
     def override preVisitEnumeration(enu:EnumerationPtr)
-        *writer |> write("enum {enu.name} : {das_to_string(enu.baseType)}")
+        *writer |> write("enum {enu.name} \{")
         self->newLine(1)
     def override preVisitEnumerationValue(enu:EnumerationPtr;name:das_string;value:ExpressionPtr;last:bool)
         *writer |> write("\t{name} =")
     def override visitEnumerationValue(enu:EnumerationPtr;name:das_string;value:ExpressionPtr;last:bool)
+        *writer |> write(",")
         self->newLine(1)
         return value
     def override visitEnumeration(enu:EnumerationPtr)
+        *writer |> write("};")
         self->newLine(1)
         return enu
 // structure
     def override canVisitStructure(str:Structure?)
-        var canVisit = false
-        for ann in str.annotations
-            peek(ann.annotation.name) <| $ ( aname )
-                if aname=="glsl_structure"
-                    canVisit = true
-        return canVisit
+        if !(depStruct |> key_exists(intptr(str)))
+            return false
+        if eq(str._module.name,"glsl")
+            return false
+        return true
     def override preVisitStructure(str:StructurePtr)
         if str.flags.isClass
             self->error("classes are not supported", str.at)
@@ -259,6 +316,8 @@ class GlslExport : AstVisitor
 // function
     def override canVisitFunction(arg:Function?):bool
         if !depFun |> key_exists(intptr(arg))
+            return false
+        if eq(arg._module.name,"glsl")
             return false
         return true
     def override preVisitFunction(fun:FunctionPtr)
@@ -320,6 +379,9 @@ class GlslExport : AstVisitor
         self->line(arg.at)
         *writer |> write("{self->describe_glsl_type(arg._type)} {arg.name}")
     def override visitExprLetVariable(expr:smart_ptr<ExprLet>;arg:VariablePtr;lastArg:bool)
+        if arg.init == null
+            *writer |> write(" = ")
+            self->produce_zero(arg._type)
         if !lastArg
             *writer |> write(";")
         return arg
@@ -331,46 +393,49 @@ class GlslExport : AstVisitor
     def override canVisitGlobalVariable(arg:Variable?):bool
         if !depVar |> key_exists(intptr(arg))
             return false
+        if eq(arg._module.name,"glsl")
+            return false
         if !(find_arg("cbuffer",arg.annotation) is nothing)
             return false
         return true
     def override preVisitGlobalLetVariable(arg:VariablePtr;lastArg:bool)
         self->line(arg.at)
+        var needInit = true
         if shaderType==ShaderType vertex
             if find_arg("uniform", arg.annotation) is tBool
-                *writer |> write("uniform ")
+                *writer |> write("uniform "); needInit = false
             let argLoc = find_arg("location", arg.annotation)
             if argLoc is tInt
-                *writer |> write("layout(location={argLoc as tInt}) ")
+                *writer |> write("layout(location={argLoc as tInt}) "); needInit = false
             if find_arg("in", arg.annotation) is tBool
-                *writer |> write("in ")
+                *writer |> write("in "); needInit = false
             if find_arg("inout", arg.annotation) is tBool
-                *writer |> write("out ")
+                *writer |> write("out "); needInit = false
         elif shaderType==ShaderType fragment
             if find_arg("uniform", arg.annotation) is tBool
-                *writer |> write("uniform ")
+                *writer |> write("uniform "); needInit = false
             if find_arg("in", arg.annotation) is tBool
-                *writer |> write("in ")
+                *writer |> write("in "); needInit = false
             if find_arg("out", arg.annotation) is tBool
-                *writer |> write("out ")
+                *writer |> write("out "); needInit = false
             if find_arg("inout", arg.annotation) is tBool
-                *writer |> write("in ")
+                *writer |> write("in "); needInit = false
         elif shaderType==ShaderType compute
             if find_arg("uniform", arg.annotation) is tBool
-                *writer |> write("uniform ")
+                *writer |> write("uniform "); needInit = false
             if find_arg("in", arg.annotation) is tBool
-                *writer |> write("in ")
+                *writer |> write("in "); needInit = false
             if find_arg("out", arg.annotation) is tBool
-                *writer |> write("out ")
+                *writer |> write("out "); needInit = false
             if find_arg("inout", arg.annotation) is tBool
-                *writer |> write("in ")
+                *writer |> write("in "); needInit = false
             if arg._type.baseType==Type tStructure
                 let sname = "{arg._type.structType.name}"
                 if sname=="image2D"
                     var layouts : array<string>
                     let i_writeonly = find_arg("writeonly", arg.annotation)
                     if (i_writeonly is tBool) && (i_writeonly as tBool)
-                        *writer |> write("writeonly ")
+                        *writer |> write("writeonly "); needInit = false
                     let s_format = find_arg("format", arg.annotation)
                     if s_format is tString
                         layouts |> push(s_format as tString)
@@ -379,8 +444,11 @@ class GlslExport : AstVisitor
                         layouts |> push("binding={i_binding as tInt}")
                     if !empty(layouts)
                         let lstr = join(layouts,",")
-                        *writer |> write("layout({lstr}) ")
+                        *writer |> write("layout({lstr}) "); needInit = false
         *writer |> write("{self->describe_glsl_type(arg._type)} {arg.name}")
+        if arg.init==null && needInit
+            *writer |> write(" = ")
+            self->produce_zero(arg._type)
     def override visitGlobalLetVariable(arg:VariablePtr;lastArg:bool)
         let reg = find_arg("register", arg.annotation)
         if reg is tString
@@ -588,8 +656,45 @@ class GlslExport : AstVisitor
     def override preVisitExprMakeVariant(expr:smart_ptr<ExprMakeVariant>)
         self->error ("variant is not supported", expr.at)
 // make structure
+    def outputMakeStruct(expr:smart_ptr<ExprMakeStruct>;index:int)
+        var prev = -1
+        for st,j in *(expr.structs[0]),range(100500)
+            for sf,i in expr._type.structType.fields,range(100500)
+                if sf.name == st.name
+                    if prev > i
+                        self->error("out of order initialization is not supported by GLSL yet", st.at)
+                    if !st.value.flags.noSideEffects
+                        prev = i
+        for sf,i in expr._type.structType.fields,range(100500)
+            if i!=0
+                *writer |> write(",")
+            var has = false
+            for st,j in *(expr.structs[0]),range(100500)
+                if sf.name == st.name
+                    has = true
+                    visit(st.value, astVisitorAdapter)
+            if !has
+                self->produce_zero(sf._type)
     def override preVisitExprMakeStruct(expr:smart_ptr<ExprMakeStruct>)
-        self->error ("structure initialization is not supported YET", expr.at)
+        if expr._block != null
+            self->error ("structure initialization with the block is not supported", expr.at)
+        *writer |> write("{self->describe_glsl_type(expr.makeType)}")
+        let nStructs = length(expr.structs)
+        if nStructs!=1
+            *writer |> write("[{nStructs}]")
+        *writer |> write("(")
+        if nStructs!=1
+            for n in range(nStructs)
+                if n!=0
+                    *writer |> write(",")
+                *writer |> write("{self->describe_glsl_type(expr.makeType)}(")
+                self->outputMakeStruct(expr,n)
+                *writer |> write(")")
+        else
+            self->outputMakeStruct(expr,0)
+        *writer |> write(")")
+    def override canVisitMakeStructBody(expr:smart_ptr<ExprMakeStruct>) : bool
+        return false
 // make array
     def override preVisitExprMakeArray(expr:smart_ptr<ExprMakeArray>)
         let atype = self->describe_glsl_type(expr._type)
@@ -827,7 +932,6 @@ class GlslExport : AstVisitor
     def override preVisitExprCallMacro(expr:smart_ptr<ExprCallMacro>) : void
         self->error ("call macro is not supported", expr.at)
 
-
 def generate_glsl(fnMain:FunctionPtr; var errors:array<string>; shaderType:ShaderType; version:int; comp_loc_size:int3 )
     var st = build_string() <| $ (var writer)
         var astVisitor = new GlslExport(writer,shaderType,version,comp_loc_size)
@@ -838,11 +942,18 @@ def generate_glsl(fnMain:FunctionPtr; var errors:array<string>; shaderType:Shade
                 astVisitor.depFun[intptr(f)] = true
             for v in vvar
                 astVisitor.depVar[intptr(v)] = true
-            visit(compiling_program(), astVisitor.astVisitorAdapter)
+            collect_used_types(vfun, vvar) <| $ ( onlyUsed  ) : void
+                for st in keys(onlyUsed.st)
+                    astVisitor.depStruct[intptr(st)] = true
+                for en in keys(onlyUsed.en)
+                    astVisitor.depStruct[intptr(en)] = true
+                visit_modules(compiling_program(), astVisitor.astVisitorAdapter)
         errors <- astVisitor.errors
         astVisitor.astVisitorAdapter := null
         unsafe
             delete astVisitor
+    if DEBUG_SHADER_TEXT
+        print("{st}\n\n")
     return st
 
 def bind_uniform_function_name(fnMain:FunctionPtr)
@@ -875,3 +986,4 @@ def generate_bind_uniform(fnMain:FunctionPtr; var fn:FunctionPtr)
                 cll_uni.arguments |> emplace_new() <| new [[ExprVar() at=vv.at, name:=vv.name]]
                 blk.list |>emplace(cll_uni)
     fn.body := blk
+

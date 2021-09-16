@@ -25,6 +25,27 @@ def vs_effect
 def ps_effect
     f_outputColor = texture(f_tex,f_texcoord) * float4(f_color.x, f_color.y, f_color.z, 1.0)
 
+/*
+struct Foo
+    pos : int2
+    color : float4
+
+def compute_color ( var f:Foo )
+    if (((f.pos.x>>2) & (f.pos.y>>2)) & 1) != 0
+        f.color = float4(1., 0.5, float(f.pos.x)/256.0, 1.)
+    else
+        f.color = float4(float(f.pos.y)/256.0, 0.25, 1., 1.)
+
+[compute_program(name="COMPUTE_SRC",version=430,local_size_x=16,local_size_y=16)]
+def compute_effect
+    var foo = [[Foo color=float4(1.),pos=int2(gl_GlobalInvocationID.xy)]]   // no sideeffects, can reorder
+    foo |> compute_color()
+    var foo2 = [[Foo pos=int2(1); color=float4(2)]]
+    compute_color(foo2[0])
+    compute_color(foo2[1])
+    imageStore(c_destTex, foo.pos, foo.color)
+*/
+
 [compute_program(name="COMPUTE_SRC",version=430,local_size_x=16,local_size_y=16)]
 def compute_effect
     let storePos = int2(gl_GlobalInvocationID.xy)
@@ -80,7 +101,7 @@ def main
     defer <|
         glfwTerminate()
     glfwInitOpenGL(4,3)
-    var window = glfwCreateWindow(1280, 720, "Hello render to texture", null, null)
+    var window = glfwCreateWindow(1280, 720, "Hello compute shader", null, null)
     if window==null
 		panic("can't create window")
     defer <|
