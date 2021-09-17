@@ -34,6 +34,14 @@ def imageSize(img:image2D)
     assert(false,"we should not be here\n")
     return int2(0)
 
+[sideeffects]
+def barrier
+    assert(false,"we should not be here\n")
+
+[sideeffects]
+def memoryBarrierShared
+    assert(false,"we should not be here\n")
+
 var gl_NumWorkGroups : uint3        // global work group size we gave to glDispatchCompute()
 var gl_WorkGroupSize : uint3        // local work group size we defined with layout
 var gl_WorkGroupID : uint3          // position of current invocation in global work group

@@ -11,7 +11,7 @@ require daslib/templates_boost
 require daslib/strings_boost
 require daslib/ast_used
 
-let DEBUG_SHADER_TEXT = false
+let DEBUG_SHADER_TEXT = true
 
 enum ShaderType
     vertex
@@ -92,18 +92,19 @@ class GlslComputeProgram : GlslShader
     override shaderType = ShaderType compute
 
 let private glsl_types <- {{
-    Type tFloat     => "float";
-    Type tFloat2    => "vec2";
-    Type tFloat3    => "vec3";
-    Type tFloat4    => "vec4";
-    Type tInt       => "int";
-    Type tInt2      => "ivec2";
-    Type tInt3      => "ivec3";
-    Type tInt4      => "ivec4";
-    Type tBool      => "bool";
-    Type tRange     => "ivec2";
-    Type tURange    => "uvec2";
-    Type tVoid      => "void"
+    Type tFloat         => "float";
+    Type tFloat2        => "vec2";
+    Type tFloat3        => "vec3";
+    Type tFloat4        => "vec4";
+    Type tInt           => "int";
+    Type tInt2          => "ivec2";
+    Type tInt3          => "ivec3";
+    Type tInt4          => "ivec4";
+    Type tBool          => "bool";
+    Type tRange         => "ivec2";
+    Type tURange        => "uvec2";
+    Type tVoid          => "void";
+    Type tEnumeration   => "int"
 }}
 
 let private glsl_handle_types <- {{
@@ -130,6 +131,7 @@ class GlslExport : AstVisitor
     errors : array<string>
     writer : StringBuilderWriter?
     tab : int = 0
+    stnames   : table<string;bool>
     depFun    : table<uint64;bool>
     depVar    : table<uint64;bool>
     depStruct : table<uint64;bool>
@@ -147,6 +149,13 @@ class GlslExport : AstVisitor
         shaderType = sht
         version = ver
         compute_local_size = cls
+    def finalize
+        delete stnames
+        delete depFun
+        delete depVar
+        delete depStruct
+        delete depEnum
+        delete renames
 // TODO: fixme (egyptian braces)
     def newLine(count:int)
         for t in range(count)
@@ -184,11 +193,14 @@ class GlslExport : AstVisitor
     def describe_glsl_function ( fun:FunctionPtr )
         let st = build_string() <| $ ( var tw )
             tw |> write <| self->describe_glsl_type(fun.result)
-            tw |> write (" {fun.name} ( ")
+            var funname = "{fun.name}"
+            while stnames |> key_exists(funname)
+                funname = "_{funname}"
+            tw |> write (" {funname} ( ")
             for arg,i in fun.arguments,range(100500)
                 if i!=0
                     tw |> write(", ")
-                if arg._type.isRef
+                if arg._type.isRef && !arg._type.flags.constant
                     tw |> write("inout ")
                 tw |> write <| self->describe_glsl_type(arg._type)
                 tw |> write ( " {arg.name}")
@@ -245,6 +257,8 @@ class GlslExport : AstVisitor
             *writer |> write("vec4(0.0)")
         elif t.baseType==Type tBool
             *writer |> write("false")
+        elif t.baseType==Type tEnumeration
+            *writer |> write("0")
         else
             self->error("unsupported zero for type {describe(t)}", t.at)
 // any subexpression to string in current context
@@ -279,6 +293,21 @@ class GlslExport : AstVisitor
             self->newLine(1)
     def override preVisitProgram(prog:ProgramPtr) : void
         *writer |> write("#version {version} core\n\n")
+        // TODO: only output builtin functions which are necessary
+        *writer |> write("float saturate ( float a ) \{ return clamp(a,0.,1.); \}\n")
+        *writer |> write("void sincos ( float a, out float sv, out float cv ) \{ sv=sin(a); cv=cos(a); \}\n")
+        *writer |> write("float length_sq ( vec2 t ) \{ return dot(t,t); \}\n")
+        *writer |> write("float length_sq ( vec3 t ) \{ return dot(t,t); \}\n")
+        *writer |> write("float length_sq ( vec4 t ) \{ return dot(t,t); \}\n")
+        *writer |> write("float mad ( float a, float b, float c ) \{ return a*b+c; \}\n")
+        *writer |> write("vec2 mad ( vec2 a, float b, vec2 c ) \{ return a*vec2(b)+c; \}\n")
+        *writer |> write("vec3 mad ( vec3 a, float b, vec3 c ) \{ return a*vec3(b)+c; \}\n")
+        *writer |> write("vec4 mad ( vec4 a, float b, vec4 c ) \{ return a*vec4(b)+c; \}\n")
+        *writer |> write("vec2 mad ( vec2 a, vec2 b, vec2 c ) \{ return a*b+c; \}\n")
+        *writer |> write("vec3 mad ( vec3 a, vec3 b, vec3 c ) \{ return a*b+c; \}\n")
+        *writer |> write("vec4 mad ( vec4 a, vec4 b, vec4 c ) \{ return a*b+c; \}\n")
+        *writer |> write("float distance_sq ( vec3 a, vec3 b ) \{ return length_sq(a-b); \}\n")
+        *writer |> write("float inv_distance_sq ( vec3 a, vec3 b ) \{ return 1. / distance_sq(a,b); \}\n")
         if shaderType==ShaderType compute
             if compute_local_size.z != 0
                 *writer |> write("layout (local_size_x={compute_local_size.x}, local_size_y={compute_local_size.y}, local_size_z={compute_local_size.z}) in;\n")
@@ -298,24 +327,7 @@ class GlslExport : AstVisitor
         return typ
 // enumeration
     def override canVisitEnumeration(enu:Enumeration?)
-        if !(depStruct |> key_exists(intptr(enu)))
-            return false
-        if eq(enu._module.name,"glsl")
-            return false
-        return true
-    def override preVisitEnumeration(enu:EnumerationPtr)
-        *writer |> write("enum {enu.name} \{")
-        self->newLine(1)
-    def override preVisitEnumerationValue(enu:EnumerationPtr;name:das_string;value:ExpressionPtr;last:bool)
-        *writer |> write("\t{name} =")
-    def override visitEnumerationValue(enu:EnumerationPtr;name:das_string;value:ExpressionPtr;last:bool)
-        *writer |> write(",")
-        self->newLine(1)
-        return value
-    def override visitEnumeration(enu:EnumerationPtr)
-        *writer |> write("};")
-        self->newLine(1)
-        return enu
+        return false
 // structure
     def override canVisitStructure(str:Structure?)
         if !(depStruct |> key_exists(intptr(str)))
@@ -356,7 +368,10 @@ class GlslExport : AstVisitor
     def override preVisitFunction(fun:FunctionPtr)
         self->line(fun.at)
         *writer |> write("{self->describe_glsl_type(fun.result)} ")
-        var fnName = self->isMainFunction(fun) ? "main" : "{fun.name}"
+        var funname = "{fun.name}"
+        while stnames |> key_exists(funname)
+            funname = "_{funname}"
+        var fnName = self->isMainFunction(fun) ? "main" : "{funname}"
         *writer |> write("{fnName} ( ")
     def override preVisitFunctionBody(fun:FunctionPtr)
         *writer |> write(" )")
@@ -530,6 +545,8 @@ class GlslExport : AstVisitor
         glsl_functions |> find_if_exists(fnName) <| $(newName:string?)
             if newName != null
                 fnName = *newName
+        while stnames |> key_exists(fnName)
+            fnName = "_{fnName}"
         *writer |> write("{fnName}(")
     def override visitExprCall(expr:smart_ptr<ExprCall>) : ExpressionPtr
         *writer |> write(")")
@@ -705,7 +722,7 @@ class GlslExport : AstVisitor
     def override preVisitExprMakeStruct(expr:smart_ptr<ExprMakeStruct>)
         if expr._block != null
             self->error ("structure initialization with the block is not supported", expr.at)
-        *writer |> write("{self->describe_glsl_type(expr.makeType)}")
+        *writer |> write("{expr.makeType.structType.name}")
         let nStructs = length(expr.structs)
         if nStructs!=1
             *writer |> write("[{nStructs}]")
@@ -714,7 +731,7 @@ class GlslExport : AstVisitor
             for n in range(nStructs)
                 if n!=0
                     *writer |> write(",")
-                *writer |> write("{self->describe_glsl_type(expr.makeType)}(")
+                *writer |> write("{expr.makeType.structType.name}(")
                 self->outputMakeStruct(expr,n)
                 *writer |> write(")")
         else
@@ -873,7 +890,8 @@ class GlslExport : AstVisitor
         self->error ("pointer is not supported", expr.at)
 // const enumeraiton
     def override preVisitExprConstEnumeration(expr:smart_ptr<ExprConstEnumeration>) : void
-        self->error ("enumeration is not supported", expr.at)
+        let val = find_enum_value(expr.enumType, "{expr.value}")
+        *writer |> write("{int(val)}")
 // const bitfield
     def override preVisitExprConstBitfield(expr:smart_ptr<ExprConstBitfield>) : void
         *writer |> write("{expr.value}")
@@ -972,6 +990,7 @@ def generate_glsl(fnMain:FunctionPtr; var errors:array<string>; shaderType:Shade
             collect_used_types(vfun, vvar) <| $ ( onlyUsed  ) : void
                 for st in keys(onlyUsed.st)
                     astVisitor.depStruct[intptr(st)] = true
+                    astVisitor.stnames["{st.name}"] = true
                 for en in keys(onlyUsed.en)
                     astVisitor.depStruct[intptr(en)] = true
                 visit_modules(compiling_program(), astVisitor.astVisitorAdapter)
