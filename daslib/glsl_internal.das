@@ -166,8 +166,8 @@ class GlslExport : AstVisitor
 // GLSL TYPE
     def describe_glsl_type ( t : TypeDeclPtr )
         let st = build_string() <| $ ( var tw )
-            if t.flags.ref
-                tw |> write("& ")
+            // if t.flags.ref
+            //    tw |> write("& ") // inout?
             if t.baseType==Type tStructure
                 tw |> write("{t.structType.name}")
             elif t.baseType==Type tHandle
@@ -180,6 +180,19 @@ class GlslExport : AstVisitor
                 tw |> write("error")
             for d in t.dim
                 tw |> write("[{d}]")
+        return st
+    def describe_glsl_function ( fun:FunctionPtr )
+        let st = build_string() <| $ ( var tw )
+            tw |> write <| self->describe_glsl_type(fun.result)
+            tw |> write (" {fun.name} ( ")
+            for arg,i in fun.arguments,range(100500)
+                if i!=0
+                    tw |> write(", ")
+                if arg._type.isRef
+                    tw |> write("inout ")
+                tw |> write <| self->describe_glsl_type(arg._type)
+                tw |> write ( " {arg.name}")
+            tw |> write(" )")
         return st
     def produce_zero ( t : TypeDeclPtr )
         if length(t.dim) > 0
@@ -243,7 +256,27 @@ class GlslExport : AstVisitor
             visit(expr, astVisitorAdapter)
         writer = oldWriter
         return st
+// check if main
+    def isMainFunction(fun:FunctionPtr)
+        var isMain = false
+        for ann in fun.annotations
+            peek(ann.annotation.name) <| $ ( aname )
+                if aname=="vertex_program" || aname=="fragment_program" || aname=="compute_program"
+                    isMain = true
+        return isMain
 // program
+    def override preVisitProgramBody(prog:ProgramPtr;mod:Module?) : void
+        var any = false
+        for_each_function(mod, "") <| $ ( fun )
+            if depFun |> key_exists(intptr(get_ptr(fun)))
+                if !self->isMainFunction(fun)
+                    if !eq(fun._module.name,"glsl")
+                        let ss = self->describe_glsl_function(fun)
+                        *writer |> write("{ss};")
+                        self->newLine(1)
+                        any = true
+        if any
+            self->newLine(1)
     def override preVisitProgram(prog:ProgramPtr) : void
         *writer |> write("#version {version} core\n\n")
         if shaderType==ShaderType compute
@@ -323,13 +356,7 @@ class GlslExport : AstVisitor
     def override preVisitFunction(fun:FunctionPtr)
         self->line(fun.at)
         *writer |> write("{self->describe_glsl_type(fun.result)} ")
-        var fnName = "{fun.name}"
-        for ann in fun.annotations
-            peek(ann.annotation.name) <| $ ( aname )
-                if aname=="vertex_program" || aname=="fragment_program" || aname=="compute_program"
-                    fnName = "main"
-                    if !fun.result.isVoid
-                        self->error("shader function must be void", fun.at)
+        var fnName = self->isMainFunction(fun) ? "main" : "{fun.name}"
         *writer |> write("{fnName} ( ")
     def override preVisitFunctionBody(fun:FunctionPtr)
         *writer |> write(" )")
