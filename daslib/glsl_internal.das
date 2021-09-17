@@ -12,7 +12,7 @@ require daslib/strings_boost
 require daslib/ast_used
 
 let OUTPUT_SHADER_LINE = true
-let DEBUG_SHADER_TEXT = false
+let DEBUG_SHADER_TEXT = true
 
 enum ShaderType
     vertex
@@ -193,12 +193,23 @@ class GlslExport : AstVisitor
             for d in t.dim
                 tw |> write("[{d}]")
         return st
+    def glsl_function_name ( fun:FunctionPtr )
+        var funname = "{fun.name}"
+        if fun.flags.builtIn
+            pass
+        elif eq(fun._module.name,"$")
+            pass
+        elif eq(fun._module.name,"glsl")
+            pass
+        elif !eq(fun._module.name,"")
+            funname = "{funname}_in_{fun._module.name}"
+        while stnames |> key_exists(funname)
+            funname = "_{funname}"
+        return funname
     def describe_glsl_function ( fun:FunctionPtr )
         let st = build_string() <| $ ( var tw )
             tw |> write <| self->describe_glsl_type(fun.result)
-            var funname = "{fun.name}"
-            while stnames |> key_exists(funname)
-                funname = "_{funname}"
+            var funname = self->glsl_function_name(fun)
             tw |> write (" {funname} ( ")
             for arg,i in fun.arguments,range(100500)
                 if i!=0
@@ -371,10 +382,7 @@ class GlslExport : AstVisitor
     def override preVisitFunction(fun:FunctionPtr)
         self->line(fun.at)
         *writer |> write("{self->describe_glsl_type(fun.result)} ")
-        var funname = "{fun.name}"
-        while stnames |> key_exists(funname)
-            funname = "_{funname}"
-        var fnName = self->isMainFunction(fun) ? "main" : "{funname}"
+        var fnName = self->isMainFunction(fun) ? "main" : self->glsl_function_name(fun)
         *writer |> write("{fnName} ( ")
     def override preVisitFunctionBody(fun:FunctionPtr)
         *writer |> write(" )")
@@ -549,12 +557,12 @@ class GlslExport : AstVisitor
         return arg
 // call
     def override preVisitExprCall(expr:smart_ptr<ExprCall>)
-        var fnName = "{expr.name}"
+        var fnName : string
+        unsafe
+            fnName = self->glsl_function_name(reinterpret<FunctionPtr> expr.func)
         glsl_functions |> find_if_exists(fnName) <| $(newName:string?)
             if newName != null
                 fnName = *newName
-        while stnames |> key_exists(fnName)
-            fnName = "_{fnName}"
         *writer |> write("{fnName}(")
     def override visitExprCall(expr:smart_ptr<ExprCall>) : ExpressionPtr
         *writer |> write(")")
