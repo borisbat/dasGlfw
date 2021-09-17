@@ -11,7 +11,8 @@ require daslib/templates_boost
 require daslib/strings_boost
 require daslib/ast_used
 
-let DEBUG_SHADER_TEXT = true
+let OUTPUT_SHADER_LINE = true
+let DEBUG_SHADER_TEXT = false
 
 enum ShaderType
     vertex
@@ -165,6 +166,8 @@ class GlslExport : AstVisitor
         let fname = at.fileInfo!=null ? "{at.fileInfo.name} " : ""
         errors |> push("\tGLSL: {txt} at {fname}line {int(at.line)}")
     def line(at:LineInfo)
+        if !OUTPUT_SHADER_LINE
+            return
         if at.fileInfo!=null
             peek(at.fileInfo.name) <| $ ( atname )
                 if trackLine!=int(at.line) || trackFile!=atname
@@ -702,7 +705,7 @@ class GlslExport : AstVisitor
 // make structure
     def outputMakeStruct(expr:smart_ptr<ExprMakeStruct>;index:int)
         var prev = -1
-        for st,j in *(expr.structs[0]),range(100500)
+        for st,j in *(expr.structs[index]),range(100500)
             for sf,i in expr._type.structType.fields,range(100500)
                 if sf.name == st.name
                     if prev > i
@@ -713,7 +716,7 @@ class GlslExport : AstVisitor
             if i!=0
                 *writer |> write(",")
             var has = false
-            for st,j in *(expr.structs[0]),range(100500)
+            for st,j in *(expr.structs[index]),range(100500)
                 if sf.name == st.name
                     has = true
                     visit(st.value, astVisitorAdapter)
