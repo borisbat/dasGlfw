@@ -11,8 +11,9 @@ require daslib/templates_boost
 require daslib/strings_boost
 require daslib/ast_used
 
-let OUTPUT_SHADER_LINE = true
-let DEBUG_SHADER_TEXT = false
+let OUTPUT_SHADER_LINE = false
+let DEBUG_SHADER_TEXT = true
+let DEBUG_SHADER_BINDINGS = true
 
 enum ShaderType
     vertex
@@ -455,58 +456,71 @@ class GlslExport : AstVisitor
         return true
     def override preVisitGlobalLetVariable(arg:VariablePtr;lastArg:bool)
         self->line(arg.at)
-        var needInit = true
-        if shaderType==ShaderType vertex
-            if find_arg("uniform", arg.annotation) is tBool
-                *writer |> write("uniform "); needInit = false
-            let argLoc = find_arg("location", arg.annotation)
-            if argLoc is tInt
-                *writer |> write("layout(location={argLoc as tInt}) "); needInit = false
-            if find_arg("in", arg.annotation) is tBool
-                *writer |> write("in "); needInit = false
-            if find_arg("inout", arg.annotation) is tBool
-                *writer |> write("out "); needInit = false
-        elif shaderType==ShaderType fragment
-            if find_arg("uniform", arg.annotation) is tBool
-                *writer |> write("uniform "); needInit = false
-            if find_arg("in", arg.annotation) is tBool
-                *writer |> write("in "); needInit = false
-            if find_arg("out", arg.annotation) is tBool
-                *writer |> write("out "); needInit = false
-            if find_arg("inout", arg.annotation) is tBool
-                *writer |> write("in "); needInit = false
-        elif shaderType==ShaderType compute
-            if find_arg("uniform", arg.annotation) is tBool
-                *writer |> write("uniform "); needInit = false
-            if find_arg("in", arg.annotation) is tBool
-                *writer |> write("in "); needInit = false
-            if find_arg("out", arg.annotation) is tBool
-                *writer |> write("out "); needInit = false
-            if find_arg("inout", arg.annotation) is tBool
-                *writer |> write("in "); needInit = false
-            if arg._type.baseType==Type tStructure
-                let sname = "{arg._type.structType.name}"
-                if sname=="image2D"
-                    var layouts : array<string>
-                    let i_writeonly = find_arg("writeonly", arg.annotation)
-                    if (i_writeonly is tBool) && (i_writeonly as tBool)
-                        *writer |> write("writeonly "); needInit = false
-                    let i_readonly = find_arg("readonly", arg.annotation)
-                    if (i_readonly is tBool) && (i_readonly as tBool)
-                        *writer |> write("readonly "); needInit = false
-                    let s_format = find_arg("format", arg.annotation)
-                    if s_format is tString
-                        layouts |> push(s_format as tString)
-                    let i_binding = find_arg("binding", arg.annotation)
-                    if i_binding is tInt
-                        layouts |> push("binding={i_binding as tInt}")
-                    if !empty(layouts)
-                        let lstr = join(layouts,",")
-                        *writer |> write("layout({lstr}) "); needInit = false
-        *writer |> write("{self->describe_glsl_type(arg._type)} {arg.name}")
-        if arg.init==null && needInit
-            *writer |> write(" = ")
-            self->produce_zero(arg._type)
+        if find_arg("ssbo", arg.annotation) is tBool
+            var binding = 0
+            let arg_bind = find_arg("binding", arg.annotation)
+            if arg_bind is tInt
+                binding = arg_bind as tInt
+            *writer |> write("layout(std430, binding={binding}) buffer {arg.name}_ssbo")
+            self->newLine(1)
+            *writer |> write("\{")
+            self->newLine(1)
+            *writer |> write("    {self->describe_glsl_type(arg._type)} {arg.name};")
+            self->newLine(1)
+            *writer |> write("\}")
+        else
+            var needInit = true
+            if shaderType==ShaderType vertex
+                if find_arg("uniform", arg.annotation) is tBool
+                    *writer |> write("uniform "); needInit = false
+                let argLoc = find_arg("location", arg.annotation)
+                if argLoc is tInt
+                    *writer |> write("layout(location={argLoc as tInt}) "); needInit = false
+                if find_arg("in", arg.annotation) is tBool
+                    *writer |> write("in "); needInit = false
+                if find_arg("inout", arg.annotation) is tBool
+                    *writer |> write("out "); needInit = false
+            elif shaderType==ShaderType fragment
+                if find_arg("uniform", arg.annotation) is tBool
+                    *writer |> write("uniform "); needInit = false
+                if find_arg("in", arg.annotation) is tBool
+                    *writer |> write("in "); needInit = false
+                if find_arg("out", arg.annotation) is tBool
+                    *writer |> write("out "); needInit = false
+                if find_arg("inout", arg.annotation) is tBool
+                    *writer |> write("in "); needInit = false
+            elif shaderType==ShaderType compute
+                if find_arg("uniform", arg.annotation) is tBool
+                    *writer |> write("uniform "); needInit = false
+                if find_arg("in", arg.annotation) is tBool
+                    *writer |> write("in "); needInit = false
+                if find_arg("out", arg.annotation) is tBool
+                    *writer |> write("out "); needInit = false
+                if find_arg("inout", arg.annotation) is tBool
+                    *writer |> write("in "); needInit = false
+                if arg._type.baseType==Type tStructure
+                    let sname = "{arg._type.structType.name}"
+                    if sname=="image2D"
+                        var layouts : array<string>
+                        let i_writeonly = find_arg("writeonly", arg.annotation)
+                        if (i_writeonly is tBool) && (i_writeonly as tBool)
+                            *writer |> write("writeonly "); needInit = false
+                        let i_readonly = find_arg("readonly", arg.annotation)
+                        if (i_readonly is tBool) && (i_readonly as tBool)
+                            *writer |> write("readonly "); needInit = false
+                        let s_format = find_arg("format", arg.annotation)
+                        if s_format is tString
+                            layouts |> push(s_format as tString)
+                        let i_binding = find_arg("binding", arg.annotation)
+                        if i_binding is tInt
+                            layouts |> push("binding={i_binding as tInt}")
+                        if !empty(layouts)
+                            let lstr = join(layouts,",")
+                            *writer |> write("layout({lstr}) "); needInit = false
+            *writer |> write("{self->describe_glsl_type(arg._type)} {arg.name}")
+            if arg.init==null && needInit
+                *writer |> write(" = ")
+                self->produce_zero(arg._type)
     def override visitGlobalLetVariable(arg:VariablePtr;lastArg:bool)
         let reg = find_arg("register", arg.annotation)
         if reg is tString
@@ -1048,4 +1062,5 @@ def generate_bind_uniform(fnMain:FunctionPtr; var fn:FunctionPtr)
                 cll_uni.arguments |> emplace_new() <| new [[ExprVar() at=vv.at, name:=vv.name]]
                 blk.list |>emplace(cll_uni)
     fn.body := blk
-
+    if DEBUG_SHADER_BINDINGS
+        print("{describe(fn)}\n")

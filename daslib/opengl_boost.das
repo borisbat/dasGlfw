@@ -31,6 +31,22 @@ def getTexture2DSize(tex:uint; mipLevel:int = 0)
     glGetTexLevelParameteriv(GL_TEXTURE_2D, mipLevel, GL_TEXTURE_HEIGHT, safe_addr(h))
     return int2(w,h)
 
+def write_ssbo ( ssbo:uint; data:auto(TT) )
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo)
+    var p_mat = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY)
+    unsafe
+        *(reinterpret<TT - const?> p_mat) = data
+    glUnmapBuffer(GL_SHADER_STORAGE_BUFFER)
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0u)
+
+def read_ssbo ( ssbo:uint; var data:auto(TT) )
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo)
+    var p_mat = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY)
+    unsafe
+        data = *(reinterpret<TT?> p_mat)
+    glUnmapBuffer(GL_SHADER_STORAGE_BUFFER)
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0u)
+
 def bind_texture_2d ( unit:int; tex:uint )
     glActiveTexture(GL_TEXTURE0 + uint(unit))
     glEnable(GL_TEXTURE_2D)
