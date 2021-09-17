@@ -163,8 +163,8 @@ class GlslExport : AstVisitor
             *writer |> write("\n")
         trackLine += count
     def error ( txt:string; at:LineInfo )
-        let fname = at.fileInfo!=null ? "{at.fileInfo.name} " : ""
-        errors |> push("\tGLSL: {txt} at {fname}line {int(at.line)}")
+        let fname = at.fileInfo!=null ? "{at.fileInfo.name}" : ""
+        errors |> push("\tGLSL: {txt} at {fname}:{int(at.line)}:{int(at.column)}")
     def line(at:LineInfo)
         if !OUTPUT_SHADER_LINE
             return
@@ -421,6 +421,8 @@ class GlslExport : AstVisitor
         self->error ("finally is not supported", blk.at)
 // let
     def override preVisitExprLetVariable(expr:smart_ptr<ExprLet>;arg:VariablePtr;lastArg:bool)
+        if arg._type.flags.ref
+            self->error("local references are not supported by GLSL", arg.at)
         self->line(arg.at)
         *writer |> write("{self->describe_glsl_type(arg._type)} {arg.name}")
     def override visitExprLetVariable(expr:smart_ptr<ExprLet>;arg:VariablePtr;lastArg:bool)
