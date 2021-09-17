@@ -11,9 +11,9 @@ require daslib/templates_boost
 require daslib/strings_boost
 require daslib/ast_used
 
-let OUTPUT_SHADER_LINE = false
-let DEBUG_SHADER_TEXT = true
-let DEBUG_SHADER_BINDINGS = true
+let OUTPUT_SHADER_LINE = true
+let DEBUG_SHADER_TEXT = false
+let DEBUG_SHADER_BINDINGS = false
 
 enum ShaderType
     vertex
