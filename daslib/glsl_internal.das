@@ -12,7 +12,7 @@ require daslib/strings_boost
 require daslib/ast_used
 
 let OUTPUT_SHADER_LINE = true
-let DEBUG_SHADER_TEXT = true
+let DEBUG_SHADER_TEXT = false
 
 enum ShaderType
     vertex
