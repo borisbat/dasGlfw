@@ -481,6 +481,9 @@ class GlslExport : AstVisitor
                     let i_writeonly = find_arg("writeonly", arg.annotation)
                     if (i_writeonly is tBool) && (i_writeonly as tBool)
                         *writer |> write("writeonly "); needInit = false
+                    let i_readonly = find_arg("readonly", arg.annotation)
+                    if (i_readonly is tBool) && (i_readonly as tBool)
+                        *writer |> write("readonly "); needInit = false
                     let s_format = find_arg("format", arg.annotation)
                     if s_format is tString
                         layouts |> push(s_format as tString)
