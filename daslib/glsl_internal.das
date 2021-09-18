@@ -305,6 +305,9 @@ class GlslExport : AstVisitor
         *writer |> write("#version {version} core\n\n")
         // TODO: only output builtin functions which are necessary
         *writer |> write("float saturate ( float a ) \{ return clamp(a,0.,1.); \}\n")
+        *writer |> write("vec2 saturate ( vec2 a ) \{ return clamp(a,vec2(0.),vec2(1.)); \}\n")
+        *writer |> write("vec3 saturate ( vec3 a ) \{ return clamp(a,vec3(0.),vec3(1.)); \}\n")
+        *writer |> write("vec4 saturate ( vec4 a ) \{ return clamp(a,vec4(0.),vec4(1.)); \}\n")
         *writer |> write("void sincos ( float a, out float sv, out float cv ) \{ sv=sin(a); cv=cos(a); \}\n")
         *writer |> write("float length_sq ( vec2 t ) \{ return dot(t,t); \}\n")
         *writer |> write("float length_sq ( vec3 t ) \{ return dot(t,t); \}\n")

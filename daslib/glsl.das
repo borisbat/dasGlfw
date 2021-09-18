@@ -39,7 +39,15 @@ def barrier
     assert(false,"we should not be here\n")
 
 [sideeffects]
+def memoryBarrier
+    assert(false,"we should not be here\n")
+
+[sideeffects]
 def memoryBarrierShared
+    assert(false,"we should not be here\n")
+
+[sideeffects]
+def memoryBarrierImage
     assert(false,"we should not be here\n")
 
 var gl_NumWorkGroups : uint3        // global work group size we gave to glDispatchCompute()
