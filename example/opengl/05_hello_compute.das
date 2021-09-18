@@ -19,6 +19,7 @@ var [[out]] f_outputColor : float4
 var [[uniform]] f_tex : sampler2D
 var [[uniform, format=rgba8, binding=0, writeonly]] c_destTex : image2D
 var [[ssbo, binding=1]] c_mat : MatTest
+var [[uniform]] c_offset : int
 
 [vertex_program(name="VERTEX_SRC",version=330)]
 def vs_effect
@@ -33,12 +34,12 @@ def ps_effect
 [compute_program(name="COMPUTE_SRC",version=430,local_size_x=16,local_size_y=16)]
 def compute_effect
     let storePos = int2(gl_GlobalInvocationID.xy)
-    let bit = (storePos.x>>2) & (storePos.y>>2) & 1
+    let bitPos = storePos + int2(c_offset*3,c_offset)
+    let bit = (bitPos.x>>4) & (bitPos.y>>4) & 1
     if bit != 0
         imageStore(c_destTex,storePos, float4(storePos.x,storePos.y,0,255)/255.)
     else
         imageStore(c_destTex,storePos, float4(1.,.5,.25,1.))
-    barrier()
     if gl_GlobalInvocationID.xy==uint2(0,0)
         c_mat.a_times_b = c_mat.a * c_mat.b
         c_mat.b_times_a = c_mat.b * c_mat.a
@@ -126,11 +127,11 @@ def main
         glUseProgram(compute_program)
         write_ssbo(ssbo, c_mat)             // upload c_mat
         c_destTex.texture2D = texture
-        // glBindImageTexture(0u, texture, 0, false, 0, GL_WRITE_ONLY, GL_RGBA8)
         compute_effect_bind_uniform(compute_program)
         glDispatchCompute(16u,16u,1u)
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT|GL_SHADER_STORAGE_BARRIER_BIT)
         read_ssbo(ssbo, c_mat)              // read c_mat back
+        c_offset ++
         // make a copy in e_mat, do computations on CPU
         var e_mat = c_mat
         e_mat.a_times_b = e_mat.a * e_mat.b
