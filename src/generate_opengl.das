@@ -7,6 +7,18 @@ require ast
 def fnPtrType(fname)
     return "PFN" + to_upper(fname) + "PROC"
 
+def generate_declaration ( fw:FILE const?; fn:ClangFunc )
+    let fntype = getFunRetType(fn)
+    fprint(fw, "{fntype} {fn.name} ( ")
+    for at,ai in fn.args,range(100500)
+        if ai!=0
+            fprint(fw, ", ")
+        var art = at.atype=="GLboolean" ? "bool" : at.atype
+        fprint(fw, "{art} {at.name}")
+    if length(fn.args) > 0
+        fprint(fw, ", ")
+    fprint(fw, "Context * __context__, LineInfoArg * __at__ )")
+
 [export]
 def main
     // configure
@@ -48,34 +60,30 @@ def main
     extra_args = "\"context\", \"lineinfo\""
 
     fopen("opengl_win32.inc","wb") <| $ ( fw )
-        gen_fn_callback <- @ <| ( fn:ClangFunc )
-            let fntype = getFunRetType(fn)
-            let ptrtype = fnPtrType(fn.name)
-            fprint(fw, "{fntype} {fn.name} ( ")
-            for at,ai in fn.args,range(100500)
-                if ai!=0
-                    fprint(fw, ", ")
-                var art = at.atype=="GLboolean" ? "bool" : at.atype
-                fprint(fw, "{art} {at.name}")
-            if length(fn.args) > 0
-                fprint(fw, ", ")
-            fprint(fw, "Context * __context__, LineInfoArg * __at__ ) \{\n")
-            fprint(fw, "    static {ptrtype} fptr = ({ptrtype}) dasGetProcAddress(\"{fn.name}\",__context__,__at__);\n")
-            fprint(fw, "    ")
-            if fntype!="void"
-                fprint(fw, "auto result = ")
-            fprint(fw, "(*fptr)(")
-            for at,ai in fn.args,range(100500)
-                if ai!=0
-                    fprint(fw, ", ")
-                fprint(fw, "{at.name}")
-            fprint(fw, ");\n")
-            if fn.name!="glGetError"
-                fprint(fw, "    checkOpenGLError(__context__,__at__);\n")
-            if fntype!="void"
-                fprint(fw, "    return result;\n")
-            fprint(fw, "\}\n\n")
-        bindHeaders(args[3], args[4])
+        fopen("aot_opengl.inc", "wb") <| $ ( faot )
+            gen_fn_callback <- @ <| ( fn:ClangFunc )
+                let fntype = getFunRetType(fn)
+                let ptrtype = fnPtrType(fn.name)
+                generate_declaration (faot,fn)
+                fprint(faot, ";\n")
+                generate_declaration (fw,fn)
+                fprint(fw, " \{\n")
+                fprint(fw, "    static {ptrtype} fptr = ({ptrtype}) dasGetProcAddress(\"{fn.name}\",__context__,__at__);\n")
+                fprint(fw, "    ")
+                if fntype!="void"
+                    fprint(fw, "auto result = ")
+                fprint(fw, "(*fptr)(")
+                for at,ai in fn.args,range(100500)
+                    if ai!=0
+                        fprint(fw, ", ")
+                    fprint(fw, "{at.name}")
+                fprint(fw, ");\n")
+                if fn.name!="glGetError"
+                    fprint(fw, "    checkOpenGLError(__context__,__at__);\n")
+                if fntype!="void"
+                    fprint(fw, "    return result;\n")
+                fprint(fw, "\}\n\n")
+            bindHeaders(args[3], args[4])
 
     print("consts headers to bind: ${args[5]}\n")
     genDefineConstants(split(args[5], ";"), args[4])

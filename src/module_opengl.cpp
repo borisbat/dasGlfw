@@ -46,10 +46,7 @@ bool Module_opengl::initDependencies()  {
     }
 
 ModuleAotType Module_opengl::aotRequire ( TextWriter & tw ) const {
-    // add your stuff here
-    // tw << "#include <GLFW/glfw3.h>\n";
-    // tw << "#include \"../modules/dasGlfw/src/aot_opengl.h\"\n";
-    // specifying AOT type, in this case direct cpp mode (and not hybrid mode)
+    tw << "#include \"../modules/dasGlfw/src/aot_opengl.h\"\n";
     return ModuleAotType::cpp;
 }
 

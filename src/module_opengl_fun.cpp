@@ -36,7 +36,7 @@ void checkOpenGLError ( Context * __context__, LineInfoArg * __at__);
 
 static bool g_breakOnOpenGLError = false;
 
-static struct GlError { GLenum code; const char * name; } g_glErrors[8] = {
+static struct GlError { uint32_t code; const char * name; } g_glErrors[8] = {
     GL_NO_ERROR, "GL_NO_ERROR",
     GL_INVALID_ENUM, "GL_INVALID_ENUM",
     GL_INVALID_VALUE, "GL_INVALID_VALUE",
@@ -47,7 +47,7 @@ static struct GlError { GLenum code; const char * name; } g_glErrors[8] = {
     GL_STACK_OVERFLOW, "GL_STACK_OVERFLOW"
 };
 
-static GLenum g_glLastError = GL_NO_ERROR;
+static uint32_t g_glLastError = GL_NO_ERROR;
 
 ___noinline void checkOpenGLError ( Context * __context__, LineInfoArg * __at__) {
     if ( g_breakOnOpenGLError ) {
@@ -74,12 +74,12 @@ bool glSetBreakOnOpenGLError ( bool on ) {
     return old;
 }
 
-GLenum glGetLastError ( Context * __context__, LineInfoArg * __at__) {
+uint32_t glGetLastError ( Context * __context__, LineInfoArg * __at__) {
     if ( !g_breakOnOpenGLError ) g_glLastError = glGetError(__context__,__at__);
     return g_glLastError;
 }
 
-void glSetLastError ( GLenum err ) {
+void glSetLastError ( uint32_t err ) {
     g_glLastError = err;
 }
 

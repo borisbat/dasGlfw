@@ -1,4 +1,5 @@
 options indenting = 4
+options no_aot
 
 module opengl_state shared private
 

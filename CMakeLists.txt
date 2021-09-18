@@ -60,7 +60,7 @@ ENDIF()
 			# libDasModuleOpenGL
 			SET(DAS_OPENGL_MODULE_SRC
 				${DAS_GLFW_DIR}/src/need_opengl.h
-				#${DAS_GLFW_DIR}/src/aot_glfw.h
+				${DAS_GLFW_DIR}/src/aot_glfw.h
 				${DAS_GLFW_DIR}/src/module_opengl.ann.cpp_inc
 				${DAS_GLFW_DIR}/src/module_opengl.ann.inc
 				${DAS_GLFW_DIR}/src/module_opengl.const_inc
@@ -73,9 +73,12 @@ ENDIF()
 				${DAS_GLFW_DIR}/src/module_opengl.enum.inc
 				${DAS_GLFW_DIR}/src/module_opengl.inc
 				${DAS_GLFW_DIR}/src/module_opengl.method.inc
+				${DAS_GLFW_DIR}/src/opengl_win32.inc
+				${DAS_GLFW_DIR}/src/aot_opengl.inc
 			)
 			ADD_MODULE_LIB(libDasModuleOpenGL)
 			ADD_MODULE_CPP(opengl)
+			ADD_MODULE_NATIVE(opengl_boost_internal)
 			ADD_MODULE_NATIVE(opengl_boost)
 			ADD_MODULE_NATIVE(opengl_state)
 			ADD_MODULE_NATIVE(glsl)
@@ -97,6 +100,29 @@ ENDIF()
 				"${glfw_INCLUDE_DIR}"
 				"./OpenGL/glcorearb.h"
 			)
+
+			# demo AOT
+			add_custom_target(dasOpenGL_AOT)
+			SET(OPENGL_AOT_GENERATED_SRC)
+			DAS_AOT("${DAS_GLFW_DIR}/example/opengl_app.das" OPENGL_AOT_GENERATED_SRC dasOpenGL_AOT dasAot)
+			DAS_AOT("${DAS_GLFW_DIR}/daslib/glfw_boost.das" OPENGL_AOT_GENERATED_SRC dasOpenGL_AOT dasAot)
+			DAS_AOT("${DAS_GLFW_DIR}/daslib/opengl_boost.das" OPENGL_AOT_GENERATED_SRC dasOpenGL_AOT dasAot)
+			SOURCE_GROUP_FILES("aot stub" OPENGL_AOT_GENERATED_SRC)
+
+			# now, the demo
+			SET(OPENGL_DEMO_SRC
+				${DAS_GLFW_DIR}/example/opengl_demo_aot.cpp
+				${DAS_MODULES_NEED_INC}
+			)
+			SOURCE_GROUP_FILES("main" _OPENGL_DEMO_SRC)
+			add_executable(dasOpenGL_DEMO ${OPENGL_DEMO_SRC} ${OPENGL_AOT_GENERATED_SRC} ${AOT_GENERATED_SRC})
+			TARGET_LINK_LIBRARIES(dasOpenGL_DEMO libDaScript libDasModuleUriparser libUriParser Threads::Threads ${DAS_MODULES_LIBS})
+			ADD_DEPENDENCIES(dasOpenGL_DEMO libDaScript libDasModuleUriparser libUriParser need_and_resolve ${DAS_MODULES_LIBS})
+			ADD_DEPENDENCIES(dasOpenGL_DEMO dasOpenGL_AOT dasAotStub)
+			SETUP_CPP11(dasOpenGL_DEMO)
+			SETUP_LTO(dasOpenGL_DEMO)
+			ADD_EXAMPLE(dasOpenGL_DEMO)
+
 		ENDIF()
 	ENDIF()
 ENDIF()
