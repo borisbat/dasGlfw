@@ -45,10 +45,14 @@ def read_ssbo ( ssbo:uint; var data:auto(TT) )
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER)
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0u)
 
-def bind_texture_2d ( unit:int; tex:uint )
+def bind_sampler_2d ( unit:int; tex:uint )
     glActiveTexture(GL_TEXTURE0 + uint(unit))
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, tex)
+    glActiveTexture(GL_TEXTURE0)
+
+def bind_image_2d ( unit:int; tex:uint; format:uint; access:uint=GL_READ_WRITE )
+    glBindImageTexture(uint(unit), tex, 0, false, 0, access, format)
 
 def bind_ffp()
     glUseProgram(0u)
@@ -84,12 +88,6 @@ def glUniformAny ( location:int; value:float4 )
 
 def glUniformAny ( location:int; value:float4x4 )
     glUniformMatrix4fv(location, value)
-
-def glUniformAny ( location:int; smp:sampler2D )
-    glUniform1i(location, smp.texture)
-
-def glUniformAny ( location:int; smp:image2D )
-    glUniform1i(location, smp.texture)
 
 def glUniformMatrix4fv ( location:int; value:float4x4 )
     unsafe

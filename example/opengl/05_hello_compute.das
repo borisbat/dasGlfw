@@ -17,7 +17,7 @@ var [[inout]] f_color : float3
 var [[inout]] f_texcoord : float2
 var [[out]] f_outputColor : float4
 var [[uniform]] f_tex : sampler2D
-var [[uniform, format=rgba8, binding=0]] c_destTex : image2D
+var [[uniform, format=rgba8, binding=0, writeonly]] c_destTex : image2D
 var [[ssbo, binding=1]] c_mat : MatTest
 
 [vertex_program(name="VERTEX_SRC",version=330)]
@@ -28,12 +28,16 @@ def vs_effect
 
 [fragment_program(name="FRAGMENT_SRC",version=330)]
 def ps_effect
-    f_outputColor = texture(f_tex,f_texcoord) //  * float4(f_color.x, f_color.y, f_color.z, 1.0)
+    f_outputColor = texture(f_tex,f_texcoord) * float4(f_color.x, f_color.y, f_color.z, 1.0)
 
 [compute_program(name="COMPUTE_SRC",version=430,local_size_x=16,local_size_y=16)]
 def compute_effect
     let storePos = int2(gl_GlobalInvocationID.xy)
-    imageStore(c_destTex,storePos, float4(storePos.x,storePos.y,0,255)/255.)
+    let bit = (storePos.x>>2) & (storePos.y>>2) & 1
+    if bit != 0
+        imageStore(c_destTex,storePos, float4(storePos.x,storePos.y,0,255)/255.)
+    else
+        imageStore(c_destTex,storePos, float4(1.,.5,.25,1.))
     barrier()
     if gl_GlobalInvocationID.xy==uint2(0,0)
         c_mat.a_times_b = c_mat.a * c_mat.b
@@ -64,22 +68,27 @@ let effect_vertices = [[EffectVertex
 let effect_indices = [[int 0; 1; 2; 2; 3; 0]]
 
 def create_gl_objects
+    // programs
     compute_program = create_compute_shader_program(COMPUTE_SRC)
     display_program = create_shader_program(VERTEX_SRC,FRAGMENT_SRC)
+    // vao
     glGenVertexArrays(1, safe_addr(vao))
     glBindVertexArray(vao);
+    // vbo
     glGenBuffers(1, safe_addr(vbo))
     glBindBuffer(GL_ARRAY_BUFFER, vbo)
     glBufferData(GL_ARRAY_BUFFER, effect_vertices, GL_STATIC_DRAW)
+    // ebo
     glGenBuffers(1, safe_addr(ebo))
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, effect_indices, GL_STATIC_DRAW)
+    // texture
     glGenTextures(1, safe_addr(texture))
     glBindTexture(GL_TEXTURE_2D, texture)
     glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 256, 256 );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-
+    // ssbo
     glGenBuffers(1, safe_addr(ssbo))
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo)
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1u, ssbo)
@@ -101,51 +110,48 @@ def main
     glfwMakeContextCurrent(window)
     glSetBreakOnOpenGLError(true)
     create_gl_objects()
-    f_tex.texture = 0
     while glfwWindowShouldClose(window)==0
         glfwPollEvents()
         var display_w, display_h : int
         glfwGetFramebufferSize(window, display_w, display_h)
-
+        // fill c_mat with values
         let rot = un_quat_from_unit_vec_ang(normalize(float3(1.,0.,0.)), PI*0.25)
         c_mat.a = compose(float4(0.), rot, float4(1.))
         c_mat.b = translation(float3(1.,2.,3.))
-        c_mat.a_times_b = c_mat.a * c_mat.b
-        c_mat.b_times_a = c_mat.b * c_mat.a
-        c_mat.a_times_1234 = c_mat.a * float4(1,2,3,4)
-        c_mat.b_times_1234 = c_mat.b * float4(1,2,3,4)
-
-        let e_mat = c_mat
-
         identity(c_mat.a_times_b)
         identity(c_mat.b_times_a)
         c_mat.a_times_1234 = float4(0.)
         c_mat.b_times_1234 = float4(0.)
-
+        // run program
         glUseProgram(compute_program)
-        c_destTex.texture = 0
+        write_ssbo(ssbo, c_mat)             // upload c_mat
+        c_destTex.texture2D = texture
+        // glBindImageTexture(0u, texture, 0, false, 0, GL_WRITE_ONLY, GL_RGBA8)
         compute_effect_bind_uniform(compute_program)
-        glBindImageTexture(0u, texture, 0, false, 0, GL_WRITE_ONLY, GL_RGBA8)
-        write_ssbo(ssbo, c_mat)
         glDispatchCompute(16u,16u,1u)
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT|GL_SHADER_STORAGE_BARRIER_BIT)
-        read_ssbo(ssbo, c_mat)
-
+        read_ssbo(ssbo, c_mat)              // read c_mat back
+        // make a copy in e_mat, do computations on CPU
+        var e_mat = c_mat
+        e_mat.a_times_b = e_mat.a * e_mat.b
+        e_mat.b_times_a = e_mat.b * e_mat.a
+        e_mat.a_times_1234 = e_mat.a * float4(1,2,3,4)
+        e_mat.b_times_1234 = e_mat.b * float4(1,2,3,4)
+        // compare CPU computations with GPU computaions
         assert(e_mat.a_times_b==c_mat.a_times_b)
         assert(e_mat.b_times_a==c_mat.b_times_a)
         assert(e_mat.a_times_1234==c_mat.a_times_1234)
         assert(e_mat.b_times_1234==c_mat.b_times_1234)
-
+        // render
         glViewport(0, 0, display_w, display_h)
         glUseProgram(display_program)
         glBindBuffer(GL_ARRAY_BUFFER, vbo)
-        bind_vertex_buffer(type<EffectVertex>)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
-        f_tex.texture = 0
-        bind_texture_2d(0, texture)
+        f_tex.texture2D = texture
         vs_effect_bind_uniform(display_program)
         ps_effect_bind_uniform(display_program)
+        bind_vertex_buffer(vbo, type<EffectVertex>)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, null)
-
+        // swap buffers
         glfwMakeContextCurrent(window)
         glfwSwapBuffers(window)

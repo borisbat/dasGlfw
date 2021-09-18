@@ -47,14 +47,18 @@ let indices = [[int 0; 1; 2; 2; 3; 0]]
 
 def create_gl_objects
     program = create_shader_program(VERTEX_SRC,FRAGMENT_SRC)
+    // vao
     glGenVertexArrays(1, safe_addr(vao))
     glBindVertexArray(vao);
+    // vbo
     glGenBuffers(1, safe_addr(vbo))
     glBindBuffer(GL_ARRAY_BUFFER, vbo)
     glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW)
+    // ebo
     glGenBuffers(1, safe_addr(ebo))
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW)
+    // texture
     texture = load_image_from_file("{get_das_root()}/modules/dasGlfw/example/opengl/image.png")
 
 [export]
@@ -71,11 +75,11 @@ def main
         glfwDestroyWindow(window)
     glfwMakeContextCurrent(window)
     create_gl_objects()
-    f_tex.texture = 0
     while glfwWindowShouldClose(window)==0
         glfwPollEvents()
         var display_w, display_h : int
         glfwGetFramebufferSize(window, display_w, display_h)
+        // render
         glViewport(0, 0, display_w, display_h)
         glClearColor(0.2, 0.2, 0.2, 1.0)
         glClearDepth(1.0lf)
@@ -83,14 +87,12 @@ def main
         glEnable(GL_DEPTH_TEST)
         glDepthFunc(GL_LEQUAL)
         glUseProgram(program)
-        glBindBuffer(GL_ARRAY_BUFFER, vbo)
-        bind_vertex_buffer(type<Vertex>)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
-        glBindTexture(GL_TEXTURE_2D, texture)
+        f_tex.texture2D = texture           // bind texture
         vs_main_bind_uniform(program)
         ps_main_bind_uniform(program)
+        bind_vertex_buffer(vbo, type<Vertex>)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, null)
+        // swap buffersa
         glfwMakeContextCurrent(window)
         glfwSwapBuffers(window)
-
-

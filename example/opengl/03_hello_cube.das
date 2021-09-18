@@ -78,15 +78,15 @@ let vertices = [[Vertex
 
 def create_gl_objects
     program = create_shader_program(VERTEX_SRC,FRAGMENT_SRC)
+    // vao
     glGenVertexArrays(1, safe_addr(vao))
     glBindVertexArray(vao)
+    // vbo
     glGenBuffers(1, safe_addr(vbo))
     glBindBuffer(GL_ARRAY_BUFFER, vbo)
     glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW)
+    // texture
     texture = load_image_from_file("{get_das_root()}/modules/dasGlfw/example/opengl/image.png")
-
-def radians(f:float)
-    return f * PI / 180.0
 
 [export]
 def main
@@ -102,12 +102,13 @@ def main
         glfwDestroyWindow(window)
     glfwMakeContextCurrent(window)
     create_gl_objects()
-    v_view = translation(float3(0.0f, 0.0f, -4.0f))
-    f_tex.texture = 0
+    v_view = translation(float3(0.0f, 0.0f, -4.0f))             // bind view
     while glfwWindowShouldClose(window)==0
         glfwPollEvents()
         var display_w, display_h : int
         glfwGetFramebufferSize(window, display_w, display_h)
+        let aspect = float(display_w)/float(display_h)
+        // render
         glViewport(0, 0, display_w, display_h)
         glClearColor(0.2, 0.2, 0.2, 1.0)
         glClearDepth(1.0lf)
@@ -118,14 +119,14 @@ def main
         if t > 1lf
             glfwSetTime(t - 1lf)
         let rot = un_quat_from_unit_vec_ang(normalize(float3(1.,1.,0.)), float(t)*PI*2.)
-        v_model = compose(float4(0.0), rot, float4(1.0))
-        v_projection = perspective_opengl( radians(45.0f), float(display_w)/float(display_h), 0.1f, 50.0f)
+        v_model = compose(float4(0.0), rot, float4(1.0))        // bind model
+        v_projection = perspective_opengl( 45.0f*PI/180., aspect, 0.1f, 50.0f)   // bind projection
         glUseProgram(program)
-        glBindBuffer(GL_ARRAY_BUFFER, vbo)
-        bind_vertex_buffer(type<Vertex>)
-        glBindTexture(GL_TEXTURE_2D, texture)
+        f_tex.texture2D = texture
         vs_main_bind_uniform(program)
         ps_main_bind_uniform(program)
+        bind_vertex_buffer(vbo, type<Vertex>)
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        // swap buffers
         glfwMakeContextCurrent(window)
         glfwSwapBuffers(window)

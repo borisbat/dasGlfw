@@ -45,10 +45,7 @@ class GlslShader : AstFunctionAnnotation
         if !(argName is tString)
             errors := "name must be string constant"
             return false
-        var version = 100
-        let argVersion = find_arg("version", args)
-        if argVersion is tInt
-            version = argVersion as tInt
+        var version = find_arg("version", args) ?as tInt ?? 100
         var compute_local_size : int3
         if shaderType==ShaderType compute
             let arg_local_size_x = find_arg("local_size_x", args)
@@ -57,12 +54,8 @@ class GlslShader : AstFunctionAnnotation
             else
                 errors := "missing local_size_x"
                 return false
-            let arg_local_size_y = find_arg("local_size_y", args)
-            if arg_local_size_y is tInt
-                compute_local_size.y = arg_local_size_y as tInt
-            let arg_local_size_z = find_arg("local_size_z", args)
-            if arg_local_size_z is tInt
-                compute_local_size.y = arg_local_size_z as tInt
+            compute_local_size.y = find_arg("local_size_y", args) ?as tInt ?? 0
+            compute_local_size.z = find_arg("local_size_z", args) ?as tInt ?? 0
         // TODO: 'find_global(name)'
         var err : array<string>
         for_each_global(compiling_module()) <| $ ( var glob )
@@ -459,10 +452,7 @@ class GlslExport : AstVisitor
     def override preVisitGlobalLetVariable(arg:VariablePtr;lastArg:bool)
         self->line(arg.at)
         if find_arg("ssbo", arg.annotation) is tBool
-            var binding = 0
-            let arg_bind = find_arg("binding", arg.annotation)
-            if arg_bind is tInt
-                binding = arg_bind as tInt
+            var binding = find_arg("binding", arg.annotation) ?as tInt ?? 0
             *writer |> write("layout(std430, binding={binding}) buffer {arg.name}_ssbo")
             self->newLine(1)
             *writer |> write("\{")
@@ -500,25 +490,23 @@ class GlslExport : AstVisitor
                     *writer |> write("out "); needInit = false
                 if find_arg("inout", arg.annotation) is tBool
                     *writer |> write("in "); needInit = false
-                if arg._type.baseType==Type tStructure
-                    let sname = "{arg._type.structType.name}"
-                    if sname=="image2D"
-                        var layouts : array<string>
-                        let i_writeonly = find_arg("writeonly", arg.annotation)
-                        if (i_writeonly is tBool) && (i_writeonly as tBool)
-                            *writer |> write("writeonly "); needInit = false
-                        let i_readonly = find_arg("readonly", arg.annotation)
-                        if (i_readonly is tBool) && (i_readonly as tBool)
-                            *writer |> write("readonly "); needInit = false
-                        let s_format = find_arg("format", arg.annotation)
-                        if s_format is tString
-                            layouts |> push(s_format as tString)
-                        let i_binding = find_arg("binding", arg.annotation)
-                        if i_binding is tInt
-                            layouts |> push("binding={i_binding as tInt}")
-                        if !empty(layouts)
-                            let lstr = join(layouts,",")
-                            *writer |> write("layout({lstr}) "); needInit = false
+                if is_glsl_structure(arg,"image2D")
+                    var layouts : array<string>
+                    let i_writeonly = find_arg("writeonly", arg.annotation)
+                    if i_writeonly is tBool
+                        *writer |> write("writeonly "); needInit = false
+                    let i_readonly = find_arg("readonly", arg.annotation)
+                    if i_readonly is tBool
+                        *writer |> write("readonly "); needInit = false
+                    let s_format = find_arg("format", arg.annotation)
+                    if s_format is tString
+                        layouts |> push(s_format as tString)
+                    let i_binding = find_arg("binding", arg.annotation)
+                    if i_binding is tInt
+                        layouts |> push("binding={i_binding as tInt}")
+                    if !empty(layouts)
+                        let lstr = join(layouts,",")
+                        *writer |> write("layout({lstr}) "); needInit = false
             *writer |> write("{self->describe_glsl_type(arg._type)} {arg.name}")
             if arg.init==null && needInit
                 *writer |> write(" = ")
@@ -1051,18 +1039,66 @@ def generate_bind_uniform_dummy(fnMain:FunctionPtr)
         panic("can't setup")
     return true
 
+def is_glsl_structure(arg; name:string)
+    if arg._type.baseType==Type tStructure && length(arg._type.dim)==0
+        if eq(arg._type.structType._module.name,"glsl") && eq(arg._type.structType.name,name)
+            return true
+    return false
+
 def generate_bind_uniform(fnMain:FunctionPtr; var fn:FunctionPtr)
     var blk <- new [[ExprBlock() at=fn.at]]
     collect_dependencies(fnMain) <| $ ( vfun, vvar )
         for vv in vvar
+            var needUniform = true
             if find_arg("uniform", vv.annotation) is tBool
-                var cll_gul <- new [[ExprCall() at=vv.at, name:="glGetUniformLocation"]]
-                cll_gul.arguments |> emplace_new() <| new [[ExprVar() at=vv.at, name:="__program"]]
-                cll_gul.arguments |> emplace_new() <| new [[ExprConstString() at=vv.at, value:=vv.name]]
-                var cll_uni <- new [[ExprCall() at=vv.at, name:="glUniformAny"]]
-                cll_uni.arguments |> emplace(cll_gul)
-                cll_uni.arguments |> emplace_new() <| new [[ExprVar() at=vv.at, name:=vv.name]]
-                blk.list |>emplace(cll_uni)
+                if is_glsl_structure(vv,"sampler2D")
+                    // bind_sampler_2d(binding, varName.texture2D)
+                    var binding = find_arg("binding", vv.annotation) ?as tInt ?? 0
+                    var vtex <- new [[ExprField() at=vv.at,
+                        value <- new [[ExprVar() at=vv.at, name:=vv.name]],
+                        name := "texture2D"
+                    ]]
+                    var cll_bind <- new [[ExprCall() at=vv.at, name:="bind_sampler_2d"]]
+                    cll_bind.arguments |> emplace_new() <| new [[ExprConstInt() at=vv.at, value=binding]]
+                    cll_bind.arguments |> emplace(vtex)
+                    blk.list |>emplace(cll_bind)
+                    // glUniformAny(gl_GetUniformLocation("varName"),binding)
+                    var cll_gul <- new [[ExprCall() at=vv.at, name:="glGetUniformLocation"]]
+                    cll_gul.arguments |> emplace_new() <| new [[ExprVar() at=vv.at, name:="__program"]]
+                    cll_gul.arguments |> emplace_new() <| new [[ExprConstString() at=vv.at, value:=vv.name]]
+                    var cll_uni <- new [[ExprCall() at=vv.at, name:="glUniformAny"]]
+                    cll_uni.arguments |> emplace(cll_gul)
+                    cll_uni.arguments |> emplace_new() <| new [[ExprConstInt() at=vv.at, value=binding]]
+                    blk.list |>emplace(cll_uni)
+                elif is_glsl_structure(vv,"image2D")
+                    // bind_sampler_2d(binding, varName.texture2D, format, access)
+                    var binding = find_arg("binding", vv.annotation) ?as tInt ?? 0
+                    var vtex <- new [[ExprField() at=vv.at,
+                        value <- new [[ExprVar() at=vv.at, name:=vv.name]],
+                        name := "texture2D"
+                    ]]
+                    var format = find_arg("format", vv.annotation) ?as tString ?? "rgba8"
+                    format = "GL_{to_upper(format)}"
+                    var access = "GL_READ_WRITE"
+                    if find_arg("writeonly", vv.annotation) is tBool
+                        access = "GL_WRITE_ONLY"
+                    if find_arg("readonly", vv.annotation) is tBool
+                        access = "GL_READ_ONLY"
+                    var cll_uni <- new [[ExprCall() at=vv.at, name:="bind_image_2d"]]
+                    cll_uni.arguments |> emplace_new() <| new [[ExprConstInt() at=vv.at, value=binding]]
+                    cll_uni.arguments |> emplace(vtex)
+                    cll_uni.arguments |> emplace_new() <| new [[ExprVar() at=vv.at, name:=format]]
+                    cll_uni.arguments |> emplace_new() <| new [[ExprVar() at=vv.at, name:=access]]
+                    blk.list |>emplace(cll_uni)
+                else
+                    // glUniformAny(gl_GetUniformLocation("varName"),varName)
+                    var cll_gul <- new [[ExprCall() at=vv.at, name:="glGetUniformLocation"]]
+                    cll_gul.arguments |> emplace_new() <| new [[ExprVar() at=vv.at, name:="__program"]]
+                    cll_gul.arguments |> emplace_new() <| new [[ExprConstString() at=vv.at, value:=vv.name]]
+                    var cll_uni <- new [[ExprCall() at=vv.at, name:="glUniformAny"]]
+                    cll_uni.arguments |> emplace(cll_gul)
+                    cll_uni.arguments |> emplace_new() <| new [[ExprVar() at=vv.at, name:=vv.name]]
+                    blk.list |>emplace(cll_uni)
     fn.body := blk
     if DEBUG_SHADER_BINDINGS
         print("{describe(fn)}\n")

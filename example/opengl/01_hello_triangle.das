@@ -36,8 +36,10 @@ let vertices = [[Vertex
 
 def create_gl_objects
     program = create_shader_program(VERTEX_SRC,FRAGMENT_SRC)
+    // vao
     glGenVertexArrays(1, safe_addr(vao))
     glBindVertexArray(vao);
+    // vbo
     glGenBuffers(1, safe_addr(vbo))
     glBindBuffer(GL_ARRAY_BUFFER, vbo)
     glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW)
@@ -60,16 +62,17 @@ def main
         glfwPollEvents()
         var display_w, display_h : int
         glfwGetFramebufferSize(window, display_w, display_h)
+        // render
         glViewport(0, 0, display_w, display_h)
         glClearColor(0.2, 0.2, 0.2, 1.0)
         glClearDepth(1.0lf)
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
         glDepthFunc(GL_LEQUAL)
         glUseProgram(program)
-        glBindBuffer(GL_ARRAY_BUFFER, vbo)
-        bind_vertex_buffer(type<Vertex>)
         vs_main_bind_uniform(program)
         ps_main_bind_uniform(program)
+        bind_vertex_buffer(vbo, type<Vertex>)   // bind vbo
         glDrawArrays(GL_TRIANGLES, 0, 3)
+        // swap buffers
         glfwMakeContextCurrent(window)
         glfwSwapBuffers(window)

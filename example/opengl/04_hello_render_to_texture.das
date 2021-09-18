@@ -69,18 +69,23 @@ let effect_indices = [[int 0; 1; 2; 2; 3; 0]]
 def create_gl_objects
     program = create_shader_program(VERTEX_SRC,FRAGMENT_SRC)
     display_program = create_shader_program(VERTEX_SRC,DISPLAY_FRAGMENT_SRC)
+    // vao
     glGenVertexArrays(1, safe_addr(vao))
     glBindVertexArray(vao);
+    // vbo
     glGenBuffers(1, safe_addr(vbo))
     glBindBuffer(GL_ARRAY_BUFFER, vbo)
     glBufferData(GL_ARRAY_BUFFER, effect_vertices, GL_STATIC_DRAW)
+    // ebo
     glGenBuffers(1, safe_addr(ebo))
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, effect_indices, GL_STATIC_DRAW)
+    // image
     texture = load_image_from_file("{get_das_root()}/modules/dasGlfw/example/opengl/image.png")
-
+    // fbo
     glGenFramebuffers(1, safe_addr(fbo))
     glBindFramebuffer(GL_FRAMEBUFFER, fbo)
+    // texture bound to fbo
     glGenTextures(1, safe_addr(target_texture))
     glBindTexture(GL_TEXTURE_2D, target_texture)
     glTexImage2D(GL_TEXTURE_2D, 0, int(GL_RGB), fbo_width, fbo_height, 0, GL_RGB, GL_UNSIGNED_BYTE, null)
@@ -104,41 +109,36 @@ def main
         glfwDestroyWindow(window)
     glfwMakeContextCurrent(window)
     create_gl_objects()
-    f_tex.texture = 0
     while glfwWindowShouldClose(window)==0
         glfwPollEvents()
         var display_w, display_h : int
         glfwGetFramebufferSize(window, display_w, display_h)
-
         let t = glfwGetTime()
         if t > 1lf
             glfwSetTime(t - 1lf)
         let ft = float(t)
         f_offset = float2(ft,sin(ft*PI*2.)*0.25)
-
+        // bind fbo and render to it
         glBindFramebuffer(GL_FRAMEBUFFER, fbo)
         glViewport(0, 0, fbo_width, fbo_height)
         glUseProgram(program)
-        glBindBuffer(GL_ARRAY_BUFFER, vbo)
-        bind_vertex_buffer(type<EffectVertex>)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
-        glBindTexture(GL_TEXTURE_2D, texture)
+        f_tex.texture2D = texture
         vs_effect_bind_uniform(program)
         ps_effect_bind_uniform(program)
+        bind_vertex_buffer(vbo, type<EffectVertex>)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, null)
-
+        // bind back buffer, and render to it
         glBindFramebuffer(GL_FRAMEBUFFER, 0u)
         glViewport(0, 0, display_w, display_h)
         glUseProgram(display_program)
-        glBindBuffer(GL_ARRAY_BUFFER, vbo)
-        bind_vertex_buffer(type<EffectVertex>)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
-        glBindTexture(GL_TEXTURE_2D, target_texture)
+        f_tex.texture2D = target_texture
         vs_effect_bind_uniform(display_program)
         ps_display_bind_uniform(display_program)
+        bind_vertex_buffer(vbo, type<EffectVertex>)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, null)
-
+        // swap buffers
         glfwMakeContextCurrent(window)
         glfwSwapBuffers(window)
-
 

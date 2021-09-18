@@ -5,10 +5,10 @@ module glsl shared public
 require glsl_internal public
 
 struct sampler2D
-    texture : int
+    texture2D : uint
 
 struct image2D
-    texture : int
+    texture2D : uint
 
 def texture(sampler:sampler2D;uv:float2)
     assert(false,"we should not be here\n")
