@@ -28,7 +28,9 @@ class GlslShader : AstFunctionAnnotation
         if !(argName is tString)
             errors := "name must be string constant"
             return false
-        add_global_var(compiling_module(),"{argName as tString}", new [[TypeDecl() at=func.at, baseType=Type tString]], func.at, false)
+        if !add_global_var(compiling_module(),"{argName as tString}", new [[TypeDecl() at=func.at, baseType=Type tString]], func.at, false)
+            errors := "can't add global variable {argName as tString}"
+            return false
         generate_bind_uniform_dummy(func)
         return true
     def override patch ( var func:FunctionPtr; var group:ModuleGroup; args,progArgs:AnnotationArgumentList; var errors : das_string; var astChanged:bool& ) : bool
