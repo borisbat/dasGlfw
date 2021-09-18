@@ -8,3 +8,5 @@ src/glfw_headers.h.json*
 daslib/_aot_generated/glfw_boost.das.cpp
 src/opengl_headers.h.json
 src/opengl_headers.h.json.log
+daslib/_aot_generated/opengl_boost.das.cpp
+example/_aot_generated/opengl_app.das.cpp
