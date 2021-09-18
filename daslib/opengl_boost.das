@@ -175,6 +175,15 @@ def create_compute_shader_program ( csrc:string )
     glDeleteShader(compute)
     return program
 
+def create_ssbo ( var value:auto& )
+    var ssbo : uint
+    glGenBuffers(1, safe_addr(ssbo))
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo)
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1u, ssbo)
+    glBufferData(GL_SHADER_STORAGE_BUFFER, int64(typeinfo(sizeof value)), safe_addr(value), GL_DYNAMIC_COPY)
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0u)
+    return ssbo
+
 def load_image_from_file ( fname:string; canfail:bool=false )
     var x, y, comp : int
     let data = stbi_load(fname, safe_addr(x), safe_addr(y), safe_addr(comp), 4)

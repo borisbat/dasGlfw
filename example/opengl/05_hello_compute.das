@@ -90,11 +90,7 @@ def create_gl_objects
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
     // ssbo
-    glGenBuffers(1, safe_addr(ssbo))
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo)
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1u, ssbo)
-    glBufferData(GL_SHADER_STORAGE_BUFFER, int64(typeinfo(sizeof c_mat)), safe_addr(c_mat), GL_DYNAMIC_COPY)
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0u)
+    ssbo = create_ssbo(c_mat)
 
 [export]
 def main
