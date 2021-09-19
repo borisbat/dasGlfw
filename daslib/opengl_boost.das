@@ -114,7 +114,7 @@ def glVertexAttribPointer ( index:uint; size:int; tp:GLenum; normalized:bool; st
     unsafe
         glVertexAttribPointer(index, size, tp, normalized, stride, reinterpret<void?> offset)
 
-def create_shader ( src:string; shaderType:uint; canfail:bool = false )
+def create_shader ( src:string implicit; shaderType:uint; canfail:bool = false )
     let s = glCreateShader(shaderType)
     glShaderSource(s, 1, safe_addr(src), null)
     glCompileShader(s)
@@ -159,7 +159,7 @@ def link_shader ( program:uint; canfail:bool = false )
     else
         return true
 
-def create_shader_program ( vsrc,fsrc:string )
+def create_shader_program ( vsrc,fsrc:string implicit )
     let vertex = create_shader(vsrc, GL_VERTEX_SHADER)
     let fragment = create_shader(fsrc, GL_FRAGMENT_SHADER)
     let program = create_shader_program(vertex, fragment)
@@ -168,7 +168,7 @@ def create_shader_program ( vsrc,fsrc:string )
     glDeleteShader(fragment)
     return program
 
-def create_compute_shader_program ( csrc:string )
+def create_compute_shader_program ( csrc:string implicit )
     let compute = create_shader(csrc, GL_COMPUTE_SHADER)
     let program = create_shader_program(compute)
     link_shader(program)
@@ -184,7 +184,7 @@ def create_ssbo ( var value:auto& )
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0u)
     return ssbo
 
-def load_image_from_file ( fname:string; canfail:bool=false )
+def load_image_from_file ( fname:string implicit; canfail:bool=false )
     var x, y, comp : int
     let data = stbi_load(fname, safe_addr(x), safe_addr(y), safe_addr(comp), 4)
     if data == null
