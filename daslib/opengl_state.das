@@ -10,7 +10,7 @@ require rtti
 
 require daslib/safe_addr
 
-let opengl_cmp_func <- {{
+let shared opengl_cmp_func <- {{
     GL_NEVER => "GL_NEVER";
     GL_LESS => "GL_LESS";
     GL_EQUAL => "GL_EQUAL";
@@ -21,13 +21,13 @@ let opengl_cmp_func <- {{
     GL_ALWAYS => "GL_ALWAYS"
 }}
 
-let opengl_cull_face_mode <- {{
+let shared opengl_cull_face_mode <- {{
     GL_FRONT => "GL_FRONT";
     GL_BACK => "GL_BACK";
     GL_FRONT_AND_BACK => "GL_FRONT_AND_BACK"
 }}
 
-let opengl_texture <- {{
+let shared opengl_texture <- {{
     GL_TEXTURE0 => "GL_TEXTURE0";
     GL_TEXTURE1 => "GL_TEXTURE1";
     GL_TEXTURE2 => "GL_TEXTURE2";
@@ -62,7 +62,7 @@ let opengl_texture <- {{
     GL_TEXTURE31 => "GL_TEXTURE31"
 }}
 
-let opengl_blend_factor <- {{
+let shared opengl_blend_factor <- {{
     uint(GL_ZERO) => "GL_ZERO";
     uint(GL_ONE) => "GL_ONE";
     GL_SRC_COLOR => "GL_SRC_COLOR";
@@ -76,7 +76,7 @@ let opengl_blend_factor <- {{
     GL_SRC_ALPHA_SATURATE => "GL_SRC_ALPHA_SATURATE"
 }}
 
-let opengl_blend_equation <- {{
+let shared opengl_blend_equation <- {{
     GL_FUNC_ADD => "GL_FUNC_ADD";
     GL_FUNC_SUBTRACT => "GL_FUNC_SUBTRACT";
     GL_FUNC_REVERSE_SUBTRACT => "GL_FUNC_REVERSE_SUBTRACT";
@@ -84,7 +84,7 @@ let opengl_blend_equation <- {{
     GL_MAX => "GL_MAX"
 }}
 
-let opengl_logic_op <- {{
+let shared opengl_logic_op <- {{
     GL_CLEAR => "GL_CLEAR";
     GL_SET => "GL_SET";
     GL_COPY => "GL_COPY";
@@ -103,7 +103,7 @@ let opengl_logic_op <- {{
     GL_OR_INVERTED => "GL_OR_INVERTED"
 }}
 
-let opengl_last_error <- {{
+let shared opengl_last_error <- {{
     uint(GL_NO_ERROR) => "GL_NO_ERROR";
     GL_INVALID_ENUM => "GL_INVALID_ENUM";
     GL_INVALID_VALUE => "GL_INVALID_VALUE";
@@ -114,7 +114,7 @@ let opengl_last_error <- {{
     GL_STACK_OVERFLOW => "GL_STACK_OVERFLOW"
 }}
 
-let opengl_debug_source <- {{
+let shared opengl_debug_source <- {{
     GL_DEBUG_SOURCE_API => "GL_DEBUG_SOURCE_API";
     GL_DEBUG_SOURCE_WINDOW_SYSTEM => "GL_DEBUG_SOURCE_WINDOW_SYSTEM";
     GL_DEBUG_SOURCE_SHADER_COMPILER => "GL_DEBUG_SOURCE_SHADER_COMPILER";
@@ -123,7 +123,7 @@ let opengl_debug_source <- {{
     GL_DEBUG_SOURCE_OTHER => "GL_DEBUG_SOURCE_OTHER"
 }}
 
-let opengl_debug_type <- {{
+let shared opengl_debug_type <- {{
     GL_DEBUG_TYPE_ERROR => "GL_DEBUG_TYPE_ERROR";
     GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR => "GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR";
     GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR => "GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR";
@@ -135,7 +135,7 @@ let opengl_debug_type <- {{
     GL_DEBUG_TYPE_OTHER => "GL_DEBUG_TYPE_OTHER"
 }}
 
-let opengl_debug_severity <- {{
+let shared opengl_debug_severity <- {{
     GL_DEBUG_SEVERITY_HIGH => "GL_DEBUG_SEVERITY_HIGH";
     GL_DEBUG_SEVERITY_MEDIUM => "GL_DEBUG_SEVERITY_MEDIUM";
     GL_DEBUG_SEVERITY_LOW => "GL_DEBUG_SEVERITY_LOW";
