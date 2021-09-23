@@ -107,7 +107,7 @@ def main
         glfwPollEvents()
         var display_w, display_h : int
         glfwGetFramebufferSize(window, display_w, display_h)
-        let aspect = float(display_w)/float(display_h)
+        let aspect = display_h!=0 ? float(display_w)/float(display_h) : 1.
         // render
         glViewport(0, 0, display_w, display_h)
         glClearColor(0.2, 0.2, 0.2, 1.0)
