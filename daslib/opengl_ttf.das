@@ -28,9 +28,10 @@ def ps_main
     let tex = texture(f_tex,f_texcoord)
     f_outputColor = float4(1.,1.,1.,tex.w)
 
+[vertex_buffer]
 struct public FontVertex
-    xy : float2
-    uv : float2
+    [[type=GL_FLOAT, size=2, normalized=false] ]xy : float2
+    [[type=GL_FLOAT, size=2, normalized=false]] uv : float2
 
 struct public Font
     ttf_buffer : array<uint8>
@@ -101,7 +102,7 @@ def public create_ttf_objects
     program = create_shader_program(VERTEX_SRC,FRAGMENT_SRC)
 
 def public draw_quads ( font:Font; quads : array<FontVertex>; mvp:float4x4 )
-    glBindVertexArray(0u)
+//    glBindVertexArray(0u)
     glDisable(GL_CULL_FACE)
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
@@ -110,12 +111,9 @@ def public draw_quads ( font:Font; quads : array<FontVertex>; mvp:float4x4 )
     v_mvp = mvp
     vs_main_bind_uniform(program)
     ps_main_bind_uniform(program)
-    glEnableVertexAttribArray(0u)
+    glBindVertexArray(0u)
     unsafe
-        glVertexAttribPointer(0u,2,GL_FLOAT,false,typeinfo(sizeof type<FontVertex>),addr(quads[0].xy))
-    glEnableVertexAttribArray(1u)
-    unsafe
-        glVertexAttribPointer(1u,2,GL_FLOAT,false,typeinfo(sizeof type<FontVertex>),addr(quads[0].uv))
+        bind_vertex_buffer(addr(quads[0]), type<FontVertex>)
     glDrawArrays(GL_QUADS, 0, length(quads))
     glUseProgram(0u)
     glEnable(GL_CULL_FACE)

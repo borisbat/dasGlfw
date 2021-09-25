@@ -54,6 +54,7 @@ def create_gl_objects
     glGenBuffers(1, safe_addr(vbo))
     glBindBuffer(GL_ARRAY_BUFFER, vbo)
     glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW)
+    bind_vertex_buffer(null,type<Vertex>)
     // ebo
     glGenBuffers(1, safe_addr(ebo))
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
@@ -67,7 +68,8 @@ def main
 		panic("can't init glfw")
     defer <|
         glfwTerminate()
-    glfwInitOpenGL(3,3)
+    glfwInitOpenGL(3,3,true)
+    glSetBreakOnOpenGLError(true)
     var window = glfwCreateWindow(1280, 720, "Hello image", null, null)
     if window==null
 		panic("can't create window")
@@ -90,7 +92,7 @@ def main
         f_tex.texture2D = texture           // bind texture
         vs_main_bind_uniform(program)
         ps_main_bind_uniform(program)
-        bind_vertex_buffer(vbo, type<Vertex>)
+        glBindVertexArray(vao)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, null)
         // swap buffersa

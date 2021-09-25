@@ -56,9 +56,9 @@ def bind_image_2d ( unit:int; tex:uint; format:uint; access:uint=GL_READ_WRITE )
 
 def bind_ffp()
     glUseProgram(0u)
+    glBindVertexArray(0u)
     glBindBuffer(GL_ARRAY_BUFFER, 0u)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0u)
-    glBindVertexArray(0u)
     glActiveTexture(GL_TEXTURE0)
     var maxAttr = 16
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,safe_addr(maxAttr))
@@ -113,6 +113,12 @@ def glBufferData(target:GLenum; arr; usage:GLenum)
 def glVertexAttribPointer ( index:uint; size:int; tp:GLenum; normalized:bool; stride:int; offset:int )
     unsafe
         glVertexAttribPointer(index, size, tp, normalized, stride, reinterpret<void?> offset)
+
+def glVertexAttribPointer ( index:uint; size:int; tp:GLenum; normalized:bool; stride:int; ptrd:void?; offset:int )
+    unsafe
+        var poffset = reinterpret<int8?> ptrd
+        poffset += offset
+        glVertexAttribPointer(index, size, tp, normalized, stride, poffset)
 
 def create_shader ( src:string implicit; shaderType:uint; canfail:bool = false )
     let s = glCreateShader(shaderType)

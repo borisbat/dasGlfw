@@ -46,6 +46,7 @@ def create_gl_objects
     glGenBuffers(1, safe_addr(vbo))
     glBindBuffer(GL_ARRAY_BUFFER, vbo)
     glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW)
+    bind_vertex_buffer(null,type<Vertex>)
 
 [export]
 def main
@@ -73,7 +74,7 @@ def main
         glDepthFunc(GL_LEQUAL)
         glUseProgram(program)
         glBindBuffer(GL_ARRAY_BUFFER, vbo)
-        bind_vertex_buffer(type<Vertex>)
+        glBindVertexArray(vao)
         glDrawArrays(GL_TRIANGLES, 0, 3)
         glfwMakeContextCurrent(window)
         glfwSwapBuffers(window)

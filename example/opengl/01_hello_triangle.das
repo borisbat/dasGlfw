@@ -43,6 +43,7 @@ def create_gl_objects
     glGenBuffers(1, safe_addr(vbo))
     glBindBuffer(GL_ARRAY_BUFFER, vbo)
     glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW)
+    bind_vertex_buffer(null, type<Vertex>)
 
 [export]
 def main
@@ -50,7 +51,8 @@ def main
 		panic("can't init glfw")
     defer <|
         glfwTerminate()
-    glfwInitOpenGL(3,3)
+    glfwInitOpenGL(3,3,true)
+    glSetBreakOnOpenGLError(true)
     var window = glfwCreateWindow(1280, 720, "Hello triangle", null, null)
     if window==null
 		panic("can't create window")
@@ -71,7 +73,7 @@ def main
         glUseProgram(program)
         vs_main_bind_uniform(program)
         ps_main_bind_uniform(program)
-        bind_vertex_buffer(vbo, type<Vertex>)   // bind vbo
+        glBindVertexArray(vao)
         glDrawArrays(GL_TRIANGLES, 0, 3)
         // swap buffers
         glfwMakeContextCurrent(window)

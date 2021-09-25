@@ -76,6 +76,7 @@ def create_gl_objects
     glGenBuffers(1, safe_addr(vbo))
     glBindBuffer(GL_ARRAY_BUFFER, vbo)
     glBufferData(GL_ARRAY_BUFFER, effect_vertices, GL_STATIC_DRAW)
+    bind_vertex_buffer(null,type<EffectVertex>)
     // ebo
     glGenBuffers(1, safe_addr(ebo))
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
@@ -101,7 +102,8 @@ def main
 		panic("can't init glfw")
     defer <|
         glfwTerminate()
-    glfwInitOpenGL(3,3)
+    glfwInitOpenGL(3,3,true)
+    glSetBreakOnOpenGLError(true)
     var window = glfwCreateWindow(1280, 720, "Hello render to texture", null, null)
     if window==null
 		panic("can't create window")
@@ -125,7 +127,7 @@ def main
         f_tex.texture2D = texture
         vs_effect_bind_uniform(program)
         ps_effect_bind_uniform(program)
-        bind_vertex_buffer(vbo, type<EffectVertex>)
+        glBindVertexArray(vao)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, null)
         // bind back buffer, and render to it
@@ -135,7 +137,7 @@ def main
         f_tex.texture2D = target_texture
         vs_effect_bind_uniform(display_program)
         ps_display_bind_uniform(display_program)
-        bind_vertex_buffer(vbo, type<EffectVertex>)
+        glBindVertexArray(vao)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, null)
         // swap buffers

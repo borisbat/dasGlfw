@@ -17,8 +17,9 @@ class GlslVertexBuffer : AstStructureAnnotation
         fn.flags |= FunctionFlags generated
         fn.result <- new [[TypeDecl() baseType=Type tVoid, at=st.at]]
         fn.arguments |> emplace_new() <| new [[Variable() at=st.at,
-            name := "vbo",
-            _type <- new [[TypeDecl() at=st.at, baseType=Type tUInt]]
+            name := "ptrd",
+            _type <- new [[TypeDecl() at=st.at, baseType=Type tPointer,
+                flags=TypeDeclFlags _implicit | TypeDeclFlags constant]]
         ]]
         fn.arguments |> emplace_new() <| new [[Variable() at=st.at,
             name := "self",
@@ -33,11 +34,6 @@ class GlslVertexBuffer : AstStructureAnnotation
             init <- new [[ExprConstUInt() at=st.at, value=0u]]
         ]]
         var blk <- new [[ExprBlock() at=st.at]]
-        // glBindBuffer(GL_ARRAY_BUFFER, vbo)
-        var cll_bb <- new [[ExprCall() at=st.at, name:="glBindBuffer" ]]
-        cll_bb.arguments |> emplace_new() <| new [[ExprConstUInt() at=st.at, value=GL_ARRAY_BUFFER]]
-        cll_bb.arguments |> emplace_new() <| new [[ExprVar() at=st.at, name:="vbo"]]
-        blk.list |> emplace(cll_bb)
         // for each field
         var stype <- new [[TypeDecl() baseType=Type tStructure, structType=get_ptr(st), at=st.at]]
         for fld,attri in st.fields,range(100500)
@@ -69,6 +65,7 @@ class GlslVertexBuffer : AstStructureAnnotation
             cll_vap.arguments |> emplace_new() <| new [[ExprVar() at=fld.at, name:=attr_type]]
             cll_vap.arguments |> emplace_new() <| new [[ExprConstBool() at=fld.at, value=is_norm]]
             cll_vap.arguments |> emplace_new() <| new [[ExprTypeInfo() at=fld.at, trait := "sizeof", typeexpr <- clone_type(stype)]]
+            cll_vap.arguments |> emplace_new() <| new [[ExprVar() at=fld.at, name:="ptrd"]]
             cll_vap.arguments |> emplace_new() <| new [[ExprTypeInfo() at=fld.at, trait := "offsetof",
                 subtrait := fld.name, typeexpr <- clone_type(stype)]]
             blk.list |> emplace(cll_vap)
