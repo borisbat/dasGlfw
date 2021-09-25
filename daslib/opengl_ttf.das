@@ -102,8 +102,8 @@ def public create_ttf_objects
     program = create_shader_program(VERTEX_SRC,FRAGMENT_SRC)
 
 def public draw_quads ( font:Font; quads : array<FontVertex>; mvp:float4x4 )
-//    glBindVertexArray(0u)
-    glDisable(GL_CULL_FACE)
+    if empty(quads)
+        return
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glUseProgram(program)
@@ -112,25 +112,55 @@ def public draw_quads ( font:Font; quads : array<FontVertex>; mvp:float4x4 )
     vs_main_bind_uniform(program)
     ps_main_bind_uniform(program)
     glBindVertexArray(0u)
+    glBindBuffer(GL_ARRAY_BUFFER, 0u)
     unsafe
         bind_vertex_buffer(addr(quads[0]), type<FontVertex>)
     glDrawArrays(GL_QUADS, 0, length(quads))
     glUseProgram(0u)
-    glEnable(GL_CULL_FACE)
     glDisable(GL_BLEND)
 
-def public quads_view ( quads : array<FontVertex> )
+
+def public quads_dim ( quads : array<FontVertex> ) : tuple<vmin:float2;vmax:float2>
+    if empty(quads)
+        return [[auto float2(0.), float2(0.)]]
     var vmin = float2(FLT_MAX,FLT_MAX)
     var vmax = float2(-FLT_MAX,-FLT_MAX)
     for q in quads
         vmin = min(vmin, q.xy)
         vmax = max(vmax, q.xy)
-    let scale = 1.0 / (vmax.x-vmin.x)
-    let offset = -(vmax+vmin) * 0.5 * scale
+    return [[auto vmin, vmax]]
+
+enum public HJust
+    left
+    center
+    right
+
+enum public VJust
+    top
+    center
+    bottom
+
+def public quads_view ( quads : array<FontVertex>; scale:float2; h:HJust = HJust center; v:VJust = VJust center )
+    if empty(quads)
+        return [[float4x4]]
+    let d = quads_dim(quads)
+    var o : float2
+    if h==HJust left
+        o.x = -(d.vmax.x-d.vmin.x)*scale.x
+    elif h==HJust center
+        o.x = -(d.vmax.x+d.vmin.x)*0.5*scale.x
+    else
+        o.x = 0.
+    if v==VJust bottom
+        o.y = -(d.vmax.y-d.vmin.y)*scale.y
+    elif v==VJust center
+        o.y = -(d.vmax.y+d.vmin.y)*0.5*scale.y
+    else
+        o.y = 0.
     return compose(
-        float4(offset.x,offset.y,0.,0.),
+        float4(o.x,o.y,0.,0.),
         float4(1,0,0,0),
-        float4(scale,scale,0.,1.))
+        float4(scale.x,scale.y,0.,1.))
 
 
 

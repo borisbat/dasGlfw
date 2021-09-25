@@ -47,19 +47,19 @@ def read_ssbo ( ssbo:uint; var data:auto(TT) )
 
 def bind_sampler_2d ( unit:int; tex:uint )
     glActiveTexture(GL_TEXTURE0 + uint(unit))
-    glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, tex)
-    glActiveTexture(GL_TEXTURE0)
 
 def bind_image_2d ( unit:int; tex:uint; format:uint; access:uint=GL_READ_WRITE )
     glBindImageTexture(uint(unit), tex, 0, false, 0, access, format)
 
 def bind_ffp()
     glUseProgram(0u)
+    glBindFramebuffer(GL_FRAMEBUFFER, 0u)
     glBindVertexArray(0u)
     glBindBuffer(GL_ARRAY_BUFFER, 0u)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0u)
     glActiveTexture(GL_TEXTURE0)
+    glBindTexture(GL_TEXTURE_2D, 0u)
     var maxAttr = 16
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,safe_addr(maxAttr))
     for va in range(maxAttr)
