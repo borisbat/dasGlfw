@@ -50,6 +50,38 @@ def memoryBarrierShared
 def memoryBarrierImage
     assert(false,"we should not be here\n")
 
+def dFdx ( val:float )
+    assert(false,"we should not be here\n")
+    return val
+
+def dFdx ( val:float2 )
+    assert(false,"we should not be here\n")
+    return val
+
+def dFdx ( val:float3 )
+    assert(false,"we should not be here\n")
+    return val
+
+def dFdx ( val:float4 )
+    assert(false,"we should not be here\n")
+    return val
+
+def dFdy ( val:float )
+    assert(false,"we should not be here\n")
+    return val
+
+def dFdy ( val:float2 )
+    assert(false,"we should not be here\n")
+    return val
+
+def dFdy ( val:float3 )
+    assert(false,"we should not be here\n")
+    return val
+
+def dFdy ( val:float4 )
+    assert(false,"we should not be here\n")
+    return val
+
 var gl_NumWorkGroups : uint3        // global work group size we gave to glDispatchCompute()
 var gl_WorkGroupSize : uint3        // local work group size we defined with layout
 var gl_WorkGroupID : uint3          // position of current invocation in global work group

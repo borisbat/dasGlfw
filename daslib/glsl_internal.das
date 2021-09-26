@@ -110,6 +110,7 @@ let private glsl_handle_types <- {{
 }}
 
 let private glsl_functions <- {{
+    "float3x3"  =>  "mat3";
     "float2"    =>  "vec2";
     "float3"    =>  "vec3";
     "float4"    =>  "vec4";
