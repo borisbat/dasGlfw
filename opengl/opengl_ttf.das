@@ -2,7 +2,7 @@ options indenting = 4
 
 module opengl_ttf shared private
 
-require daslib/opengl_boost
+require opengl/opengl_boost
 require daslib/safe_addr
 
 require stbtruetype

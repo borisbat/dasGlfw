@@ -4,13 +4,15 @@ module opengl_boost shared
 
 require opengl public
 
-require daslib/opengl_state
+
 
 require daslib/safe_addr
 require daslib/contracts
 
-require daslib/glsl public
-require daslib/opengl_boost_internal public
+require glsl/glsl public
+
+require opengl/opengl_state
+require opengl/opengl_boost_internal public
 
 require stbimage
 

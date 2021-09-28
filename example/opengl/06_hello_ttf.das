@@ -1,6 +1,6 @@
-require daslib/glfw_boost
-require daslib/opengl_boost
-require daslib/opengl_ttf
+require glfw/glfw_boost
+require opengl/opengl_boost
+require opengl/opengl_ttf
 require daslib/defer
 require math
 
