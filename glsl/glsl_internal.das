@@ -539,11 +539,7 @@ class GlslExport : AstVisitor
         self->error ("named call is not supported", expr.at)
 // looks like call (debug,assert,verify,erase,find,key_exists,keys,values,invoke,memzero etc)
     def isInvokeMethod(expr:smart_ptr<ExprLooksLikeCall>)
-        if expr is ExprInvoke
-            unsafe
-                let einvoke = reinterpret<ExprInvoke?> expr
-                return einvoke.isInvokeMethod
-        return false
+        return (expr ?as ExprInvoke)?.isInvokeMethod ?? false
     def override preVisitExprLooksLikeCall(expr:smart_ptr<ExprLooksLikeCall>)
         if self->isInvokeMethod(expr)
             pass
