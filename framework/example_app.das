@@ -48,6 +48,8 @@ def initialize
 [export]
 def shutdown
     glDeleteProgram(program)
+    glDeleteBuffers(1,safe_addr(vbo))
+    glDeleteVertexArrays(1,safe_addr(vao))
 
 [export]
 def display ( display_w, display_h : int )
@@ -58,8 +60,9 @@ def display ( display_w, display_h : int )
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LEQUAL)
     glUseProgram(program)
-    glBindBuffer(GL_ARRAY_BUFFER, vbo)
     glBindVertexArray(vao)
+    vs_main_bind_uniform(program)
+    ps_main_bind_uniform(program)
     glDrawArrays(GL_TRIANGLES, 0, 3)
     // panic("i failed")
 
