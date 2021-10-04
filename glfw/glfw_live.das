@@ -10,7 +10,28 @@ require opengl/opengl_boost
 require daslib/defer
 require daslib/live
 
-def public glfw_live(appf,appd,title:string)
+def private setup_events ( win:GLFWwindow? )
+    win |> glfwSetKeyCallback <| @ ( ewin, key, scancode, action, mods )
+        //invoke_live("keypressed", key, scancode, action, mods )
+        live_keypressed(key,scancode,action,mods)
+    win |> glfwSetCharCallback <| @ ( ewin, charcode )
+        invoke_live("charpressed", charcode )
+    win |> glfwSetCursorPosCallback <| @ ( ewin, x, y )
+        invoke_live("mousemoved", x, y )
+
+    /*
+
+    addExtern<DAS_BIND_FUN(DasGlfw_SetCursorPosCallback)>(*this,lib,"glfwSetCursorPosCallback",
+        SideEffects::worstDefault,"DasGlfw_SetCursorPosCallback");
+    addExtern<DAS_BIND_FUN(DasGlfw_SetCursorEnterCallback)>(*this,lib,"glfwSetCursorEnterCallback",
+        SideEffects::worstDefault,"DasGlfw_SetCursorEnterCallback");
+    addExtern<DAS_BIND_FUN(DasGlfw_SetMouseButtonCallback)>(*this,lib,"glfwSetMouseButtonCallback",
+        SideEffects::worstDefault,"DasGlfw_SetMouseButtonCallback");
+    addExtern<DAS_BIND_FUN(DasGlfw_SetScrollCallback)>(*this,lib,"glfwSetScrollCallback",
+        SideEffects::worstDefault,"DasGlfw_SetScrollCallback");
+    */
+
+def public glfw_live(title,appf,appd:string)
     if glfwInit()==0
 		panic("can't init glfw")
     defer <|

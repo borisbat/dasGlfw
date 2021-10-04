@@ -64,8 +64,15 @@ def display ( display_w, display_h : int )
     vs_main_bind_uniform(program)
     ps_main_bind_uniform(program)
     glDrawArrays(GL_TRIANGLES, 0, 3)
-    // panic("i failed")
+    panic("i failed")
+
+    // if key_.....
+
+// def keypressed(keycode, scancode, action, )
+
 
 [export]
 def main
     glfw_app("GLFW demo in app mode")
+
+options debugger
