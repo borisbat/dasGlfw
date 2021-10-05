@@ -64,12 +64,31 @@ def display ( display_w, display_h : int )
     vs_main_bind_uniform(program)
     ps_main_bind_uniform(program)
     glDrawArrays(GL_TRIANGLES, 0, 3)
-    panic("i failed")
+    // panic("i failed")
 
-    // if key_.....
+[export]
+def keypressed ( keycode, scancode, action, mods : int )
+    print("[keypressed] {keycode} {scancode} {action} {mods}\n")
 
-// def keypressed(keycode, scancode, action, )
+[export]
+def charpressed ( charcode : uint )
+    print("[charpressed] {charcode}\n")
 
+[export]
+def mousemoved ( x, y : double )
+    print("[mousemoved] {x} {y}\n")
+
+[export]
+def mouseenter ( yes : bool )
+    print("mouseenter {yes}\n")
+
+[export]
+def mousebutton ( button, action, mods : int )
+    print("mousebutton {button} {action} {mods}\n" )
+
+[export]
+def mousescroll ( x, y : double )
+    print("mousescroll {x} {y}\n" )
 
 [export]
 def main

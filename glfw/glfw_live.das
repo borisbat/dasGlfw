@@ -9,27 +9,21 @@ require glfw/glfw_boost
 require opengl/opengl_boost
 require daslib/defer
 require daslib/live
+require daslib/safe_addr
 
 def private setup_events ( win:GLFWwindow? )
     win |> glfwSetKeyCallback <| @ ( ewin, key, scancode, action, mods )
-        //invoke_live("keypressed", key, scancode, action, mods )
         live_keypressed(key,scancode,action,mods)
     win |> glfwSetCharCallback <| @ ( ewin, charcode )
-        invoke_live("charpressed", charcode )
+        live_charpressed(charcode )
     win |> glfwSetCursorPosCallback <| @ ( ewin, x, y )
-        invoke_live("mousemoved", x, y )
-
-    /*
-
-    addExtern<DAS_BIND_FUN(DasGlfw_SetCursorPosCallback)>(*this,lib,"glfwSetCursorPosCallback",
-        SideEffects::worstDefault,"DasGlfw_SetCursorPosCallback");
-    addExtern<DAS_BIND_FUN(DasGlfw_SetCursorEnterCallback)>(*this,lib,"glfwSetCursorEnterCallback",
-        SideEffects::worstDefault,"DasGlfw_SetCursorEnterCallback");
-    addExtern<DAS_BIND_FUN(DasGlfw_SetMouseButtonCallback)>(*this,lib,"glfwSetMouseButtonCallback",
-        SideEffects::worstDefault,"DasGlfw_SetMouseButtonCallback");
-    addExtern<DAS_BIND_FUN(DasGlfw_SetScrollCallback)>(*this,lib,"glfwSetScrollCallback",
-        SideEffects::worstDefault,"DasGlfw_SetScrollCallback");
-    */
+        live_mousemoved(x,y)
+    win |> glfwSetCursorEnterCallback <| @ ( ewin, ent )
+        live_mouseenter(ent)
+    win |> glfwSetMouseButtonCallback <| @ ( ewin, button, action, mods )
+        live_mousebutton(button, action, mods)
+    win |> glfwSetScrollCallback <| @ ( ewin, x, y )
+        live_mousescroll(x, y)
 
 def public glfw_live(title,appf,appd:string)
     if glfwInit()==0
@@ -37,12 +31,16 @@ def public glfw_live(title,appf,appd:string)
     defer <|
         glfwTerminate()
     glfwInitOpenGL(3,3)
-    var window = glfwCreateWindow(1280, 720, title, null, null)
+    var vidMode = glfwGetVideoMode( glfwGetPrimaryMonitor() )
+    var window = glfwCreateWindow(vidMode.width/2, vidMode.height/2, title, null, null)
     if window==null
 		panic("can't create window")
     defer <|
         glfwDestroyWindow(window)
+    glfwSetInputMode(window, int(GLFW_STICKY_KEYS), GLFW_TRUE)  // note sticky keys
+    glfwSetWindowPos(window,vidMode.width/2,vidMode.height/4)
     glfwMakeContextCurrent(window)
+    setup_events(window)
     go_live(appf, appd)
     while glfwWindowShouldClose(window)==0
         glfwPollEvents()
@@ -66,12 +64,16 @@ def public glfw_app(title:string)
     defer <|
         glfwTerminate()
     glfwInitOpenGL(3,3)
-    var window = glfwCreateWindow(1280, 720, title, null, null)
+    var vidMode = glfwGetVideoMode( glfwGetPrimaryMonitor() )
+    var window = glfwCreateWindow(vidMode.width/2, vidMode.height/2, title, null, null)
     if window==null
 		panic("can't create window")
     defer <|
         glfwDestroyWindow(window)
+    glfwSetInputMode(window, int(GLFW_STICKY_KEYS), GLFW_TRUE)    // note sticky keys
+    glfwSetWindowPos(window,vidMode.width/4,vidMode.height/4)
     glfwMakeContextCurrent(window)
+    setup_events(window)
     go_main()
     invoke_live("initialize")
     while glfwWindowShouldClose(window)==0
