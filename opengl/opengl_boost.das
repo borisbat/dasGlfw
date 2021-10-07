@@ -125,6 +125,8 @@ def glVertexAttribPointer ( index:uint; size:int; tp:GLenum; normalized:bool; st
         glVertexAttribPointer(index, size, tp, normalized, stride, poffset)
 
 def create_shader ( src:string implicit; shaderType:uint; canfail:bool = false )
+    if src==""
+        panic("create_shaer with empty shader")
     let s = glCreateShader(shaderType)
     glShaderSource(s, 1, safe_addr(src), null)
     glCompileShader(s)

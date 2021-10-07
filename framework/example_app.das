@@ -3,6 +3,7 @@ require glfw/glfw_live
 require opengl/opengl_boost
 require daslib/defer
 require daslib/safe_addr
+require daslib/decs_boost
 
 require math
 
