@@ -10,7 +10,9 @@ bool pauseAfterErrors = false;
 void compile_and_run ( const string & fn, const string & mainFnName, bool outputProgramCode ) {
     auto access = make_smart<FsFileAccess>();
     ModuleGroup dummyGroup;
-    if ( auto program = compileDaScript(fn,access,tout,dummyGroup) ) {
+    CodeOfPolicies policies;
+    policies.aot = true;
+    if ( auto program = compileDaScript(fn,access,tout,dummyGroup,false,policies) ) {
         if ( program->failed() ) {
             for ( auto & err : program->errors ) {
                 tout << reportError(err.at, err.what, err.extra, err.fixme, err.cerr );
@@ -23,13 +25,7 @@ void compile_and_run ( const string & fn, const string & mainFnName, bool output
                 tout << *program << "\n";
             Context ctx(program->getContextStackSize());
             program->simulate(ctx, tout);
-            program->linkCppAot(ctx, getGlobalAotLibrary(), tout);
-            if ( program->failed() ) {
-                tout << "failed to link AOT\n";
-                for ( auto & err : program->errors ) {
-                    tout << reportError(err.at, err.what, err.extra, err.fixme, err.cerr );
-                }
-            }
+
             if ( auto fnTest = ctx.findFunction(mainFnName.c_str()) ) {
                 ctx.restart();
                 ctx.eval(fnTest, nullptr);
