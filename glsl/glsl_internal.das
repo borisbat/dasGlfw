@@ -1,6 +1,7 @@
 options indenting = 4
 options no_unused_block_arguments = false
 options no_unused_function_arguments = false
+options no_aot = true
 
 module glsl_internal shared private
 
@@ -999,6 +1000,7 @@ class GlslExport : AstVisitor
     def override preVisitExprCallMacro(expr:smart_ptr<ExprCallMacro>) : void
         self->error ("call macro is not supported", expr.at)
 
+[macro_function]
 def generate_glsl(fnMain:FunctionPtr; var errors:array<string>; shaderType:ShaderType; version:int; comp_loc_size:int3 )
     var st = build_string() <| $ (var writer)
         var astVisitor = new GlslExport(writer,shaderType,version,comp_loc_size)
@@ -1024,9 +1026,11 @@ def generate_glsl(fnMain:FunctionPtr; var errors:array<string>; shaderType:Shade
         print("{st}\n\n")
     return st
 
+[macro_function]
 def bind_uniform_function_name(fnMain:FunctionPtr)
     return "{fnMain.name}_bind_uniform"
 
+[macro_function]
 def generate_bind_uniform_dummy(fnMain:FunctionPtr)
     var fn <- new [[Function() at = fnMain.at, atDecl = fnMain.at, name := bind_uniform_function_name(fnMain)]]
     fn.flags |= FunctionFlags generated
@@ -1041,12 +1045,14 @@ def generate_bind_uniform_dummy(fnMain:FunctionPtr)
         panic("can't setup")
     return true
 
+[macro_function]
 def is_glsl_structure(arg; name:string)
     if arg._type.baseType==Type tStructure && length(arg._type.dim)==0
         if eq(arg._type.structType._module.name,"glsl") && eq(arg._type.structType.name,name)
             return true
     return false
 
+[macro_function]
 def generate_bind_uniform(fnMain:FunctionPtr; var fn:FunctionPtr)
     var blk <- new [[ExprBlock() at=fn.at]]
     collect_dependencies(fnMain) <| $ ( vfun, vvar )
