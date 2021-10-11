@@ -1,3 +1,7 @@
+options persistent_heap
+options persistent_string_heap
+options gc
+
 require glfw/glfw_boost
 require glfw/glfw_live
 require opengl/opengl_boost
@@ -51,7 +55,7 @@ var cube, sphere : Fragment
 var tex : uint
 
 [export]
-def initialize
+def initialize(full_restart:bool)
     cube <- gen_cube()
     sphere <- gen_sphere(32,16,false)
     tex = gen_tex_checkerboard(16, 16, 0xff404040 , 0xff808080)
@@ -60,6 +64,18 @@ def initialize
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
     glBindTexture(GL_TEXTURE_2D, 0u)
     program = create_shader_program(PBR_VERTEX_SRC,LIT_FRAGMENT_SRC)
+    if length(decsState.allArchetypes)==0 || full_restart
+        print("create all new ecs objects\n")
+        restart()
+        for x in range(-10,10)
+            for z in range(-10,10)
+                create_entity <| @ ( eid, cmp )
+                    cmp |> set ( "pos", float3(x, 0, z))
+                    cmp |> set ( "scale", 0.45)
+                    cmp |> set ( "pulse", -0.01)
+        commit()
+    else
+        print("continue with live ecs...\n")
 
 [export]
 def shutdown
@@ -80,6 +96,26 @@ def draw_cube ( pos:float3; scale:float=1. )
     cube |> draw_fragment()
     glUseProgram(0u)
 
+[decs(stage="update")]
+def update_cubes ( var scale,pulse:float& )
+    let MIN_SCALE = 0.2
+    let MAX_SCALE = 0.45
+    scale += pulse
+    if scale < MIN_SCALE
+        scale = MIN_SCALE + (MIN_SCALE - scale)
+        pulse = -pulse
+    elif scale > MAX_SCALE
+        scale = MAX_SCALE - (scale - MAX_SCALE)
+        pulse = -pulse
+
+[decs(stage="draw")]
+def draw_cubes ( var pos:float3; scale:float )
+    draw_cube(pos, scale)
+
+[export]
+def update ( dt : float )
+    decs_stage("update")
+
 [export]
 def display ( display_w, display_h : int )
     glViewport(0, 0, display_w, display_h)
@@ -88,7 +124,6 @@ def display ( display_w, display_h : int )
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LEQUAL)
-
     let aspect = display_h!=0 ? float(display_w)/float(display_h) : 1.
     v_view = look_at(
         float3(0.,25.,-25.),  // camera
@@ -96,12 +131,7 @@ def display ( display_w, display_h : int )
         float3(0.,1.,0.)
     )
     v_projection = perspective_opengl( 45.0f*PI/180., aspect, 0.1f, 200.0f)   // bind projection
-
-    for x in range(-10,10)
-        for z in range(-10,10)
-            draw_cube(float3(x, 0, z), 0.45)
-
-
+    decs_stage("draw")
     glDisable(GL_DEPTH_TEST)
     bind_ffp()
     // panic("i failed")
@@ -112,23 +142,23 @@ def keypressed ( keycode, scancode, action, mods : int )
 
 [export]
 def charpressed ( charcode : uint )
-    print("[charpressed] {charcode}\n")
+    pass // print("[charpressed] {charcode}\n")
 
 [export]
 def mousemoved ( x, y : double )
-    print("[mousemoved] {x} {y}\n")
+    pass // print("[mousemoved] {x} {y}\n")
 
 [export]
 def mouseenter ( yes : bool )
-    print("mouseenter {yes}\n")
+    pass // print("mouseenter {yes}\n")
 
 [export]
 def mousebutton ( button, action, mods : int )
-    print("mousebutton {button} {action} {mods}\n" )
+    pass // print("mousebutton {button} {action} {mods}\n" )
 
 [export]
 def mousescroll ( x, y : double )
-    print("mousescroll {x} {y}\n" )
+    pass // print("mousescroll {x} {y}\n" )
 
 [export]
 def main

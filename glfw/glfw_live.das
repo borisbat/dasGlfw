@@ -44,6 +44,7 @@ def public glfw_live(title,appf,appd:string)
     go_live(appf, appd)
     while glfwWindowShouldClose(window)==0
         glfwPollEvents()
+        live_update(glfwGetTime())
         var display_w, display_h : int
         glfwGetFramebufferSize(window, display_w, display_h)
         if is_live()
@@ -78,6 +79,7 @@ def public glfw_app(title:string)
     invoke_live("initialize")
     while glfwWindowShouldClose(window)==0
         glfwPollEvents()
+        live_update(glfwGetTime())
         var display_w, display_h : int
         glfwGetFramebufferSize(window, display_w, display_h)
         invoke_live("display", display_w, display_h)
