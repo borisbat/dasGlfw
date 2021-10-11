@@ -6,8 +6,6 @@ module opengl_boost shared
 
 require opengl public
 
-
-
 require daslib/safe_addr
 require daslib/contracts
 
@@ -22,6 +20,19 @@ require math
 
 typedef
     GLenum = uint
+
+def look_at ( cameraPosition, cameraTarget, cameraUpVector : float3 )
+    let zaxis = -normalize(cameraTarget - cameraPosition)
+    let xaxis = normalize(cross(zaxis,cameraUpVector))
+    let yaxis = cross(xaxis, zaxis)
+    var tm : float4x4
+    tm[0] = float4(xaxis.x,yaxis.x,zaxis.x,0.)
+    tm[1] = float4(xaxis.y,yaxis.y,zaxis.y,0.)
+    tm[2] = float4(xaxis.z,yaxis.z,zaxis.z,0.)
+    tm[3] = float4( -dot(xaxis, cameraPosition),
+                    -dot(yaxis, cameraPosition),
+                    -dot(zaxis, cameraPosition),1.)
+    return tm
 
 def glTexParameteri ( target : uint; pname : uint; param : uint )
     glTexParameteri(target,pname,int(param))
@@ -196,6 +207,18 @@ def create_ssbo ( var value:auto& )
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0u)
     return ssbo
 
+def load_image_from_bytes ( width,height:int; data:void? )
+    var texture : uint
+    glGenTextures(1, safe_addr(texture))
+    glBindTexture(GL_TEXTURE_2D, texture)
+    glTexImage2D(GL_TEXTURE_2D, 0, int(GL_RGBA), width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glBindTexture(GL_TEXTURE_2D, GL_INVALID_VALUE)
+    return texture
+
 def load_image_from_file ( fname:string implicit; canfail:bool=false )
     var x, y, comp : int
     let data = stbi_load(fname, safe_addr(x), safe_addr(y), safe_addr(comp), 4)
@@ -205,12 +228,7 @@ def load_image_from_file ( fname:string implicit; canfail:bool=false )
             panic(reason)
         return 0u
     else
-        var texture_id : uint
-        glGenTextures(1, safe_addr(texture_id))
-        glBindTexture(GL_TEXTURE_2D, texture_id)
-        glTexImage2D(GL_TEXTURE_2D, 0, int(GL_RGBA), x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        let texture_id = load_image_from_bytes(x, y, data)
         stbi_image_free(data)
         return texture_id
 

@@ -10,3 +10,9 @@ src/opengl_headers.h.json
 src/opengl_headers.h.json.log
 daslib/_aot_generated/opengl_boost.das.cpp
 example/_aot_generated/opengl_app.das.cpp
+glfw/_aot_generated/glfw_boost.das.cpp
+glsl/_aot_generated/glsl.das.cpp
+opengl/_aot_generated/opengl_boost.das.cpp
+opengl/_aot_generated/opengl_gen.das.cpp
+opengl/_aot_generated/opengl_state.das.cpp
+opengl/_aot_generated/opengl_ttf.das.cpp
