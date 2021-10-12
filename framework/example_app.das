@@ -78,21 +78,21 @@ def initialize(full_restart:bool)
                         // cmp |> set ( "pulse", -0.25)
                         cmp |> set ( "color", float3(1.,0.2,0.2))
                         cmp |> set ( "solid", true )
-        // tank tower
-        var tower_id = create_entity <| @ ( eid, cmp )
-            cmp |> set ( "eid", eid )
-            cmp |> set ( "tower_pos", float3(0.) )
-            cmp |> set ( "tower_col", float3(.5,.5,0.1))
         // tank
         var tank_id = create_entity <| @ ( eid, cmp )
             cmp |> set ( "eid", eid )
-            cmp |> set ( "tower_id", tower_id )
             cmp |> set ( "pos", float3(-8, 0, -8))
             cmp |> set ( "vel", float3(0.))
             cmp |> set ( "scale", 0.45)
             cmp |> set ( "pulse", -0.25)
             cmp |> set ( "color", float3(1.,1.0,0.2))
             cmp |> set ( "tank", true )
+        // tank tower
+        create_entity <| @ ( eid, cmp )
+            cmp |> set ( "eid", eid )
+            cmp |> set ( "pos", float3(0.) )
+            cmp |> set ( "col", float3(.5,.5,0.1))
+            cmp |> set ( "tower_base",tank_id)
         commit()
     else
         print("continue with live ecs...\n")
@@ -103,6 +103,8 @@ def shutdown
     glDeleteTextures(1,safe_addr(tex))
     delete cube
     delete sphere
+    delete ground
+    delete cylinder
 
 def draw_cube ( pos:float3; scale:float; color:float3 )
     glUseProgram(program)
@@ -141,9 +143,11 @@ var key_up = false
 var key_down = false
 var key_left = false
 var key_right = false
+var display_w = 0
+var display_h = 0
 
 [decs(stage="update")]
-def update_tank ( eid:EntityId; var pos,vel:float3&; tower_id:EntityId )
+def update_tank ( eid:EntityId; var pos,vel:float3& )
     // drive tank
     let TANK_VEL = 2.
     if key_up
@@ -170,9 +174,6 @@ def update_tank ( eid:EntityId; var pos,vel:float3&; tower_id:EntityId )
     // bounds of arena
     pos.x = clamp(pos.x, -10., 9.)
     pos.z = clamp(pos.z, -10., 9.)
-    // and now the tower
-    tower_id |> update_entity <| @ ( eid, cmp )
-        cmp |> set("tower_pos", pos)
 
 [decs(stage="update")]
 def update_cubes ( var scale,pulse:float& )
@@ -186,25 +187,37 @@ def update_cubes ( var scale,pulse:float& )
         scale = MAX_SCALE - (scale - MAX_SCALE)
         pulse = -pulse
 
+[decs(stage="update_attachments")]
+def update_towers ( eid:EntityId; var pos:float3&; tower_base:EntityId )
+    var tower_pos & = pos
+    let upd = query(tower_base) <| $ ( pos : float3 )
+        tower_pos = pos
+    if !upd
+        delete_entity(eid)
+
+
 [decs(stage="draw")]
 def draw_cubes ( var pos:float3; scale:float; color:float3 )
     draw_cube(pos, scale, color)
 
 [decs(stage="draw")]
-def draw_towers ( tower_pos:float3; tower_col:float3 )
-    draw_cylinder(tower_pos + float3(0.,0.5,0.), float3(0.25,0.25,0.25), tower_col)
+def draw_towers ( pos:float3; col:float3 )
+    draw_cylinder(pos + float3(0.,0.5,0.), float3(0.25,0.25,0.25), col)
 
 [export]
 def update ( dt : float )
     tick_dt = min(dt,1./30.)
     decs_stage("update")
+    decs_stage("update_attachments")
 
 def draw
     draw_ground_plane(float3(0.,-.5,0.), 12.0, float3(.3,.2,0.0))
     decs_stage("draw")
 
 [export]
-def display ( display_w, display_h : int )
+def display ( _display_w, _display_h : int )
+    display_w = _display_w
+    display_h = _display_h
     glViewport(0, 0, display_w, display_h)
     glClearColor(0.1, 0.1, 0.1, 1.0)
     glClearDepth(1.0lf)
@@ -254,3 +267,6 @@ def mousescroll ( x, y : double )
 [export]
 def main
     glfw_app("GLFW demo in app mode")
+
+options debugger
+require daslib/debug

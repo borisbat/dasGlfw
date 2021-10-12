@@ -54,7 +54,7 @@ def private create_objects ( var frag : Fragment )
 def public draw_fragment ( frag : Fragment )
     with frag
         glBindVertexArray(vao)
-        glBindBuffer(GL_ARRAY_BUFFER, vbo)
+        // glBindBuffer(GL_ARRAY_BUFFER, vbo)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
         glDrawElements(frag.prim, length(indices), GL_UNSIGNED_INT, null)
 
