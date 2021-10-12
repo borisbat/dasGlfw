@@ -35,6 +35,12 @@ def public finalize ( var frag:Fragment )
 
 def private create_objects ( var frag : Fragment )
     with frag
+        // verify indices
+        static_if true
+            let maxI = length(vertices)
+            for i in frag.indices
+                verify(i>=0 && i<maxI)
+        // create objects
         glGenVertexArrays(1, safe_addr(vao))
         glBindVertexArray(vao)
         glGenBuffers(1, safe_addr(vbo))
@@ -47,8 +53,9 @@ def private create_objects ( var frag : Fragment )
 
 def public draw_fragment ( frag : Fragment )
     with frag
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
         glBindVertexArray(vao)
+        glBindBuffer(GL_ARRAY_BUFFER, vbo)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
         glDrawElements(frag.prim, length(indices), GL_UNSIGNED_INT, null)
 
 def private ssign ( x : float )
@@ -105,6 +112,103 @@ def gen_sphere ( sectorCount,stackCount:int; cubeUV : bool )
             ++k2
     frag.prim = GL_TRIANGLES
     frag |> create_objects()
+    return <- frag
+
+enum GenDirection
+    xy
+    xz
+    yz
+
+def private apply_gen_direction_tm ( plt : GenDirection; var frag:Fragment )
+    var tm : float3x3
+    identity(tm)
+    if plt==GenDirection xy
+        pass
+    elif plt==GenDirection xz
+        swap(tm[1],tm[2])
+    else    // yz
+        swap(tm[0],tm[2])       // todo: verify
+        tm[2][0] = -1.
+    for vtx in frag.vertices
+        vtx.xyz = tm * vtx.xyz
+        vtx.normal = normalize ( tm*vtx.normal )
+
+def gen_plane ( plt : GenDirection )
+    var frag : Fragment
+    frag.vertices <- [{PreviewVertex
+        xyz=float3( 1, 1, 0), normal=float3(  0, 0, 1),  uv=float2(0,0);
+        xyz=float3(-1, 1, 0), normal=float3(  0, 0, 1),  uv=float2(1,0);
+        xyz=float3(-1,-1, 0), normal=float3(  0, 0, 1),  uv=float2(1,1);
+        xyz=float3( 1,-1, 0), normal=float3(  0, 0, 1),  uv=float2(0,1)
+    }]
+    apply_gen_direction_tm(plt, frag)
+    frag.indices <- [{int 0; 1; 2; 2; 3; 0 }]
+    frag.prim = GL_TRIANGLES
+    frag |> create_objects()
+    return <- frag
+
+def private get_unit_circle_veritces ( sectorCount:int )
+    let sectorStep = 2. * PI / float(sectorCount)
+    var unitCircleVertices : array<float3>
+    unitCircleVertices |> reserve(sectorCount+1)
+    for i in range(sectorCount+1)
+        let sectorAngle = sectorStep * float(i)
+        unitCircleVertices |> push(float3(cos(sectorAngle), sin(sectorAngle), 0.))
+    return <- unitCircleVertices
+
+def gen_cylinder(plt:GenDirection; sectorCount:int)
+    var frag : Fragment
+    var unitVertices <- get_unit_circle_veritces(sectorCount)
+    // vertices
+    for tb in range(2)
+        let isTB = tb!=0
+        for i in range(2)
+            let h = float(i) * 2. - 1.
+            let t = 1.0 - float(i)
+            for j in range(sectorCount+1)                   // sectorCount + 1 vertices for top or bottom
+                let u = unitVertices[j]
+                let s = float(j) / float(sectorCount)
+                frag.vertices |> push([[PreviewVertex
+                    xyz = float3(u.x,u.y,h),
+                    normal = isTB ? normalize(float3(0.,0.,h)) : normalize(float3(u.x,u.y,0.)),
+                    uv = float2(s, t)
+                ]])
+            frag.vertices |> push([[PreviewVertex           // + center
+                xyz = float3(0.,0.,h),
+                normal = normalize(float3(0.,0.,h)),
+                uv = float2(0.5, 0.5)
+            ]])
+    apply_gen_direction_tm(plt, frag)
+    // indices
+    for i in range(sectorCount)
+        let k1 = i
+        let k2 = i + sectorCount + 2
+        // triangle 1
+        frag.indices |> push(k1)
+        frag.indices |> push(k1+1)
+        frag.indices |> push(k2)
+        // triangle 2
+        frag.indices |> push(k2)
+        frag.indices |> push(k1+1)
+        frag.indices |> push(k2+1)
+    // top
+    let tbOfs = (sectorCount + 2) * 2
+    let kc1 = sectorCount + 1 + tbOfs
+    for i in range(sectorCount)
+        var k = i + tbOfs
+        frag.indices |> push(kc1)
+        frag.indices |> push(k)
+        frag.indices |> push(k+1)
+    // bottom
+    let kc2 = ((sectorCount + 2) + sectorCount + 1) + tbOfs
+    for i in range(sectorCount)
+        var k = (sectorCount + 2) + i + tbOfs
+        frag.indices |> push(kc2)
+        frag.indices |> push(k+1)
+        frag.indices |> push(k)
+    frag.prim = GL_TRIANGLES
+    frag |> create_objects()
+    delete unitVertices
     return <- frag
 
 def gen_cube
