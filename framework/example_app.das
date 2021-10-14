@@ -89,7 +89,7 @@ struct Projectile
     size : float
     projectile : bool
 
-def make_tank(pos:float3)
+def make_tank ( pos:float3 )
     // tank
     var tank_id = create_entity <| @ ( eid, cmp )
         cmp |> set ( "eid", eid )
@@ -108,7 +108,7 @@ def make_tank(pos:float3)
         apply_decs_template(cmp, [[Turret base=tank_id, reload_time=TANK_TURRET_RELOAD_TIME]])
         apply_decs_template(cmp, [[MouseControls]])
 
-def make_tower(pos:float3)
+def make_tower ( pos:float3 )
     // tower
     var tower_id = create_entity <| @ ( eid, cmp )
         cmp |> set ( "eid", eid )
@@ -118,6 +118,7 @@ def make_tower(pos:float3)
         cmp |> set ( "tower", true )
     // tower turret
     create_entity <| @ ( eid, cmp )
+        print("turret {eid}\n")
         cmp |> set ( "eid", eid )
         cmp |> set ( "pos", float3(0.) )
         cmp |> set ( "color", float3(.2,.2,0.5))
@@ -127,6 +128,16 @@ def make_tower(pos:float3)
             rot_speed=TOWER_ROT_SPEED
         ]])
         cmp |> set ( "ai_turret", true )
+
+def make_wall( pos:float3 )
+    create_entity <| @ ( eid, cmp )
+        cmp |> set ( "eid", eid )
+        cmp |> set ( "pos", pos)
+        cmp |> set ( "scale", 0.45)
+        // cmp |> set ( "pulse", -0.25)
+        cmp |> set ( "color", float3(1.,0.2,0.2))
+        cmp |> set ( "solid", true )
+        cmp |> set ( "obstacle", true )
 
 [export]
 def initialize(full_restart:bool)
@@ -148,13 +159,7 @@ def initialize(full_restart:bool)
         for x in range(-10,10)
             for z in range(-10,10)
                 if x==-10 || x==9 || z==-10 || z==9 || random_float(seed)<0.1
-                    create_entity <| @ ( eid, cmp )
-                        cmp |> set ( "eid", eid )
-                        cmp |> set ( "pos", float3(x, 0, z))
-                        cmp |> set ( "scale", 0.45)
-                        // cmp |> set ( "pulse", -0.25)
-                        cmp |> set ( "color", float3(1.,0.2,0.2))
-                        cmp |> set ( "solid", true )
+                    make_wall(float3(x,0,z))
         // tank
         make_tank(float3(-8, 0, -8))
         // tower
@@ -251,18 +256,32 @@ def update_turret_cannon ( pos:float3; var turret:Turret; var ctrl:MouseControls
         fire_turret(turret.reload,turret.reload_time,turret.dir,pos,
             TANK_SHELL_VELOCITY,TANK_SHELL_COLOR,TANK_SHELL_SIZE)
 
+def can_see ( src_pos,tgt_pos:float3 )
+    let dist = distance(tgt_pos, src_pos)
+    let ray = [[Ray origin=src_pos, dir=normalize(tgt_pos-src_pos)]]
+    let found = find_query <| $ [REQUIRE(obstacle)] ( pos:float3 )
+        let aabb = [[AABB min=pos-float3(0.5), max=pos+float3(0.5) ]]
+        if is_intersecting(ray, aabb, 0.1, dist)
+            return true
+    return !found
+
 [decs(stage=update_ai, REQUIRE=ai_turret)]
-def update_ai ( var turret:Turret; pos:float3 )
-    var target = float3(-1000.)
-    var distance = 1000.0
-    let turret_pos = pos
-    query <| $ [REQUIRE(tank)] ( pos:float3 )
-        let dist = distance(turret_pos,pos)
-        if dist < distance
-            target = pos
-            distance = dist
-    if distance < 100.
-        let dxy = normalize((target - turret_pos).xz)
+def update_ai ( eid:EntityId; var turret:Turret; pos:float3 )
+    print("update ai {eid}\n")
+    var target : float3
+    let found = find_query <| $ [REQUIRE(tank)] ( pos:float3 )
+        target = pos
+        return true
+    if found
+        if !can_see(pos, target)
+            turret.dir_vel = 0.
+            turret.base |> update_entity <| @ ( eidd, cmp )
+                cmp |> remove("pulse")
+            return
+        turret.base |> update_entity <| @ ( eidd, cmp )
+            if ! cmp |> has("pulse")
+                cmp |> set("pulse",0.25)
+        let dxy = normalize((target - pos).xz)
         var angle = atan2(-dxy.y,dxy.x)
         var A = angle - turret.dir
         if A > PI
@@ -311,12 +330,12 @@ def update_tank ( eid:EntityId; var pos,vel:float3& )
     // print("tank at {pos}, vel={vel}, dt={tick_dt}\n")
     var new_pos = pos + vel * tick_dt
     var old_pos = pos
-    var trect = [[AARect
+    var trect = [[AABR
         min=float2(new_pos.x-0.45,new_pos.z-0.45),
         max=float2(new_pos.x+0.45,new_pos.z+0.45)
     ]]
     query <| $ [REQUIRE(solid)] ( pos : float3 )
-        let wrect = [[AARect
+        let wrect = [[AABR
             min=float2(pos.x-0.5,pos.z-0.5),
             max=float2(pos.x+0.5,pos.z+0.5)
         ]]
@@ -329,7 +348,7 @@ def update_tank ( eid:EntityId; var pos,vel:float3& )
     pos.z = clamp(pos.z, -10., 9.)
 
 [decs(stage=update)]
-def update_cubes ( var scale,pulse:float& )
+def update_pulses ( var scale,pulse:float& )
     let MIN_SCALE = 0.40
     let MAX_SCALE = 0.45
     scale += pulse * tick_dt
@@ -355,8 +374,8 @@ def update_turrets ( eid:EntityId; var pos:float3&; turret:Turret )
         delete_entity(eid)
 
 [decs(stage=draw,REQUIRE=tower)]
-def draw_towers ( var pos:float3; color:float3 )
-    draw_cylinder(pos, 0.5, color)
+def draw_towers ( var pos:float3; color:float3; scale:float )
+    draw_cylinder(pos, scale, color)
 
 [decs(stage=draw,REQUIRE=tank)]
 def draw_tank ( var pos:float3; scale:float; color:float3 )
