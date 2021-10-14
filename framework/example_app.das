@@ -11,8 +11,20 @@ require daslib/safe_addr
 require daslib/decs_boost
 require daslib/static_let
 require daslib/random
-
+require daslib/math_boost
 require math
+
+let TANK_VEL = 2.                       // how fast tank drives
+let TANK_SHELL_VELOCITY = 4.            // how fast cannon ball flys
+let TANK_SHELL_COLOR = float3(1,1,0)
+let TANK_TURRET_RELOAD_TIME = 0.3       // how long it takes to reload tank cannon
+let TANK_SHELL_SIZE = 0.12
+
+let TOWER_TURRET_RELOAD_TIME = 1.0      // how long it takes to reload tower cannon
+let TOWER_ROT_SPEED = 25.*PI/180.       // rotation speed of a tower
+let TURRET_SHELL_VELOCITY = 3.          // how fast turret cannon ball flys
+let TURRET_SHELL_COLOR = float3(1,0,1)
+let TURRET_SHELL_SIZE = 0.18
 
 var [[in, location=0]] v_position : float3
 var [[in, location=1]] v_normal   : float3
@@ -52,15 +64,20 @@ var ground : Fragment
 var tex : uint
 
 [decs_template]
-struct Controls
+struct KeyControls
     key_up, key_down, key_left, key_right : bool
+
+[decs_template]
+struct MouseControls
     mouse_pos     : float2
     mouse_buttons : bitfield<left;center;right>
 
 [decs_template]
-struct Tower
+struct Turret
     base        : EntityId
     dir         : float
+    dir_vel     : float
+    rot_speed   : float
     reload      : float
     reload_time : float
 
@@ -69,7 +86,47 @@ struct Projectile
     pos : float3
     vel : float3
     color : float3
+    size : float
     projectile : bool
+
+def make_tank(pos:float3)
+    // tank
+    var tank_id = create_entity <| @ ( eid, cmp )
+        cmp |> set ( "eid", eid )
+        cmp |> set ( "pos", pos)
+        cmp |> set ( "vel", float3(0.))
+        cmp |> set ( "scale", 0.45)
+        cmp |> set ( "pulse", -0.25)
+        cmp |> set ( "color", float3(1.,1.0,0.2))
+        cmp |> set ( "tank", true )
+        apply_decs_template(cmp, [[KeyControls]])
+    // tank turret
+    create_entity <| @ ( eid, cmp )
+        cmp |> set ( "eid", eid )
+        cmp |> set ( "pos", float3(0.) )
+        cmp |> set ( "color", float3(.5,.5,0.1))
+        apply_decs_template(cmp, [[Turret base=tank_id, reload_time=TANK_TURRET_RELOAD_TIME]])
+        apply_decs_template(cmp, [[MouseControls]])
+
+def make_tower(pos:float3)
+    // tower
+    var tower_id = create_entity <| @ ( eid, cmp )
+        cmp |> set ( "eid", eid )
+        cmp |> set ( "pos", pos)
+        cmp |> set ( "scale", 0.45)
+        cmp |> set ( "color", float3(1.0,0.2,1.0))
+        cmp |> set ( "tower", true )
+    // tower turret
+    create_entity <| @ ( eid, cmp )
+        cmp |> set ( "eid", eid )
+        cmp |> set ( "pos", float3(0.) )
+        cmp |> set ( "color", float3(.2,.2,0.5))
+        apply_decs_template(cmp, [[Turret
+            base=tower_id,
+            reload_time=TOWER_TURRET_RELOAD_TIME,
+            rot_speed=TOWER_ROT_SPEED
+        ]])
+        cmp |> set ( "ai_turret", true )
 
 [export]
 def initialize(full_restart:bool)
@@ -99,22 +156,10 @@ def initialize(full_restart:bool)
                         cmp |> set ( "color", float3(1.,0.2,0.2))
                         cmp |> set ( "solid", true )
         // tank
-        var tank_id = create_entity <| @ ( eid, cmp )
-            cmp |> set ( "eid", eid )
-            cmp |> set ( "pos", float3(-8, 0, -8))
-            cmp |> set ( "vel", float3(0.))
-            cmp |> set ( "scale", 0.45)
-            cmp |> set ( "pulse", -0.25)
-            cmp |> set ( "color", float3(1.,1.0,0.2))
-            cmp |> set ( "tank", true )
-            apply_decs_template(cmp, [[Controls]])
-        // tank tower
-        create_entity <| @ ( eid, cmp )
-            cmp |> set ( "eid", eid )
-            cmp |> set ( "pos", float3(0.) )
-            cmp |> set ( "color", float3(.5,.5,0.1))
-            apply_decs_template(cmp, [[Tower base=tank_id, reload_time=0.5]])
-            apply_decs_template(cmp, [[Controls]])
+        make_tank(float3(-8, 0, -8))
+        // tower
+        make_tower(float3(7, 0, 7))
+        make_tower(float3(0, 0,-6))
         commit()
     else
         print("continue with live ecs...\n")
@@ -161,6 +206,10 @@ def draw_cylinder ( tm:float4x4; color:float3 )
     ps_preview_bind_uniform(program)
     cylinder |> draw_fragment()
 
+def draw_cylinder ( pos:float3; scale:float; color:float3 )
+    let tm = compose(float4(pos.x,pos.y,pos.z,0.0), float4(0), float4(scale, scale, scale, 1.))
+    draw_cylinder(tm, color)
+
 def draw_cylinder ( pos:float3; scale:float3; color:float3 )
     let tm = compose(float4(pos.x,pos.y,pos.z,0.0), float4(0), float4(scale.x, scale.y, scale.z, 1.))
     draw_cylinder(tm, color)
@@ -169,8 +218,8 @@ var tick_dt = 1.0
 var display_w = 0
 var display_h = 0
 
-[decs(stage="update_controls")]
-def update_tower_rotation ( pos:float3; var tower:Tower; var ctrl:Controls )
+[decs(stage=update_controls)]
+def update_turret_direction ( pos:float3; var turret:Turret; var ctrl:MouseControls )
     // project to 2d screen space
     var pos4d = v_projection * v_view * float4(pos.x, pos.y, pos.z, 1.0)
     pos4d = pos4d / pos4d.w
@@ -178,31 +227,71 @@ def update_tower_rotation ( pos:float3; var tower:Tower; var ctrl:Controls )
     // get rotation angle out of relative mouse position
     let dxy = ctrl.mouse_pos - pos2d
     let angle = atan2(dxy.y,dxy.x)
-    tower.dir = angle
+    turret.dir = angle
 
-[decs(stage="update_controls")]
-def update_tower_cannon ( pos:float3; var tower:Tower; var ctrl:Controls )
-    let TANK_SHELL_VELOCITY = 2.
-    if ctrl.mouse_buttons.left && tower.reload==0.
-        tower.reload = tower.reload_time
-        create_entity <| @ ( eid, cmp )
-            cmp |> set ( "eid", eid )
-            let qr = un_quat_from_unit_vec_ang(float3(0,1,0), tower.dir)
-            let vel = quat_mul_vec(qr, float3(1.,0.,0.))
-            apply_decs_template(cmp, [[Projectile
-                pos = pos + float3(0.,.625,0.) + vel*0.5,
-                vel = vel * TANK_SHELL_VELOCITY,
-                color = float3(0.2,0.2,1.)
-            ]])
+def fire_turret ( var turret_reload:float& implicit; turret_reload_time, turret_dir:float; pos:float3;
+        velocity:float; color:float3; size:float )
+    if turret_reload != 0.
+        return
+    turret_reload = turret_reload_time
+    create_entity <| @ ( eid, cmp )
+        cmp |> set ( "eid", eid )
+        let qr = un_quat_from_unit_vec_ang(float3(0,1,0), turret_dir)
+        let vel = quat_mul_vec(qr, float3(1.,0.,0.))
+        apply_decs_template(cmp, [[Projectile
+            pos = pos + float3(0.,0.625,0.) + vel*0.5,
+            vel = vel * velocity,
+            color = color,
+            size = size
+        ]])
 
-[decs(stage="update")]
-def update_tower_reload ( var tower:Tower )
-    tower.reload = max(tower.reload - tick_dt, 0.)
+[decs(stage=update_controls)]
+def update_turret_cannon ( pos:float3; var turret:Turret; var ctrl:MouseControls )
+    if ctrl.mouse_buttons.left
+        fire_turret(turret.reload,turret.reload_time,turret.dir,pos,
+            TANK_SHELL_VELOCITY,TANK_SHELL_COLOR,TANK_SHELL_SIZE)
 
-[decs(stage="update_controls")]
-def update_tank_controls ( var pos,vel:float3&; var ctrl:Controls )
+[decs(stage=update_ai, REQUIRE=ai_turret)]
+def update_ai ( var turret:Turret; pos:float3 )
+    var target = float3(-1000.)
+    var distance = 1000.0
+    let turret_pos = pos
+    query <| $ [REQUIRE(tank)] ( pos:float3 )
+        let dist = distance(turret_pos,pos)
+        if dist < distance
+            target = pos
+            distance = dist
+    if distance < 100.
+        let dxy = normalize((target - turret_pos).xz)
+        var angle = atan2(-dxy.y,dxy.x)
+        var A = angle - turret.dir
+        if A > PI
+            A -= 2. * PI
+        if A < -PI
+            A += 2. * PI
+        if A > 0.
+            turret.dir_vel = turret.rot_speed
+        else
+            turret.dir_vel = -turret.rot_speed
+        if turret.reload==0. && abs(A) < PI/180.
+            fire_turret(turret.reload,turret.reload_time,turret.dir,pos,
+                TURRET_SHELL_VELOCITY,TURRET_SHELL_COLOR,TURRET_SHELL_SIZE)
+
+[decs(stage=update)]
+def update_turret_reload ( var turret:Turret )
+    turret.reload = max(turret.reload - tick_dt, 0.)
+
+[decs(stage=update)]
+def update_turret_rotation ( var turret:Turret )
+    turret.dir += turret.dir_vel * tick_dt
+    if turret.dir < 0.
+        turret.dir += 2.*PI
+    if turret.dir > 2.*PI
+        turret.dir -= 2.*PI
+
+[decs(stage=update_controls)]
+def update_tank_controls ( eid:EntityId; var pos,vel:float3&; var ctrl:KeyControls )
     // drive tank
-    let TANK_VEL = 2.
     if ctrl.key_up
         vel = vel.z!=0. ? float3(0.) : float3(0.,0., TANK_VEL)
         ctrl.key_up = false
@@ -216,14 +305,22 @@ def update_tank_controls ( var pos,vel:float3&; var ctrl:Controls )
         vel = vel.x!=0. ? float3(0.) : float3( TANK_VEL,0.,0.)
         ctrl.key_right = false
 
-[decs(stage="update")]
+[decs(stage=update)]
 def update_tank ( eid:EntityId; var pos,vel:float3& )
     // clmup and update pos
+    // print("tank at {pos}, vel={vel}, dt={tick_dt}\n")
     var new_pos = pos + vel * tick_dt
     var old_pos = pos
+    var trect = [[AARect
+        min=float2(new_pos.x-0.45,new_pos.z-0.45),
+        max=float2(new_pos.x+0.45,new_pos.z+0.45)
+    ]]
     query <| $ [REQUIRE(solid)] ( pos : float3 )
-        let dist = max(abs(pos.x-new_pos.x),abs(pos.z-new_pos.z))
-        if dist < .9
+        let wrect = [[AARect
+            min=float2(pos.x-0.5,pos.z-0.5),
+            max=float2(pos.x+0.5,pos.z+0.5)
+        ]]
+        if is_intersecting(trect,wrect)
             new_pos = old_pos
             vel = float3(0.)
     pos = new_pos
@@ -231,7 +328,7 @@ def update_tank ( eid:EntityId; var pos,vel:float3& )
     pos.x = clamp(pos.x, -10., 9.)
     pos.z = clamp(pos.z, -10., 9.)
 
-[decs(stage="update")]
+[decs(stage=update)]
 def update_cubes ( var scale,pulse:float& )
     let MIN_SCALE = 0.40
     let MAX_SCALE = 0.45
@@ -243,34 +340,42 @@ def update_cubes ( var scale,pulse:float& )
         scale = MAX_SCALE - (scale - MAX_SCALE)
         pulse = -pulse
 
-[decs(stage="update")]
+[decs(stage=update)]
 def update_projectile ( eid:EntityId; var proj:Projectile )
     proj.pos += proj.vel * tick_dt
     if proj.pos.x< -12. || proj.pos.x > 12. || proj.pos.z < -12. || proj.pos.z > 12.
         delete_entity(eid)
 
-[decs(stage="update_attachments")]
-def update_towers ( eid:EntityId; var pos:float3&; tower:Tower )
-    var tower_pos & = pos
-    let upd = query(tower.base) <| $ ( pos : float3 )
-        tower_pos = pos
+[decs(stage=update_attachments)]
+def update_turrets ( eid:EntityId; var pos:float3&; turret:Turret )
+    var turret_pos & = pos
+    let upd = query(turret.base) <| $ ( pos : float3 )
+        turret_pos = pos
     if !upd
         delete_entity(eid)
 
-[decs(stage="draw")]
-def draw_cubes ( var pos:float3; scale:float; color:float3 )
+[decs(stage=draw,REQUIRE=tower)]
+def draw_towers ( var pos:float3; color:float3 )
+    draw_cylinder(pos, 0.5, color)
+
+[decs(stage=draw,REQUIRE=tank)]
+def draw_tank ( var pos:float3; scale:float; color:float3 )
     draw_cube(pos, scale, color)
 
-[decs(stage="draw")]
-def draw_projectiles ( var proj:Projectile )
-    draw_sphere(proj.pos, .12, proj.color)
+[decs(stage=draw,REQUIRE_NOT=tower)]
+def draw_walls ( var pos:float3; scale:float; color:float3 )
+    draw_cube(pos, scale, color)
 
-[decs(stage="draw")]
-def draw_towers ( pos:float3; color:float3; tower:Tower )
+[decs(stage=draw)]
+def draw_projectiles ( var proj:Projectile )
+    draw_sphere(proj.pos, proj.size, proj.color)
+
+[decs(stage=draw)]
+def draw_turrets ( pos:float3; color:float3; turret:Turret )
     draw_cylinder(pos + float3(0.,0.5,0.), float3(0.25,0.25,0.25), color)
     // build turret
-    let cannon_recoil = 1. - tower.reload / tower.reload_time
-    let rot_a = un_quat_from_unit_vec_ang(float3(0,1,0), tower.dir)
+    let cannon_recoil = 1. - turret.reload / turret.reload_time
+    let rot_a = un_quat_from_unit_vec_ang(float3(0,1,0), turret.dir)
     let m_rota =compose(float4(0),rot_a,float4(1))
     let m_scale = compose(float4(0),float4(0),float4(.125,.3,.125,1.))
     let m_ofsa = compose(float4(0.3+0.2*cannon_recoil,.6,0.,0.),float4(0),float4(1))
@@ -283,6 +388,7 @@ def draw_towers ( pos:float3; color:float3; tower:Tower )
 def update ( dt : float )
     tick_dt = min(dt,1./30.)
     decs_stage("update_controls")
+    decs_stage("update_ai")
     decs_stage("update")
     decs_stage("update_attachments")
 
@@ -321,16 +427,17 @@ var mouse_x = 0.
 var mouse_y = 0.
 var mouse_buttons : uint
 
-[decs(stage="controls_changed")]
-def update_controls(var ctr:Controls)
+[decs(stage=key_controls_changed)]
+def update_key_controls(var ctr:KeyControls)
     ctr.key_up = key_up
     ctr.key_down = key_down
     ctr.key_left = key_left
     ctr.key_right = key_right
+
+[decs(stage=mouse_controls_changed)]
+def update_mouse_controls(var ctr:MouseControls)
     ctr.mouse_pos = float2(mouse_x,mouse_y)
     ctr.mouse_buttons = bitfield(mouse_buttons)
-
-options log
 
 [export]
 def keypressed ( keycode, scancode, action, mods : int )
@@ -340,11 +447,11 @@ def keypressed ( keycode, scancode, action, mods : int )
         key_down  = scancode==336 || scancode==31   // S
         key_left  = scancode==331 || scancode==30   // A
         key_right = scancode==333 || scancode==32   // D
-        decs_stage("controls_changed")
+        decs_stage("key_controls_changed")
         if keycode==81 && scancode==16  // letter Q
-            query <| $ ( eid:EntityId; ctrl:Controls )
+            query <| $ ( eid:EntityId; ctrl:KeyControls )
                 eid |> update_entity <| @ ( eid, cmp )
-                    remove_decs_template`Controls(cmp)
+                    remove_decs_template`KeyControls(cmp)
 
 [export]
 def charpressed ( charcode : uint )
@@ -355,7 +462,7 @@ def mousemoved ( x, y : double )
     // print("[mousemoved] {x} {y}\n")
     mouse_x = float(x)
     mouse_y = float(y)
-    decs_stage("controls_changed")
+    decs_stage("mouse_controls_changed")
 
 [export]
 def mouseenter ( yes : bool )
@@ -367,7 +474,7 @@ def mousebutton ( button, action, mods : int )
         mouse_buttons |= uint(1<<button)
     else
         mouse_buttons &= ~ uint(1<<button)
-    decs_stage("controls_changed")
+    decs_stage("mouse_controls_changed")
 
 [export]
 def mousescroll ( x, y : double )
