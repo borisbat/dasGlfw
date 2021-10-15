@@ -461,7 +461,7 @@ def draw_turrets ( pos:float3; color:float3; turret:Turret )
     draw_cylinder ( m_pos * m_rota * m_ofsa * m_rot * m_scale, color )
 
 [export]
-def update ( dt : float )
+def act ( dt : float )
     tick_dt = min(dt,1./30.)
     decs_stage("update_controls")
     decs_stage("update_ai")
