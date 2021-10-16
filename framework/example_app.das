@@ -15,18 +15,21 @@ require daslib/static_let
 require daslib/random
 require daslib/math_boost
 require math
+require strings
 
 let TANK_VEL = 2.                       // how fast tank drives
 let TANK_SHELL_VELOCITY = 4.            // how fast cannon ball flys
 let TANK_SHELL_COLOR = float3(1,1,0)
 let TANK_TURRET_RELOAD_TIME = 0.3       // how long it takes to reload tank cannon
 let TANK_SHELL_SIZE = 0.12
+let TANK_HEALTH = 3
 
 let TOWER_TURRET_RELOAD_TIME = 1.0      // how long it takes to reload tower cannon
 let TOWER_ROT_SPEED = 25.*PI/180.       // rotation speed of a tower
-let TURRET_SHELL_VELOCITY = 3.          // how fast turret cannon ball flys
-let TURRET_SHELL_COLOR = float3(1,0,1)
-let TURRET_SHELL_SIZE = 0.18
+let TOWER_SHELL_VELOCITY = 3.          // how fast turret cannon ball flys
+let TOWER_SHELL_COLOR = float3(1,0,1)
+let TOWER_SHELL_SIZE = 0.18
+let TOWER_HEALTH = 10
 
 let KABOOM_TIME = 0.2
 let KABOOM_COLOR = float3(1.,.8,.1)
@@ -94,6 +97,7 @@ struct Turret
     rot_speed   : float
     reload      : float
     reload_time : float
+    health      : int
 
 [decs_template]
 struct Projectile
@@ -123,13 +127,18 @@ def make_tank ( pos:float3 )
         cmp |> set ( "color", float3(1.,1.0,0.2))
         cmp |> set ( "tank", true )
         cmp |> set ( "obstacle", Obstacle tank )
+        cmp |> set ( "alive", true )
         apply_decs_template(cmp, [[KeyControls]])
     // tank turret
     create_entity <| @ ( eid, cmp )
         cmp |> set ( "eid", eid )
         cmp |> set ( "pos", float3(0.) )
         cmp |> set ( "color", float3(.5,.5,0.1))
-        apply_decs_template(cmp, [[Turret base=tank_id, reload_time=TANK_TURRET_RELOAD_TIME]])
+        cmp |> set ( "name", "TANK" )
+        apply_decs_template(cmp, [[Turret
+            base=tank_id,
+            reload_time=TANK_TURRET_RELOAD_TIME,
+            health=TANK_HEALTH]])
         apply_decs_template(cmp, [[MouseControls]])
 
 def make_tower ( pos:float3 )
@@ -141,15 +150,18 @@ def make_tower ( pos:float3 )
         cmp |> set ( "color", float3(1.0,0.2,1.0))
         cmp |> set ( "tower", true )
         cmp |> set ( "obstacle", Obstacle tower )
+        cmp |> set ( "alive", true )
     // tower turret
     create_entity <| @ ( eid, cmp )
         cmp |> set ( "eid", eid )
         cmp |> set ( "pos", float3(0.) )
         cmp |> set ( "color", float3(.2,.2,0.5))
+        cmp |> set ( "name", "TOWER")
         apply_decs_template(cmp, [[Turret
             base=tower_id,
             reload_time=TOWER_TURRET_RELOAD_TIME,
-            rot_speed=TOWER_ROT_SPEED
+            rot_speed=TOWER_ROT_SPEED,
+            health=TOWER_HEALTH
         ]])
         cmp |> set ( "ai_turret", true )
 
@@ -195,7 +207,6 @@ def initialize(full_restart:bool)
         commit()
     else
         print("continue with live ecs...\n")
-
 
 [export]
 def shutdown
@@ -255,6 +266,8 @@ var display_h = 0
 
 [decs(stage=update_controls)]
 def update_turret_direction ( pos:float3; var turret:Turret; var ctrl:MouseControls )
+    if turret.health==0
+        return
     // project to 2d screen space
     var pos4d = v_projection * v_view * float4(pos.x, pos.y, pos.z, 1.0)
     pos4d = pos4d / pos4d.w
@@ -283,6 +296,8 @@ def fire_turret ( var turret_reload:float& implicit; turret_reload_time, turret_
 
 [decs(stage=update_controls)]
 def update_turret_cannon ( pos:float3; var turret:Turret; var ctrl:MouseControls )
+    if turret.health==0
+        return
     if ctrl.mouse_buttons.left
         fire_turret(turret.reload,turret.reload_time,turret.dir,pos,
             TANK_SHELL_VELOCITY,TANK_SHELL_COLOR,TANK_SHELL_SIZE,
@@ -299,8 +314,19 @@ def can_see ( src_pos,tgt_pos:float3 )
             return true
     return !found
 
+def set_pulse ( base:EntityId implicit; on:bool )
+    if on
+        base |> update_entity <| @ ( eidd, cmp )
+            if !cmp |> has("pulse")
+                cmp |> set("pulse",0.25)
+    else
+        base |> update_entity <| @ ( eidd, cmp )
+            cmp |> remove("pulse")
+
 [decs(stage=update_ai, REQUIRE=ai_turret)]
 def update_ai ( eid:EntityId; var turret:Turret; pos:float3 )
+    if turret.health == 0
+        return
     var target : float3
     let found = find_query <| $ [REQUIRE(tank)] ( pos:float3 )
         target = pos
@@ -310,12 +336,9 @@ def update_ai ( eid:EntityId; var turret:Turret; pos:float3 )
     let seeTarget = can_see(pos, target)
     if seeTarget
         turret.last_target = target
-        turret.base |> update_entity <| @ ( eidd, cmp )
-            if !cmp |> has("pulse")
-                cmp |> set("pulse",0.25)
+        turret.base |> set_pulse(true)
     else
-        turret.base |> update_entity <| @ ( eidd, cmp )
-            cmp |> remove("pulse")
+        turret.base |> set_pulse(false)
     let dxy = normalize((turret.last_target - pos).xz)
     var angle = atan2(-dxy.y,dxy.x)
     var A = angle - turret.dir
@@ -329,7 +352,7 @@ def update_ai ( eid:EntityId; var turret:Turret; pos:float3 )
         turret.dir_vel = -turret.rot_speed
     if seeTarget && turret.reload==0. && abs(A) < PI/180.
         fire_turret(turret.reload,turret.reload_time,turret.dir,pos,
-            TURRET_SHELL_VELOCITY,TURRET_SHELL_COLOR,TURRET_SHELL_SIZE,
+            TOWER_SHELL_VELOCITY,TOWER_SHELL_COLOR,TOWER_SHELL_SIZE,
                 Obstacle wall | Obstacle tank)
 
 [decs(stage=update)]
@@ -345,8 +368,9 @@ def update_turret_rotation ( var turret:Turret )
         turret.dir -= 2.*PI
 
 [decs(stage=update_controls)]
-def update_tank_controls ( eid:EntityId; var pos,vel:float3&; var ctrl:KeyControls )
-    // drive tank
+def update_tank_controls ( eid:EntityId; var pos,vel:float3&; var ctrl:KeyControls; alive:bool )
+    if !alive
+        return
     if ctrl.key_up
         vel = vel.z!=0. ? float3(0.) : float3(0.,0., TANK_VEL)
         ctrl.key_up = false
@@ -430,6 +454,21 @@ def update_kaboom ( eid:EntityId; var kaboom:Kaboom )
     kaboom.radius += kaboom.radius_vel*tick_dt
     kaboom.time -= tick_dt
     if kaboom.time < 0.
+        var trect = [[AABR
+            min=float2(kaboom.pos.x-kaboom.radius,kaboom.pos.z-kaboom.radius),
+            max=float2(kaboom.pos.x+kaboom.radius,kaboom.pos.z+kaboom.radius)
+        ]]
+        query <| $ (pos:float3; var Turret_health:int&; Turret_base:EntityId)
+            let wrect = [[AABR
+                min=float2(pos.x-0.5,pos.z-0.5),
+                max=float2(pos.x+0.5,pos.z+0.5)
+            ]]
+            if is_intersecting(trect,wrect)
+                Turret_health = max(Turret_health-1,0)
+                if Turret_health==0
+                    Turret_base |> set_pulse(false)
+                    query(Turret_base) <| $ ( var alive:bool& )
+                        alive = false
         delete_entity(eid)
 
 [decs(stage=update_attachments)]
@@ -489,6 +528,15 @@ def act ( dt : float )
     decs_stage("update")
     decs_stage("update_attachments")
 
+def draw_health_overlay
+    var vofs = 30
+    query() <| $ ( name:string; Turret_health:int )
+        let text = "{name} : {Turret_health}"
+        var hw_text <- *font |> create_quads(text)
+        *font |> draw_quads_2d(hw_text, display_w, display_h, 30, vofs)
+        vofs += 30
+        delete hw_text
+
 def draw
     glUseProgram(program)
     draw_ground_plane(float3(0.,-.5,0.), 12.0, float3(.3,.2,0.0))
@@ -498,10 +546,6 @@ def draw
     decs_stage("draw_transparent")
     glDisable(GL_BLEND)
     glUseProgram(0u)
-
-    var hw_text <- *font |> create_quads("Hello, world")
-    *font |> draw_quads_2d(hw_text, display_w, display_h, 30,30)
-    delete hw_text
 
 [export]
 def display ( _display_w, _display_h : int )
@@ -522,6 +566,7 @@ def display ( _display_w, _display_h : int )
     v_projection = perspective_opengl( 45.0f*PI/180., aspect, 0.1f, 200.0f)   // bind projection
     draw()
     glDisable(GL_DEPTH_TEST)
+    draw_health_overlay()
     bind_ffp()
 
 var key_up = false
