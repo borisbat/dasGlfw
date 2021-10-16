@@ -68,6 +68,11 @@ var cube, sphere, cylinder : Fragment
 var ground : Fragment
 var tex : uint
 
+bitfield Obstacle
+    wall
+    tank
+    tower
+
 [decs_template]
 struct KeyControls
     key_up, key_down, key_left, key_right : bool
@@ -94,6 +99,7 @@ struct Projectile
     color      : float3
     size       : float
     projectile : bool
+    targets    : Obstacle
 
 [decs_template]
 struct Kaboom
@@ -102,6 +108,8 @@ struct Kaboom
     radius_vel : float
     time       : float
     time_max   : float
+
+
 
 def make_tank ( pos:float3 )
     // tank
@@ -113,6 +121,7 @@ def make_tank ( pos:float3 )
         cmp |> set ( "pulse", -0.25)
         cmp |> set ( "color", float3(1.,1.0,0.2))
         cmp |> set ( "tank", true )
+        cmp |> set ( "obstacle", Obstacle tank )
         apply_decs_template(cmp, [[KeyControls]])
     // tank turret
     create_entity <| @ ( eid, cmp )
@@ -130,6 +139,7 @@ def make_tower ( pos:float3 )
         cmp |> set ( "scale", 0.45)
         cmp |> set ( "color", float3(1.0,0.2,1.0))
         cmp |> set ( "tower", true )
+        cmp |> set ( "obstacle", Obstacle tower )
     // tower turret
     create_entity <| @ ( eid, cmp )
         cmp |> set ( "eid", eid )
@@ -150,7 +160,7 @@ def make_wall( pos:float3; height : float )
         cmp |> set ( "height", height )
         // cmp |> set ( "pulse", -0.25)
         cmp |> set ( "color", float3(1.,0.2,0.2))
-        cmp |> set ( "obstacle", true )
+        cmp |> set ( "obstacle", Obstacle wall )
 
 [export]
 def initialize(full_restart:bool)
@@ -253,7 +263,7 @@ def update_turret_direction ( pos:float3; var turret:Turret; var ctrl:MouseContr
     turret.dir = angle
 
 def fire_turret ( var turret_reload:float& implicit; turret_reload_time, turret_dir:float; pos:float3;
-        velocity:float; color:float3; size:float )
+        velocity:float; color:float3; size:float; targets:Obstacle )
     if turret_reload != 0.
         return
     turret_reload = turret_reload_time
@@ -265,19 +275,23 @@ def fire_turret ( var turret_reload:float& implicit; turret_reload_time, turret_
             pos = pos + float3(0.,0.625,0.) + vel*0.5,
             vel = vel * velocity,
             color = color,
-            size = size
+            size = size,
+            targets = targets
         ]])
 
 [decs(stage=update_controls)]
 def update_turret_cannon ( pos:float3; var turret:Turret; var ctrl:MouseControls )
     if ctrl.mouse_buttons.left
         fire_turret(turret.reload,turret.reload_time,turret.dir,pos,
-            TANK_SHELL_VELOCITY,TANK_SHELL_COLOR,TANK_SHELL_SIZE)
+            TANK_SHELL_VELOCITY,TANK_SHELL_COLOR,TANK_SHELL_SIZE,
+                Obstacle wall | Obstacle tower)
 
 def can_see ( src_pos,tgt_pos:float3 )
     let dist = distance(tgt_pos, src_pos)
     let ray = [[Ray origin=src_pos, dir=normalize(tgt_pos-src_pos)]]
-    let found = find_query <| $ [REQUIRE(obstacle)] ( pos:float3 )
+    let found = find_query <| $ ( pos:float3; obstacle:Obstacle )
+        if !obstacle.wall
+            return false
         let aabb = [[AABB min=pos-float3(0.5), max=pos+float3(0.5) ]]
         if is_intersecting(ray, aabb, 0.1, dist)
             return true
@@ -313,7 +327,8 @@ def update_ai ( eid:EntityId; var turret:Turret; pos:float3 )
         turret.dir_vel = -turret.rot_speed
     if seeTarget && turret.reload==0. && abs(A) < PI/180.
         fire_turret(turret.reload,turret.reload_time,turret.dir,pos,
-            TURRET_SHELL_VELOCITY,TURRET_SHELL_COLOR,TURRET_SHELL_SIZE)
+            TURRET_SHELL_VELOCITY,TURRET_SHELL_COLOR,TURRET_SHELL_SIZE,
+                Obstacle wall | Obstacle tank)
 
 [decs(stage=update)]
 def update_turret_reload ( var turret:Turret )
@@ -352,7 +367,9 @@ def update_tank ( eid:EntityId; var pos,vel:float3& )
         min=float2(new_pos.x-0.45,new_pos.z-0.45),
         max=float2(new_pos.x+0.45,new_pos.z+0.45)
     ]]
-    let collide = find_query <| $ [REQUIRE(obstacle)] ( pos : float3 )
+    let collide = find_query <| $ ( pos:float3; obstacle:Obstacle )
+        if obstacle.tank
+            return false
         let wrect = [[AABR
             min=float2(pos.x-0.5,pos.z-0.5),
             max=float2(pos.x+0.5,pos.z+0.5)
@@ -384,7 +401,9 @@ def update_projectile ( eid:EntityId; var proj:Projectile )
         min=float2(proj.pos.x-proj.size,proj.pos.z-proj.size),
         max=float2(proj.pos.x+proj.size,proj.pos.z+proj.size)
     ]]
-    let collide = find_query <| $ [REQUIRE(obstacle)] ( pos : float3 )
+    let collide = find_query <| $ ( pos:float3; obstacle:Obstacle )
+        if (proj.targets & obstacle)==bitfield(0)
+            return false
         let wrect = [[AABR
             min=float2(pos.x-0.5,pos.z-0.5),
             max=float2(pos.x+0.5,pos.z+0.5)
