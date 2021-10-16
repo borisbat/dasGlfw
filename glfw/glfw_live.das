@@ -7,6 +7,7 @@ module glfw_live shared public
 
 require glfw/glfw_boost
 require opengl/opengl_boost
+require opengl/opengl_cache
 require daslib/defer
 require daslib/live
 require daslib/safe_addr
@@ -40,6 +41,7 @@ def public glfw_live(title,appf,appd:string)
     glfwSetInputMode(window, int(GLFW_STICKY_KEYS), GLFW_TRUE)  // note sticky keys
     glfwSetWindowPos(window,vidMode.width/2,vidMode.height/4)
     glfwMakeContextCurrent(window)
+    init_opengl_cache()
     setup_events(window)
     go_live(appf, appd)
     while glfwWindowShouldClose(window)==0
@@ -74,6 +76,7 @@ def public glfw_app(title:string)
     glfwSetInputMode(window, int(GLFW_STICKY_KEYS), GLFW_TRUE)    // note sticky keys
     glfwSetWindowPos(window,vidMode.width/4,vidMode.height/4)
     glfwMakeContextCurrent(window)
+    init_opengl_cache()
     setup_events(window)
     go_main()
     invoke_live("initialize")

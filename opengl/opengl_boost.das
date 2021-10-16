@@ -119,6 +119,17 @@ def perspective_opengl(fovy,aspect,zNear,zFar:float)
     Result[3][2] = - ( 2.0 * zFar * zNear) / (zFar - zNear)
     return Result
 
+def ortho_opengl ( left,right,bottom,top,zNear,zFar:float )
+    var Result : float4x4
+    identity(Result)
+    Result[0][0] =  2. / ( right - left )
+    Result[1][1] =  2. / ( top - bottom )
+    Result[2][2] = -2. / ( zFar - zNear )
+    Result[3][0] = - ( right + left ) / ( right - left )
+    Result[3][1] = - ( top + bottom ) / ( top - bottom )
+    Result[3][2] = - ( zFar + zNear ) / ( zFar - zNear )
+    return Result
+
 [expect_any_array(arr)]
 def glBufferData(target:GLenum; arr; usage:GLenum)
     unsafe

@@ -6,6 +6,8 @@ require glfw/glfw_boost
 require glfw/glfw_live
 require opengl/opengl_boost
 require opengl/opengl_gen
+require opengl/opengl_cache
+require opengl/opengl_ttf
 require daslib/defer
 require daslib/safe_addr
 require daslib/decs_boost
@@ -67,6 +69,7 @@ var program : uint
 var cube, sphere, cylinder : Fragment
 var ground : Fragment
 var tex : uint
+var font : opengl_ttf::Font?
 
 bitfield Obstacle
     wall
@@ -108,8 +111,6 @@ struct Kaboom
     radius_vel : float
     time       : float
     time_max   : float
-
-
 
 def make_tank ( pos:float3 )
     // tank
@@ -164,6 +165,8 @@ def make_wall( pos:float3; height : float )
 
 [export]
 def initialize(full_restart:bool)
+    cache_ttf_objects()
+    font = cache_font("c:/windows/fonts/arial.ttf")
     cube <- gen_cube()
     sphere <- gen_sphere(32,16,false)
     ground <- gen_plane(GenDirection xz)
@@ -173,7 +176,7 @@ def initialize(full_restart:bool)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
     glBindTexture(GL_TEXTURE_2D, 0u)
-    program = create_shader_program(PBR_VERTEX_SRC,LIT_FRAGMENT_SRC)
+    program = cache_shader_program(PBR_VERTEX_SRC,LIT_FRAGMENT_SRC)
     if length(decsState.allArchetypes)==0 || full_restart
         print("create all new ecs objects\n")
         restart()
@@ -196,7 +199,6 @@ def initialize(full_restart:bool)
 
 [export]
 def shutdown
-    glDeleteProgram(program)
     glDeleteTextures(1,safe_addr(tex))
     delete cube
     delete sphere
@@ -496,6 +498,10 @@ def draw
     decs_stage("draw_transparent")
     glDisable(GL_BLEND)
     glUseProgram(0u)
+
+    var hw_text <- *font |> create_quads("Hello, world")
+    *font |> draw_quads_2d(hw_text, display_w, display_h, 30,30)
+    delete hw_text
 
 [export]
 def display ( _display_w, _display_h : int )

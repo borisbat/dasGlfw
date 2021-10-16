@@ -102,8 +102,22 @@ var private program : uint
 
 def public create_ttf_objects
     program = create_shader_program(VERTEX_SRC,FRAGMENT_SRC)
+    return program
+
+def public get_ttf_program : tuple<vtx:string;frag:string>
+    return [[auto VERTEX_SRC, FRAGMENT_SRC]]
+
+def public set_ttf_objects(prog:uint)
+    program = prog
+
+def public draw_quads_2d ( font:Font; quads : array<FontVertex>; w,h,x,y:int )
+    let view = translation(float3(x, y, 0))
+    let projection = ortho_opengl(0., float(w), float(h), 0., -1., 1.)
+    let mvp = projection * view
+    font |> draw_quads(quads, mvp)
 
 def public draw_quads ( font:Font; quads : array<FontVertex>; mvp:float4x4 )
+    assert(program!=0u,"missing create_ttf_objects or cache_ttf_objects somewhere in the initialization")
     if empty(quads)
         return
     glEnable(GL_BLEND)
