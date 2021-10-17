@@ -386,8 +386,6 @@ def update_tank_controls ( eid:EntityId; var pos,vel:float3&; var ctrl:KeyContro
 
 [decs(stage=update)]
 def update_tank ( eid:EntityId; var pos,vel:float3& )
-    // clmup and update pos
-    // print("tank at {pos}, vel={vel}, dt={tick_dt}\n")
     var new_pos = pos + vel * tick_dt
     var trect = [[AABR
         min=float2(new_pos.x-0.45,new_pos.z-0.45),
