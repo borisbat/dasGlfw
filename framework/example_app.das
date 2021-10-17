@@ -111,10 +111,13 @@ struct Projectile
 [decs_template]
 struct Kaboom
     pos        : float3
+    vel        : float3
     radius     : float
     radius_vel : float
     time       : float
     time_max   : float
+    color      : float3
+    damage     : bool
 
 def make_tank ( pos:float3 )
     // tank
@@ -216,14 +219,17 @@ def shutdown
     delete ground
     delete cylinder
 
-def draw_cube ( pos:float3; scale:float3; color:float3 )
-    v_model = compose(float4(pos.x,pos.y,pos.z,0.0), float4(0.0), scale.xyzz)
+def draw_cube ( tm:float4x4; color:float3 )
+    v_model = tm
     f_Color.xyz = color
     f_Color.w = 1.
     f_tex.texture2D = tex
     vs_preview_bind_uniform(program)
     ps_preview_bind_uniform(program)
     cube |> draw_fragment()
+
+def draw_cube ( pos:float3; scale:float3; color:float3 )
+    draw_cube ( compose(float4(pos.x,pos.y,pos.z,0.0), float4(0.0), scale.xyzz), color )
 
 def draw_sphere ( pos:float3; scale:float; color:float3; alpha:float=1. )
     v_model = compose(float4(pos.x,pos.y,pos.z,0.0), float4(0.0), float4(scale))
@@ -359,6 +365,31 @@ def update_ai ( eid:EntityId; var turret:Turret; pos:float3 )
 def update_turret_reload ( var turret:Turret )
     turret.reload = max(turret.reload - tick_dt, 0.)
 
+def make_smoke ( pos:float3)
+    let smkt = random_float(seed)*1.5+1.5     // time
+    let smkr = 0.1+random_float(seed)*0.1  // radius
+    let smkrv = 0.2+random_float(seed)*0.1   // radius velocity
+    create_entity <| @ ( eidd, cmp )
+        cmp |> set("eid", eidd)
+        apply_decs_template(cmp, [[Kaboom
+            pos=pos + random_in_unit_disk(seed)*0.3,
+            vel=float3(0.,1.+random_float(seed),0.),
+            radius=smkr,
+            radius_vel=smkrv,
+            time=smkt,
+            time_max=smkt,
+            color=float3(0.2,0.2,0.2),
+            damage=false
+        ]])
+
+[decs(stage=update)]
+def update_turret_smoke ( pos:float3; var turret:Turret )
+    if turret.health == 0
+        let smoke_rate = 5.
+        let smoke_chance = tick_dt * smoke_rate
+        if random_float(seed) < smoke_chance
+            make_smoke(pos)
+
 [decs(stage=update)]
 def update_turret_rotation ( var turret:Turret )
     turret.dir += turret.dir_vel * tick_dt
@@ -442,31 +473,37 @@ def update_projectile ( eid:EntityId; var proj:Projectile )
                 radius=0.,
                 radius_vel=(proj.size*proj.size)*150.,
                 time=KABOOM_TIME,
-                time_max=KABOOM_TIME
+                time_max=KABOOM_TIME,
+                color=KABOOM_COLOR,
+                damage=true
             ]])
+        for t in range(5)
+            make_smoke(proj.pos)
     if collide || proj.pos.x< -12. || proj.pos.x > 12. || proj.pos.z < -12. || proj.pos.z > 12.
         delete_entity(eid)
 
 [decs(stage=update)]
 def update_kaboom ( eid:EntityId; var kaboom:Kaboom )
+    kaboom.pos += kaboom.vel*tick_dt
     kaboom.radius += kaboom.radius_vel*tick_dt
     kaboom.time -= tick_dt
     if kaboom.time < 0.
-        var trect = [[AABR
-            min=float2(kaboom.pos.x-kaboom.radius,kaboom.pos.z-kaboom.radius),
-            max=float2(kaboom.pos.x+kaboom.radius,kaboom.pos.z+kaboom.radius)
-        ]]
-        query <| $ (pos:float3; var Turret_health:int&; Turret_base:EntityId)
-            let wrect = [[AABR
-                min=float2(pos.x-0.5,pos.z-0.5),
-                max=float2(pos.x+0.5,pos.z+0.5)
+        if kaboom.damage
+            var trect = [[AABR
+                min=float2(kaboom.pos.x-kaboom.radius,kaboom.pos.z-kaboom.radius),
+                max=float2(kaboom.pos.x+kaboom.radius,kaboom.pos.z+kaboom.radius)
             ]]
-            if is_intersecting(trect,wrect)
-                Turret_health = max(Turret_health-1,0)
-                if Turret_health==0
-                    Turret_base |> set_pulse(false)
-                    query(Turret_base) <| $ ( var alive:bool& )
-                        alive = false
+            query <| $ (pos:float3; var Turret_health:int&; Turret_base:EntityId)
+                let wrect = [[AABR
+                    min=float2(pos.x-0.5,pos.z-0.5),
+                    max=float2(pos.x+0.5,pos.z+0.5)
+                ]]
+                if is_intersecting(trect,wrect)
+                    Turret_health = max(Turret_health-1,0)
+                    if Turret_health==0
+                        Turret_base |> set_pulse(false)
+                        query(Turret_base) <| $ ( var alive:bool& )
+                            alive = false
         delete_entity(eid)
 
 [decs(stage=update_attachments)]
@@ -487,14 +524,8 @@ def draw_tank ( var pos:float3; scale:float; color:float3 )
 
 [decs(stage=draw)]
 def draw_walls ( var pos:float3; scale:float; height:float; color:float3 )
-    v_model = compose(float4(pos.x,pos.y+height/2.,pos.z,0.0), float4(0.0),
-        float4(scale,scale+height/2.,scale,1.))
-    f_Color.xyz = color
-    f_Color.w = 1.
-    f_tex.texture2D = tex
-    vs_preview_bind_uniform(program)
-    ps_preview_bind_uniform(program)
-    cube |> draw_fragment()
+    draw_cube ( compose(float4(pos.x,pos.y+height/2.,pos.z,0.0), float4(0.0),
+        float4(scale,scale+height/2.,scale,1.)), color )
 
 [decs(stage=draw)]
 def draw_projectiles ( var proj:Projectile )
@@ -502,7 +533,7 @@ def draw_projectiles ( var proj:Projectile )
 
 [decs(stage=draw_transparent)]
 def draw_kaboom ( var kaboom:Kaboom )
-    draw_sphere(kaboom.pos, kaboom.radius, KABOOM_COLOR, kaboom.time/kaboom.time_max)
+    draw_sphere(kaboom.pos, kaboom.radius, kaboom.color, kaboom.time/kaboom.time_max)
 
 [decs(stage=draw)]
 def draw_turrets ( pos:float3; color:float3; turret:Turret )
@@ -541,7 +572,9 @@ def draw
     decs_stage("draw")
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    glDisable(GL_DEPTH_TEST)
     decs_stage("draw_transparent")
+    glEnable(GL_DEPTH_TEST)
     glDisable(GL_BLEND)
     glUseProgram(0u)
 
