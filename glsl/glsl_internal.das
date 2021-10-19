@@ -176,7 +176,7 @@ class GlslExport : AstVisitor
                     let trackFileText = trackFile |> replace("\\","/")
                     *writer |> write("#line {trackLine} \"{trackFileText}\"\n")
 // GLSL TYPE
-    def describe_glsl_type ( t : TypeDeclPtr )
+    def describe_glsl_type_ex ( t : TypeDeclPtr; write_dim:bool )
         let st = build_string() <| $ ( var tw )
             // if t.flags.ref
             //    tw |> write("& ") // inout?
@@ -190,9 +190,12 @@ class GlslExport : AstVisitor
             else
                 self->error ("unsupported type {t.baseType}", t.at)
                 tw |> write("error")
-            for d in t.dim
-                tw |> write("[{d}]")
+            if write_dim
+                for d in t.dim
+                    tw |> write("[{d}]")
         return st
+    def describe_glsl_type ( t : TypeDeclPtr )
+        return self->describe_glsl_type_ex(t,true)
     def glsl_function_name ( fun:FunctionPtr )
         var funname = "{fun.name}"
         if fun.flags.builtIn
@@ -308,6 +311,8 @@ class GlslExport : AstVisitor
     def override preVisitProgram(prog:ProgramPtr) : void
         *writer |> write("#version {version} core\n\n")
         // TODO: only output builtin functions which are necessary
+        *writer |> write("ivec2 range ( int r ) \{ return ivec2(0,r); \}\n")
+        *writer |> write("ivec2 range ( int f, int t ) \{ return ivec2(f,t); \}\n")
         *writer |> write("float saturate ( float a ) \{ return clamp(a,0.,1.); \}\n")
         *writer |> write("vec2 saturate ( vec2 a ) \{ return clamp(a,vec2(0.),vec2(1.)); \}\n")
         *writer |> write("vec3 saturate ( vec3 a ) \{ return clamp(a,vec3(0.),vec3(1.)); \}\n")
@@ -365,10 +370,12 @@ class GlslExport : AstVisitor
         *writer |> write("\t")
         //if decl.annotation.length != 0
         //    *writer |> write("[{describe(decl.annotation)}] ")
-        *writer |> write("{self->describe_glsl_type(decl._type)} {decl.name}")
+        *writer |> write("{self->describe_glsl_type_ex(decl._type,false)} {decl.name}")
         if decl.init != null
             self->error("structure initialization is not supported", decl.init.at)
     def override visitStructureField(str:StructurePtr;decl:FieldDeclaration;last:bool)
+        for d in decl._type.dim
+            *writer |> write("[{d}]")
         *writer |> write(";")
         self->newLine(1)
     def override visitStructure(str:StructurePtr) : StructurePtr

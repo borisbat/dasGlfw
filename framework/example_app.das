@@ -18,7 +18,10 @@ require strings
 
 let LIGHT_DIRECTION = normalize(float3(-1,-4,3))
 
-let SHADOW_COLOR = float3(0.05,0.05,0.05)
+let LIGHT_COLOR = UCOLOR_TO_RGB(0xffffff)
+let LIGHT_BK_COLOR = UCOLOR_TO_RGB(0x202025)
+
+let SHADOW_COLOR = UCOLOR_TO_RGB(0x101010)
 
 let TANK_VEL = 2.                       // how fast tank drives
 let TANK_SHELL_VELOCITY = 4.            // how fast cannon ball flys
@@ -26,25 +29,37 @@ let TANK_SHELL_COLOR = float3(1,1,0)
 let TANK_TURRET_RELOAD_TIME = 0.3       // how long it takes to reload tank cannon
 let TANK_SHELL_SIZE = 0.12
 let TANK_HEALTH = 3
-let TANK_COLOR = float3(1.,1.0,0.2)
+let TANK_COLOR = UCOLOR_TO_RGB(0xffff20)
 
 let TOWER_TURRET_RELOAD_TIME = 1.0      // how long it takes to reload tower cannon
 let TOWER_ROT_SPEED = 25.*PI/180.       // rotation speed of a tower
 let TOWER_SHELL_VELOCITY = 3.          // how fast turret cannon ball flys
-let TOWER_SHELL_COLOR = float3(1,0,1)
+let TOWER_SHELL_COLOR = UCOLOR_TO_RGB(0xff00ff)
 let TOWER_SHELL_SIZE = 0.18
 let TOWER_HEALTH = 10
-let TOWER_COLOR = float3(1.0,0.2,1.0)
+let TOWER_COLOR = UCOLOR_TO_RGB(0xff20ff)
 
-let WALL_COLOR = float3(1.,0.2,0.2)
+let WALL_COLOR = UCOLOR_TO_RGB(0xff2020)
+
+let BUILDING_COLOR = UCOLOR_TO_RGB(0xDABB98)
 
 let KABOOM_TIME = 0.2
-let KABOOM_COLOR = float3(1.,.8,.1)
+let KABOOM_COLOR = UCOLOR_TO_RGB(0xFF4800)
 
 let PULSE_MIN_SCALE = 0.85
 let PULSE_MAX_SCALE = 0.95
 
 var seed = random_seed(13)
+
+let MAX_POINT_LIGHTS = 8
+
+struct PointLight
+    xyz_r : float4
+    color : float4
+
+struct PointLights
+    lights  : PointLight[8]
+    nLights : int
 
 var [[in, location=0]] v_position : float3
 var [[in, location=1]] v_normal   : float3
@@ -58,8 +73,9 @@ var [[inout]] f_position : float3
 var [[uniform, binding=0]] f_tex : sampler2D
 var [[uniform]] f_Color : float4
 var [[out]] f_outputColor : float4
+var [[ssbo, binding=1]] c_lights : PointLights
 
-[vertex_program(name="PBR_VERTEX_SRC",version=330)]
+[vertex_program(name="PBR_VERTEX_SRC",version=430)]
 def vs_preview
     f_texcoord = v_texcoord
     f_normal = normalize ( float3x3(v_model) * v_normal )
@@ -67,14 +83,19 @@ def vs_preview
     f_position = tpos.xyz
     gl_Position = v_projection * v_view * tpos
 
-[fragment_program(name="LIT_FRAGMENT_SRC",version=330)]
+[fragment_program(name="LIT_FRAGMENT_SRC",version=430)]
 def ps_preview
     let camera_dir = normalize(f_position)
     let normal = normalize(f_normal)
-    // blinn-phong
-    let k = -dot(LIGHT_DIRECTION,normal)
-    let diffuse = float3(saturate(k))
-    f_outputColor.xyz = f_Color.xyz *  diffuse
+    let k = saturate(-dot(LIGHT_DIRECTION,normal))
+    let k2 = saturate(dot(LIGHT_DIRECTION,normal))
+    var diffuse = float3(0)
+    for i in range(c_lights.nLights)
+        let xyz_r = c_lights.lights[i].xyz_r
+        let dist = distance(xyz_r.xyz,f_position)
+        let attn = 1. - saturate(dist/xyz_r.w)
+        diffuse += attn * c_lights.lights[i].color.xyz
+    f_outputColor.xyz = f_Color.xyz*(LIGHT_COLOR*k + LIGHT_BK_COLOR*k2 + diffuse)
     f_outputColor.w = f_Color.w
 
 [fragment_program(name="SHADOW_FRAGMENT_SRC",version=330)]
@@ -83,6 +104,7 @@ def ps_shadow_preview
     f_outputColor.w = f_Color.w
 
 var program, shadow_program : uint
+var ssbo : uint
 var cube, sphere, cylinder : Fragment
 var ground : Fragment
 var tex : uint
@@ -146,6 +168,7 @@ struct Kaboom
     time_max   : float
     color      : float3
     damage     : bool
+    light_f    : float
 
 def make_tank ( pos:float3 )
     // tank
@@ -207,7 +230,6 @@ def make_tower ( pos:float3 )
 def make_wall( pos:float3; height : float )
     create_entity <| @ ( eid, cmp )
         // cmp |> set ( "pulse", -0.25)
-        cmp |> set ( "color", float3(1.,0.2,0.2))
         apply_decs_template(cmp, [[Object
             eid=eid,
             pos=pos,
@@ -217,6 +239,54 @@ def make_wall( pos:float3; height : float )
             obstacle=Obstacle wall,
             prim=Primitive cube
         ]])
+
+def make_building_congregation ( n:int; center:float3; radius:float; minDim, maxDim : float3 )
+    for t in range(n)
+        var pos = random_in_unit_disk(seed).xzy*radius + center
+        let dim = minDim + (maxDim-minDim)*random_float4(seed).xyz
+        let color = BUILDING_COLOR * ( random_float(seed)*0.4+0.4 )
+        create_entity <| @ ( eid, cmp )
+            apply_decs_template(cmp, [[Object
+                eid=eid,
+                pos=pos,
+                dim=dim,
+                scale=1.0,
+                color=color,
+                obstacle=Obstacle wall,
+                prim=Primitive cube
+            ]])
+
+def make_level_1
+    // walls
+    for x in range(-10,10)
+        for z in range(-10,10)
+            if x==-10 || x==9 || z==-10 || z==9
+                make_wall(float3(x,0,z),2.)
+            elif random_float(seed)<0.1
+                make_wall(float3(x,0,z),1.4 + random_float(seed)*1.4)
+    // tank
+    make_tank(float3(-8, 0, -8))
+    // tower
+    make_tower(float3(7, 0, 7))
+    make_tower(float3(0, 0,-6))
+    commit()
+
+def make_level_2
+    // walls
+    for x in range(-10,10)
+        for z in range(-10,10)
+            if x==-10 || x==9 || z==-10 || z==9
+                make_wall(float3(x,0,z),2.)
+    make_building_congregation(
+        12,
+        float3(0),
+        3.5,
+        float3(1,1,1),
+        float3(2,3,2)
+    )
+    // tank
+    make_tank(float3(-8, 0, -8))
+    commit()
 
 [export]
 def initialize(full_restart:bool)
@@ -233,22 +303,12 @@ def initialize(full_restart:bool)
     glBindTexture(GL_TEXTURE_2D, 0u)
     program = cache_shader_program(PBR_VERTEX_SRC,LIT_FRAGMENT_SRC)
     shadow_program = cache_shader_program(PBR_VERTEX_SRC,SHADOW_FRAGMENT_SRC)
+    ssbo = create_ssbo(c_lights)
     if length(decsState.allArchetypes)==0 || full_restart
         print("create all new ecs objects\n")
         restart()
-        // walls
-        for x in range(-10,10)
-            for z in range(-10,10)
-                if x==-10 || x==9 || z==-10 || z==9
-                    make_wall(float3(x,0,z),2.)
-                elif random_float(seed)<0.1
-                    make_wall(float3(x,0,z),1.4 + random_float(seed)*1.4)
-        // tank
-        make_tank(float3(-8, 0, -8))
-        // tower
-        make_tower(float3(7, 0, 7))
-        make_tower(float3(0, 0,-6))
-        commit()
+        // make_level_1()
+        make_level_2()
     else
         print("continue with live ecs...\n")
 
@@ -444,16 +504,16 @@ def update_tank_controls ( eid:EntityId; var pos,vel:float3&; var ctrl:KeyContro
     if !alive
         return
     if ctrl.key_up
-        vel = vel.z!=0. ? float3(0.) : float3(0.,0.,-TANK_VEL)
+        vel = vel.z>0. ? float3(0.) : float3(0.,0.,-TANK_VEL)
         ctrl.key_up = false
     if ctrl.key_down
-        vel = vel.z!=0. ? float3(0.) : float3(0.,0.,+TANK_VEL)
+        vel = vel.z<0. ? float3(0.) : float3(0.,0.,+TANK_VEL)
         ctrl.key_down = false
     if ctrl.key_left
-        vel = vel.x!=0. ? float3(0.) : float3(-TANK_VEL,0.,0.)
+        vel = vel.x>0. ? float3(0.) : float3(-TANK_VEL,0.,0.)
         ctrl.key_left = false
     if ctrl.key_right
-        vel = vel.x!=0. ? float3(0.) : float3( TANK_VEL,0.,0.)
+        vel = vel.x<0. ? float3(0.) : float3( TANK_VEL,0.,0.)
         ctrl.key_right = false
 
 [decs(stage=update)]
@@ -514,7 +574,8 @@ def update_projectile ( eid:EntityId; var proj:Projectile )
                 time=KABOOM_TIME,
                 time_max=KABOOM_TIME,
                 color=KABOOM_COLOR,
-                damage=true
+                damage=true,
+                light_f=6.
             ]])
         for t in range(5)
             make_smoke(proj.pos)
@@ -576,6 +637,17 @@ def draw_projectiles ( var proj:Projectile )
 def draw_kaboom ( var kaboom:Kaboom )
     draw_sphere(kaboom.pos, kaboom.radius, kaboom.color, kaboom.time/kaboom.time_max)
 
+[decs(stage=update_lights)]
+def update_kaboom_light ( var kaboom:Kaboom )
+    if c_lights.nLights<MAX_POINT_LIGHTS && kaboom.light_f>0.
+        c_lights.lights[0].xyz_r = float4(kaboom.pos.x, kaboom.pos.y, kaboom.pos.z, kaboom.radius*kaboom.light_f)
+        c_lights.lights[0].color = float4(kaboom.color.x, kaboom.color.y, kaboom.color.z, 1.)
+        c_lights.nLights ++
+
+def update_lights
+    c_lights.nLights = 0
+    decs_stage("update_lights")
+
 [decs(stage=draw)]
 def draw_turrets ( pos:float3; color:float3; turret:Turret )
     draw_cylinder(pos + float3(0.,0.5,0.), float3(0.25,0.25,0.25), color)
@@ -609,16 +681,26 @@ def draw_health_overlay
 
 def draw_ground_plane
     glUseProgram(program)
+    glDisable(GL_CULL_FACE)
+    glDisable(GL_DEPTH_TEST)
+    glDepthMask(false)
+    write_ssbo(ssbo, c_lights)
     draw_ground_plane(float3(0.,-.5,0.), 12.0, float3(.3,.2,0.0))
+    glEnable(GL_CULL_FACE)
+    glEnable(GL_DEPTH_TEST)
+    glDepthMask(true)
     glUseProgram(0u)
 
 def draw
     glUseProgram(program)
+    write_ssbo(ssbo, c_lights)
     decs_stage("draw")
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    glDepthMask(false)
     glDisable(GL_DEPTH_TEST)
     decs_stage("draw_transparent")
+    glDepthMask(true)
     glEnable(GL_DEPTH_TEST)
     glDisable(GL_BLEND)
     glUseProgram(0u)
@@ -644,7 +726,7 @@ def display ( _display_w, _display_h : int )
     glCullFace(GL_BACK)
     let aspect = display_h!=0 ? float(display_w)/float(display_h) : 1.
     let tm_camera = look_at_rh(
-        float3(0.,20.,20.),  // camera
+        float3(0.,25.,25.),  // camera
         float3(0.,0.,0.),
         float3(0.,1.,0.)
     )
@@ -653,6 +735,7 @@ def display ( _display_w, _display_h : int )
         plane_from_point_normal(float3(0.),float3(0.,1.,0.))
     )
     v_projection = perspective_rh_opengl( 45.0f*PI/180., aspect, 0.1f, 200.0f)   // bind projection
+    update_lights()
     v_view = tm_camera
     draw_ground_plane()
     v_view = tm_camera * tm_shadow
