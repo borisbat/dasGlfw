@@ -14,10 +14,9 @@ require daslib/decs_boost
 require daslib/static_let
 require daslib/random
 require daslib/math_boost
-require math
 require strings
 
-let LIGHT_DIRECTION = normalize(float3(-1,-4,-3))
+let LIGHT_DIRECTION = normalize(float3(-1,-4,3))
 
 let SHADOW_COLOR = float3(0.05,0.05,0.05)
 
@@ -322,7 +321,7 @@ def update_turret_direction ( pos:float3; var turret:Turret; var ctrl:MouseContr
     let pos2d = (pos4d.xy * float2(0.5,-0.5) + float2(0.5)) * float2(display_w,display_h)
     // get rotation angle out of relative mouse position
     let dxy = ctrl.mouse_pos - pos2d
-    let angle = atan2(dxy.y,dxy.x)
+    let angle = atan2(-dxy.y,dxy.x)
     turret.dir = angle
 
 def fire_turret ( var turret_reload:float& implicit; turret_reload_time, turret_dir:float; pos:float3;
@@ -445,10 +444,10 @@ def update_tank_controls ( eid:EntityId; var pos,vel:float3&; var ctrl:KeyContro
     if !alive
         return
     if ctrl.key_up
-        vel = vel.z!=0. ? float3(0.) : float3(0.,0., TANK_VEL)
+        vel = vel.z!=0. ? float3(0.) : float3(0.,0.,-TANK_VEL)
         ctrl.key_up = false
     if ctrl.key_down
-        vel = vel.z!=0. ? float3(0.) : float3(0.,0.,-TANK_VEL)
+        vel = vel.z!=0. ? float3(0.) : float3(0.,0.,+TANK_VEL)
         ctrl.key_down = false
     if ctrl.key_left
         vel = vel.x!=0. ? float3(0.) : float3(-TANK_VEL,0.,0.)
@@ -642,10 +641,10 @@ def display ( _display_w, _display_h : int )
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LEQUAL)
     glEnable(GL_CULL_FACE)
-    glCullFace(GL_FRONT)
+    glCullFace(GL_BACK)
     let aspect = display_h!=0 ? float(display_w)/float(display_h) : 1.
-    let tm_camera = look_at(
-        float3(0.,25.,-25.),  // camera
+    let tm_camera = look_at_rh(
+        float3(0.,20.,20.),  // camera
         float3(0.,0.,0.),
         float3(0.,1.,0.)
     )
@@ -653,13 +652,14 @@ def display ( _display_w, _display_h : int )
         float4(LIGHT_DIRECTION.x, LIGHT_DIRECTION.y, LIGHT_DIRECTION.z, 0.),
         plane_from_point_normal(float3(0.),float3(0.,1.,0.))
     )
-    v_projection = perspective_rh( 45.0f*PI/180., aspect, 0.1f, 200.0f)   // bind projection
+    v_projection = perspective_rh_opengl( 45.0f*PI/180., aspect, 0.1f, 200.0f)   // bind projection
     v_view = tm_camera
     draw_ground_plane()
     v_view = tm_camera * tm_shadow
     draw_shadow()
     v_view = tm_camera
     draw()
+    glDisable(GL_CULL_FACE)
     draw_health_overlay()
     bind_ffp()
 
