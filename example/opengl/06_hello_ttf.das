@@ -3,6 +3,7 @@ require opengl/opengl_boost
 require opengl/opengl_ttf
 require daslib/defer
 require math
+require daslib/math_boost
 
 var font : Font
 
@@ -40,7 +41,7 @@ def main
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
         // model-view-projection setup
         let view = translation(float3(0.0f, 0.0f, -4.0f))
-        let projection = perspective_opengl( 45.0f*PI/180., aspect, 0.1f, 50.0f)
+        let projection = perspective_rh( 45.0f*PI/180., aspect, 0.1f, 50.0f)
         let mvp = projection * view * model
         font |> draw_quads(hw_text, mvp)
         // swap buffers

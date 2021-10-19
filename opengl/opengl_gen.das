@@ -185,12 +185,12 @@ def gen_cylinder(plt:GenDirection; sectorCount:int)
         let k2 = i + sectorCount + 2
         // triangle 1
         frag.indices |> push(k1)
-        frag.indices |> push(k1+1)
         frag.indices |> push(k2)
+        frag.indices |> push(k1+1)
         // triangle 2
         frag.indices |> push(k2)
-        frag.indices |> push(k1+1)
         frag.indices |> push(k2+1)
+        frag.indices |> push(k1+1)
     // top
     let tbOfs = (sectorCount + 2) * 2
     let kc1 = sectorCount + 1 + tbOfs

@@ -6,6 +6,7 @@ module opengl_ttf shared private
 
 require opengl/opengl_boost
 require daslib/safe_addr
+require daslib/math_boost
 
 require stbtruetype
 
@@ -112,7 +113,7 @@ def public set_ttf_objects(prog:uint)
 
 def public draw_quads_2d ( font:Font; quads : array<FontVertex>; w,h,x,y:int )
     let view = translation(float3(x, y, 0))
-    let projection = ortho_opengl(0., float(w), float(h), 0., -1., 1.)
+    let projection = ortho_rh(0., float(w), float(h), 0., -1., 1.)
     let mvp = projection * view
     font |> draw_quads(quads, mvp)
 

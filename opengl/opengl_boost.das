@@ -21,19 +21,6 @@ require math
 typedef
     GLenum = uint
 
-def look_at ( cameraPosition, cameraTarget, cameraUpVector : float3 )
-    let zaxis = -normalize(cameraTarget - cameraPosition)
-    let xaxis = normalize(cross(zaxis,cameraUpVector))
-    let yaxis = cross(xaxis, zaxis)
-    var tm : float4x4
-    tm[0] = float4(xaxis.x,yaxis.x,zaxis.x,0.)
-    tm[1] = float4(xaxis.y,yaxis.y,zaxis.y,0.)
-    tm[2] = float4(xaxis.z,yaxis.z,zaxis.z,0.)
-    tm[3] = float4( -dot(xaxis, cameraPosition),
-                    -dot(yaxis, cameraPosition),
-                    -dot(zaxis, cameraPosition),1.)
-    return tm
-
 def glTexParameteri ( target : uint; pname : uint; param : uint )
     glTexParameteri(target,pname,int(param))
 
@@ -107,28 +94,6 @@ def glUniformAny ( location:int; value:float4x4 )
 def glUniformMatrix4fv ( location:int; value:float4x4 )
     unsafe
         glUniformMatrix4fv(location, 1, false, addr(value[0][0]))
-
-def perspective_opengl(fovy,aspect,zNear,zFar:float)
-	let tanHalfFovy = tan(fovy / 2.0);
-    var Result : float4x4
-    identity(Result)
-    Result[0][0] = 1.0 / (aspect * tanHalfFovy)
-    Result[1][1] = 1.0 / (tanHalfFovy)
-    Result[2][2] = - (zFar + zNear) / (zFar - zNear)
-    Result[2][3] = - 1.0
-    Result[3][2] = - ( 2.0 * zFar * zNear) / (zFar - zNear)
-    return Result
-
-def ortho_opengl ( left,right,bottom,top,zNear,zFar:float )
-    var Result : float4x4
-    identity(Result)
-    Result[0][0] =  2. / ( right - left )
-    Result[1][1] =  2. / ( top - bottom )
-    Result[2][2] = -2. / ( zFar - zNear )
-    Result[3][0] = - ( right + left ) / ( right - left )
-    Result[3][1] = - ( top + bottom ) / ( top - bottom )
-    Result[3][2] = - ( zFar + zNear ) / ( zFar - zNear )
-    return Result
 
 [expect_any_array(arr)]
 def glBufferData(target:GLenum; arr; usage:GLenum)

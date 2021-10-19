@@ -17,12 +17,17 @@ require daslib/math_boost
 require math
 require strings
 
+let LIGHT_DIRECTION = normalize(float3(-1,-4,-3))
+
+let SHADOW_COLOR = float3(0.05,0.05,0.05)
+
 let TANK_VEL = 2.                       // how fast tank drives
 let TANK_SHELL_VELOCITY = 4.            // how fast cannon ball flys
 let TANK_SHELL_COLOR = float3(1,1,0)
 let TANK_TURRET_RELOAD_TIME = 0.3       // how long it takes to reload tank cannon
 let TANK_SHELL_SIZE = 0.12
 let TANK_HEALTH = 3
+let TANK_COLOR = float3(1.,1.0,0.2)
 
 let TOWER_TURRET_RELOAD_TIME = 1.0      // how long it takes to reload tower cannon
 let TOWER_ROT_SPEED = 25.*PI/180.       // rotation speed of a tower
@@ -30,9 +35,15 @@ let TOWER_SHELL_VELOCITY = 3.          // how fast turret cannon ball flys
 let TOWER_SHELL_COLOR = float3(1,0,1)
 let TOWER_SHELL_SIZE = 0.18
 let TOWER_HEALTH = 10
+let TOWER_COLOR = float3(1.0,0.2,1.0)
+
+let WALL_COLOR = float3(1.,0.2,0.2)
 
 let KABOOM_TIME = 0.2
 let KABOOM_COLOR = float3(1.,.8,.1)
+
+let PULSE_MIN_SCALE = 0.85
+let PULSE_MAX_SCALE = 0.95
 
 var seed = random_seed(13)
 
@@ -59,16 +70,20 @@ def vs_preview
 
 [fragment_program(name="LIT_FRAGMENT_SRC",version=330)]
 def ps_preview
-    let light_dir = normalize(float3(-1,-4,-3))
     let camera_dir = normalize(f_position)
     let normal = normalize(f_normal)
     // blinn-phong
-    let k = -dot(light_dir,normal)
+    let k = -dot(LIGHT_DIRECTION,normal)
     let diffuse = float3(saturate(k))
     f_outputColor.xyz = f_Color.xyz *  diffuse
     f_outputColor.w = f_Color.w
 
-var program : uint
+[fragment_program(name="SHADOW_FRAGMENT_SRC",version=330)]
+def ps_shadow_preview
+    f_outputColor.xyz = SHADOW_COLOR
+    f_outputColor.w = f_Color.w
+
+var program, shadow_program : uint
 var cube, sphere, cylinder : Fragment
 var ground : Fragment
 var tex : uint
@@ -79,6 +94,10 @@ bitfield Obstacle
     tank
     tower
 
+enum Primitive
+    cube
+    cylinder
+
 [decs_template]
 struct KeyControls
     key_up, key_down, key_left, key_right : bool
@@ -87,6 +106,16 @@ struct KeyControls
 struct MouseControls
     mouse_pos     : float2
     mouse_buttons : bitfield<left;center;right>
+
+[decs_template(prefix)]
+struct Object
+    eid      : EntityId
+    pos      : float3
+    dim      : float3
+    scale    : float
+    color    : float3
+    obstacle : Obstacle
+    prim     : Primitive
 
 [decs_template]
 struct Turret
@@ -122,15 +151,19 @@ struct Kaboom
 def make_tank ( pos:float3 )
     // tank
     var tank_id = create_entity <| @ ( eid, cmp )
-        cmp |> set ( "eid", eid )
-        cmp |> set ( "pos", pos)
         cmp |> set ( "vel", float3(0.))
-        cmp |> set ( "scale", 0.45)
         cmp |> set ( "pulse", -0.25)
-        cmp |> set ( "color", float3(1.,1.0,0.2))
         cmp |> set ( "tank", true )
-        cmp |> set ( "obstacle", Obstacle tank )
         cmp |> set ( "alive", true )
+        apply_decs_template(cmp, [[Object
+            eid=eid,
+            pos=pos,
+            dim=float3(1.),
+            scale=0.95,
+            color=TANK_COLOR,
+            obstacle=Obstacle tank,
+            prim=Primitive cube
+        ]])
         apply_decs_template(cmp, [[KeyControls]])
     // tank turret
     create_entity <| @ ( eid, cmp )
@@ -147,13 +180,17 @@ def make_tank ( pos:float3 )
 def make_tower ( pos:float3 )
     // tower
     var tower_id = create_entity <| @ ( eid, cmp )
-        cmp |> set ( "eid", eid )
-        cmp |> set ( "pos", pos)
-        cmp |> set ( "scale", 0.45)
-        cmp |> set ( "color", float3(1.0,0.2,1.0))
         cmp |> set ( "tower", true )
-        cmp |> set ( "obstacle", Obstacle tower )
         cmp |> set ( "alive", true )
+        apply_decs_template(cmp, [[Object
+            eid=eid,
+            pos=pos,
+            dim=float3(1.),
+            scale=0.95,
+            color=TOWER_COLOR,
+            obstacle=Obstacle tower,
+            prim=Primitive cylinder
+        ]])
     // tower turret
     create_entity <| @ ( eid, cmp )
         cmp |> set ( "eid", eid )
@@ -170,13 +207,17 @@ def make_tower ( pos:float3 )
 
 def make_wall( pos:float3; height : float )
     create_entity <| @ ( eid, cmp )
-        cmp |> set ( "eid", eid )
-        cmp |> set ( "pos", pos)
-        cmp |> set ( "scale", 0.45)
-        cmp |> set ( "height", height )
         // cmp |> set ( "pulse", -0.25)
         cmp |> set ( "color", float3(1.,0.2,0.2))
-        cmp |> set ( "obstacle", Obstacle wall )
+        apply_decs_template(cmp, [[Object
+            eid=eid,
+            pos=pos,
+            dim=float3(1.,height,1.),
+            scale=0.95,
+            color=WALL_COLOR,
+            obstacle=Obstacle wall,
+            prim=Primitive cube
+        ]])
 
 [export]
 def initialize(full_restart:bool)
@@ -192,6 +233,7 @@ def initialize(full_restart:bool)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
     glBindTexture(GL_TEXTURE_2D, 0u)
     program = cache_shader_program(PBR_VERTEX_SRC,LIT_FRAGMENT_SRC)
+    shadow_program = cache_shader_program(PBR_VERTEX_SRC,SHADOW_FRAGMENT_SRC)
     if length(decsState.allArchetypes)==0 || full_restart
         print("create all new ecs objects\n")
         restart()
@@ -199,9 +241,9 @@ def initialize(full_restart:bool)
         for x in range(-10,10)
             for z in range(-10,10)
                 if x==-10 || x==9 || z==-10 || z==9
-                    make_wall(float3(x,0,z),1.)
+                    make_wall(float3(x,0,z),2.)
                 elif random_float(seed)<0.1
-                    make_wall(float3(x,0,z),0.7 + random_float(seed)*0.7)
+                    make_wall(float3(x,0,z),1.4 + random_float(seed)*1.4)
         // tank
         make_tank(float3(-8, 0, -8))
         // tower
@@ -312,10 +354,10 @@ def update_turret_cannon ( pos:float3; var turret:Turret; var ctrl:MouseControls
 def can_see ( src_pos,tgt_pos:float3 )
     let dist = distance(tgt_pos, src_pos)
     let ray = [[Ray origin=src_pos, dir=normalize(tgt_pos-src_pos)]]
-    let found = find_query <| $ ( pos:float3; obstacle:Obstacle )
+    let found = find_query <| $ ( pos,dim:float3; obstacle:Obstacle )
         if !obstacle.wall
             return false
-        let aabb = [[AABB min=pos-float3(0.5), max=pos+float3(0.5) ]]
+        let aabb = [[AABB min=pos-dim*0.5, max=pos+dim*0.5 ]]
         if is_intersecting(ray, aabb, 0.1, dist)
             return true
     return !found
@@ -416,18 +458,18 @@ def update_tank_controls ( eid:EntityId; var pos,vel:float3&; var ctrl:KeyContro
         ctrl.key_right = false
 
 [decs(stage=update)]
-def update_tank ( eid:EntityId; var pos,vel:float3& )
+def update_tank ( eid:EntityId; var pos,dim,vel:float3& )
     var new_pos = pos + vel * tick_dt
     var trect = [[AABR
-        min=float2(new_pos.x-0.45,new_pos.z-0.45),
-        max=float2(new_pos.x+0.45,new_pos.z+0.45)
+        min=new_pos.xz-dim.xz*0.45,
+        max=new_pos.xz+dim.xz*0.45
     ]]
-    let collide = find_query <| $ ( pos:float3; obstacle:Obstacle )
+    let collide = find_query <| $ ( pos,dim:float3; obstacle:Obstacle )
         if obstacle.tank
             return false
         let wrect = [[AABR
-            min=float2(pos.x-0.5,pos.z-0.5),
-            max=float2(pos.x+0.5,pos.z+0.5)
+            min=pos.xz-dim.xz*0.5,
+            max=pos.xz+dim.xz*0.5
         ]]
         if is_intersecting(trect,wrect)
             return true
@@ -439,14 +481,12 @@ def update_tank ( eid:EntityId; var pos,vel:float3& )
 
 [decs(stage=update)]
 def update_pulses ( var scale,pulse:float& )
-    let MIN_SCALE = 0.40
-    let MAX_SCALE = 0.45
     scale += pulse * tick_dt
-    if scale < MIN_SCALE
-        scale = MIN_SCALE + (MIN_SCALE - scale)
+    if scale < PULSE_MIN_SCALE
+        scale = PULSE_MIN_SCALE + (PULSE_MIN_SCALE - scale)
         pulse = -pulse
-    elif scale > MAX_SCALE
-        scale = MAX_SCALE - (scale - MAX_SCALE)
+    elif scale > PULSE_MAX_SCALE
+        scale = PULSE_MAX_SCALE - (scale - PULSE_MAX_SCALE)
         pulse = -pulse
 
 [decs(stage=update)]
@@ -509,23 +549,25 @@ def update_kaboom ( eid:EntityId; var kaboom:Kaboom )
 [decs(stage=update_attachments)]
 def update_turrets ( eid:EntityId; var pos:float3&; turret:Turret )
     var turret_pos & = pos
-    let upd = query(turret.base) <| $ ( pos : float3 )
-        turret_pos = pos
+    let upd = query(turret.base) <| $ ( pos, dim : float3 )
+        turret_pos = pos + float3(0., dim.y*0.5, 0.)
     if !upd
         delete_entity(eid)
 
-[decs(stage=draw,REQUIRE=tower)]
-def draw_towers ( var pos:float3; color:float3; scale:float )
-    draw_cylinder(pos, scale, color)
-
-[decs(stage=draw,REQUIRE=tank)]
-def draw_tank ( var pos:float3; scale:float; color:float3 )
-    draw_cube(pos, float3(scale), color)
-
 [decs(stage=draw)]
-def draw_walls ( var pos:float3; scale:float; height:float; color:float3 )
-    draw_cube ( compose(float4(pos.x,pos.y+height/2.,pos.z,0.0), float4(0.0),
-        float4(scale,scale+height/2.,scale,1.)), color )
+def draw_objects ( obj:Object )
+    let ofs = obj.pos + float3(0., obj.dim.y * 0.5, 0.)  // we put it on the ground place
+    let scl = obj.dim * (0.5 * obj.scale)
+    v_model = compose(ofs.xyzz, float4(0), scl.xyzz)
+    f_Color.xyz = color
+    f_Color.w = 1.
+    f_tex.texture2D = tex
+    vs_preview_bind_uniform(program)
+    ps_preview_bind_uniform(program)
+    if obj.prim==Primitive cube
+        cube |> draw_fragment()
+    elif obj.prim==Primitive cylinder
+        cylinder |> draw_fragment()
 
 [decs(stage=draw)]
 def draw_projectiles ( var proj:Projectile )
@@ -566,9 +608,13 @@ def draw_health_overlay
         vofs += 30
         delete hw_text
 
-def draw
+def draw_ground_plane
     glUseProgram(program)
     draw_ground_plane(float3(0.,-.5,0.), 12.0, float3(.3,.2,0.0))
+    glUseProgram(0u)
+
+def draw
+    glUseProgram(program)
     decs_stage("draw")
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
@@ -576,6 +622,13 @@ def draw
     decs_stage("draw_transparent")
     glEnable(GL_DEPTH_TEST)
     glDisable(GL_BLEND)
+    glUseProgram(0u)
+
+def draw_shadow
+    glUseProgram(shadow_program)
+    glDisable(GL_DEPTH_TEST)
+    decs_stage("draw")
+    glEnable(GL_DEPTH_TEST)
     glUseProgram(0u)
 
 [export]
@@ -588,15 +641,25 @@ def display ( _display_w, _display_h : int )
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LEQUAL)
+    glEnable(GL_CULL_FACE)
+    glCullFace(GL_FRONT)
     let aspect = display_h!=0 ? float(display_w)/float(display_h) : 1.
-    v_view = look_at(
+    let tm_camera = look_at(
         float3(0.,25.,-25.),  // camera
         float3(0.,0.,0.),
         float3(0.,1.,0.)
     )
-    v_projection = perspective_opengl( 45.0f*PI/180., aspect, 0.1f, 200.0f)   // bind projection
+    let tm_shadow = planar_shadow(
+        float4(LIGHT_DIRECTION.x, LIGHT_DIRECTION.y, LIGHT_DIRECTION.z, 0.),
+        plane_from_point_normal(float3(0.),float3(0.,1.,0.))
+    )
+    v_projection = perspective_rh( 45.0f*PI/180., aspect, 0.1f, 200.0f)   // bind projection
+    v_view = tm_camera
+    draw_ground_plane()
+    v_view = tm_camera * tm_shadow
+    draw_shadow()
+    v_view = tm_camera
     draw()
-    glDisable(GL_DEPTH_TEST)
     draw_health_overlay()
     bind_ffp()
 

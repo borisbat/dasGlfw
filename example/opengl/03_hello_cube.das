@@ -4,6 +4,7 @@ require daslib/defer
 require math
 
 require daslib/safe_addr
+require daslib/math_boost
 
 var [[in, location=0]] v_position : float3
 var [[in, location=1]] v_color : float3
@@ -122,7 +123,7 @@ def main
             glfwSetTime(t - 1lf)
         let rot = un_quat_from_unit_vec_ang(normalize(float3(1.,1.,0.)), float(t)*PI*2.)
         v_model = compose(float4(0.0), rot, float4(1.0))        // bind model
-        v_projection = perspective_opengl( 45.0f*PI/180., aspect, 0.1f, 50.0f)   // bind projection
+        v_projection = perspective_rh( 45.0f*PI/180., aspect, 0.1f, 50.0f)   // bind projection
         glUseProgram(program)
         f_tex.texture2D = texture
         vs_main_bind_uniform(program)
