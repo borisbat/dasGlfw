@@ -49,6 +49,11 @@ let KABOOM_COLOR = UCOLOR_TO_RGB(0xFF4800)
 let PULSE_MIN_SCALE = 0.85
 let PULSE_MAX_SCALE = 0.95
 
+let FADE_MIN_SCALE = 0.4
+let FADE_MAX_SCALE = 0.6
+let FADE_TIME = 4.
+let FADE_VEL = 1. / FADE_TIME
+
 var seed = random_seed(13)
 
 let MAX_POINT_LIGHTS = 8
@@ -95,7 +100,7 @@ def ps_preview
         let dist = distance(xyz_r.xyz,f_position)
         let attn = 1. - saturate(dist/xyz_r.w)
         diffuse += attn * c_lights.lights[i].color.xyz
-    f_outputColor.xyz = f_Color.xyz*(LIGHT_COLOR*k + LIGHT_BK_COLOR*k2 + diffuse)
+    f_outputColor.xyz = f_Color.xyz*(LIGHT_COLOR*k + LIGHT_BK_COLOR*k2) + diffuse
     f_outputColor.w = f_Color.w
 
 [fragment_program(name="SHADOW_FRAGMENT_SRC",version=330)]
@@ -170,6 +175,17 @@ struct Kaboom
     damage     : bool
     light_f    : float
 
+[decs_template]
+struct PickUpItem
+    eid          : EntityId
+    pos          : float3
+    color        : float3
+    fade         : float
+    fade_vel     : float
+    rot_t        : float
+    rot_total    : float
+    health_bonus : int
+
 def make_tank ( pos:float3 )
     // tank
     var tank_id = create_entity <| @ ( eid, cmp )
@@ -240,6 +256,19 @@ def make_wall( pos:float3; height : float )
             prim=Primitive cube
         ]])
 
+def make_bonus( pos:float3 )
+    create_entity <| @ ( eid, cmp )
+        // cmp |> set ( "pulse", -0.25)
+        apply_decs_template(cmp, [[PickUpItem
+            eid=eid,
+            pos=pos,
+            color=UCOLOR_TO_RGB(0x0000BB),
+            fade=FADE_MIN_SCALE,
+            fade_vel=FADE_VEL,
+            rot_total=2.0,
+            health_bonus=3
+        ]])
+
 def make_building_congregation ( n:int; center:float3; radius:float; minDim, maxDim : float3 )
     for t in range(n)
         var pos = random_in_unit_disk(seed).xzy*radius + center
@@ -257,16 +286,13 @@ def make_building_congregation ( n:int; center:float3; radius:float; minDim, max
             ]])
 
 def make_level_1
-    // walls
     for x in range(-10,10)
         for z in range(-10,10)
             if x==-10 || x==9 || z==-10 || z==9
                 make_wall(float3(x,0,z),2.)
             elif random_float(seed)<0.1
                 make_wall(float3(x,0,z),1.4 + random_float(seed)*1.4)
-    // tank
     make_tank(float3(-8, 0, -8))
-    // tower
     make_tower(float3(7, 0, 7))
     make_tower(float3(0, 0,-6))
     commit()
@@ -284,7 +310,7 @@ def make_level_2
         float3(1,1,1),
         float3(2,3,2)
     )
-    // tank
+    make_bonus(float3(-7,0,-5))
     make_tank(float3(-8, 0, -8))
     commit()
 
@@ -320,23 +346,10 @@ def shutdown
     delete ground
     delete cylinder
 
-def draw_cube ( tm:float4x4; color:float3 )
-    v_model = tm
-    f_Color.xyz = color
-    f_Color.w = 1.
-    f_tex.texture2D = tex
-    vs_preview_bind_uniform(program)
-    ps_preview_bind_uniform(program)
-    cube |> draw_fragment()
-
-def draw_cube ( pos:float3; scale:float3; color:float3 )
-    draw_cube ( compose(float4(pos.x,pos.y,pos.z,0.0), float4(0.0), scale.xyzz), color )
-
 def draw_sphere ( pos:float3; scale:float; color:float3; alpha:float=1. )
     v_model = compose(float4(pos.x,pos.y,pos.z,0.0), float4(0.0), float4(scale))
     f_Color.xyz = color
     f_Color.w = alpha
-    f_tex.texture2D = tex
     vs_preview_bind_uniform(program)
     ps_preview_bind_uniform(program)
     sphere |> draw_fragment()
@@ -345,7 +358,6 @@ def draw_ground_plane ( pos:float3; scale:float; color:float3 )
     v_model = compose(float4(pos.x,pos.y,pos.z,0.0), float4(0.0), float4(scale))
     f_Color.xyz = color
     f_Color.w = 1.
-    f_tex.texture2D = tex
     vs_preview_bind_uniform(program)
     ps_preview_bind_uniform(program)
     ground |> draw_fragment()
@@ -354,7 +366,6 @@ def draw_cylinder ( tm:float4x4; color:float3 )
     v_model = tm
     f_Color.xyz = color
     f_Color.w = 1.
-    f_tex.texture2D = tex
     vs_preview_bind_uniform(program)
     ps_preview_bind_uniform(program)
     cylinder |> draw_fragment()
@@ -370,6 +381,36 @@ def draw_cylinder ( pos:float3; scale:float3; color:float3 )
 var tick_dt = 1.0
 var display_w = 0
 var display_h = 0
+
+[decs(stage=update)]
+def update_pickup_items ( var p:PickUpItem )
+    p.rot_t += tick_dt
+    if p.rot_t > p.rot_total
+        p.rot_t -= p.rot_total
+    p.fade += p.fade_vel * tick_dt
+    if p.fade < FADE_MIN_SCALE
+        p.fade = FADE_MIN_SCALE
+        p.fade_vel = -p.fade_vel
+    elif p.fade > FADE_MAX_SCALE
+        p.fade = FADE_MAX_SCALE
+        p.fade_vel = -p.fade_vel
+    var trect = [[AABR
+        min=float2(p.pos.x-0.25,p.pos.z-0.25),
+        max=float2(p.pos.x+0.25,p.pos.z+0.25)
+    ]]
+    var any = false
+    query <| $ (pos:float3; var Turret_health:int&)
+        let wrect = [[AABR
+            min=float2(pos.x-0.5,pos.z-0.5),
+            max=float2(pos.x+0.5,pos.z+0.5)
+        ]]
+        if is_intersecting(trect,wrect)
+            Turret_health += p.health_bonus
+            any = true
+    if any
+        for i in range(5)
+            make_sparks(p.pos, p.color)
+        delete_entity(p.eid)
 
 [decs(stage=update_controls)]
 def update_turret_direction ( pos:float3; var turret:Turret; var ctrl:MouseControls )
@@ -466,9 +507,9 @@ def update_ai ( eid:EntityId; var turret:Turret; pos:float3 )
 def update_turret_reload ( var turret:Turret )
     turret.reload = max(turret.reload - tick_dt, 0.)
 
-def make_smoke ( pos:float3)
-    let smkt = random_float(seed)*1.5+1.5     // time
-    let smkr = 0.1+random_float(seed)*0.1  // radius
+def make_smoke ( pos:float3 )
+    let smkt = random_float(seed)*1.5+1.5    // time
+    let smkr = 0.1+random_float(seed)*0.1    // radius
     let smkrv = 0.2+random_float(seed)*0.1   // radius velocity
     create_entity <| @ ( eidd, cmp )
         cmp |> set("eid", eidd)
@@ -482,6 +523,27 @@ def make_smoke ( pos:float3)
             color=float3(0.2,0.2,0.2),
             damage=false
         ]])
+
+def make_sparks ( pos:float3; bonus_color:float3 )
+    let smkt = random_float(seed)*1.5+1.5    // time
+    let smkr = 0.2+random_float(seed)*0.1    // radius
+    let smkrv = -0.3                         // radius velocity
+    create_entity <| @ ( eidd, cmp )
+        cmp |> set("eid", eidd)
+        var vel = random_in_unit_sphere(seed) * 6.0
+        vel.y = abs(vel.y)
+        apply_decs_template(cmp, [[Kaboom
+            pos=pos + random_in_unit_disk(seed)*0.3,
+            vel=vel,
+            radius=smkr,
+            radius_vel=smkrv,
+            time=smkt,
+            time_max=smkt,
+            color=bonus_color,
+            damage=false,
+            light_f=10.
+        ]])
+
 
 [decs(stage=update)]
 def update_turret_smoke ( pos:float3; var turret:Turret )
@@ -585,7 +647,7 @@ def update_projectile ( eid:EntityId; var proj:Projectile )
 [decs(stage=update)]
 def update_kaboom ( eid:EntityId; var kaboom:Kaboom )
     kaboom.pos += kaboom.vel*tick_dt
-    kaboom.radius += kaboom.radius_vel*tick_dt
+    kaboom.radius = max(0., kaboom.radius + kaboom.radius_vel*tick_dt)
     kaboom.time -= tick_dt
     if kaboom.time < 0.
         if kaboom.damage
@@ -621,13 +683,28 @@ def draw_objects ( obj:Object )
     v_model = compose(ofs.xyzz, float4(0), scl.xyzz)
     f_Color.xyz = color
     f_Color.w = 1.
-    f_tex.texture2D = tex
     vs_preview_bind_uniform(program)
     ps_preview_bind_uniform(program)
     if obj.prim==Primitive cube
         cube |> draw_fragment()
     elif obj.prim==Primitive cylinder
         cylinder |> draw_fragment()
+
+[decs(stage=draw_pickup_items)]
+def draw_pickup_items ( var p:PickUpItem )
+    let rot_a = un_quat_from_unit_vec_ang(float3(1,0,0), radians(45.))
+    let rot_b = un_quat_from_unit_vec_ang(float3(0,1,0), radians(45.))
+    let rot_t = un_quat_from_unit_vec_ang(float3(0,1,0), 2.*PI*(p.rot_t/p.rot_total))
+    let rot_q = quat_mul( rot_t, quat_mul(rot_a, rot_b) )
+    let tm_scale = compose(float4(0),float4(0),float4(0.15,0.5,.15,.1))
+    let tm_rot = compose(float4(0), rot_q, float4(1))
+    let tm_pos = compose(float4(p.pos.x,p.pos.y+0.25,p.pos.z,1.),float4(0),float4(1))
+    v_model = tm_pos * tm_scale * tm_rot
+    f_Color.xyz = p.color
+    f_Color.w = p.fade
+    vs_preview_bind_uniform(program)
+    ps_preview_bind_uniform(program)
+    cube |> draw_fragment()
 
 [decs(stage=draw)]
 def draw_projectiles ( var proj:Projectile )
@@ -640,8 +717,15 @@ def draw_kaboom ( var kaboom:Kaboom )
 [decs(stage=update_lights)]
 def update_kaboom_light ( var kaboom:Kaboom )
     if c_lights.nLights<MAX_POINT_LIGHTS && kaboom.light_f>0.
-        c_lights.lights[0].xyz_r = float4(kaboom.pos.x, kaboom.pos.y, kaboom.pos.z, kaboom.radius*kaboom.light_f)
-        c_lights.lights[0].color = float4(kaboom.color.x, kaboom.color.y, kaboom.color.z, 1.)
+        c_lights.lights[c_lights.nLights].xyz_r = float4(kaboom.pos.x, kaboom.pos.y, kaboom.pos.z, kaboom.radius*kaboom.light_f)
+        c_lights.lights[c_lights.nLights].color = float4(kaboom.color.x, kaboom.color.y, kaboom.color.z, 1.)
+        c_lights.nLights ++
+
+[decs(stage=update_lights)]
+def update_pickup_light ( var p:PickUpItem )
+    if c_lights.nLights<MAX_POINT_LIGHTS
+        c_lights.lights[c_lights.nLights].xyz_r = float4(p.pos.x, p.pos.y, p.pos.z, 1.5 + p.fade)
+        c_lights.lights[c_lights.nLights].color = float4(p.color.x, p.color.y, p.color.z, 1.)
         c_lights.nLights ++
 
 def update_lights
@@ -698,6 +782,8 @@ def draw
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glDepthMask(false)
+    glEnable(GL_DEPTH_TEST)
+    decs_stage("draw_pickup_items")
     glDisable(GL_DEPTH_TEST)
     decs_stage("draw_transparent")
     glDepthMask(true)
