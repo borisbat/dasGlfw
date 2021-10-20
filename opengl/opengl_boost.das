@@ -34,6 +34,8 @@ def getTexture2DSize(tex:uint; mipLevel:int = 0)
 def write_ssbo ( ssbo:uint; data:auto(TT) )
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo)
     var p_mat = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY)
+    if p_mat==null
+        panic("can't map ssbo")
     unsafe
         *(reinterpret<TT - const?> p_mat) = data
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER)

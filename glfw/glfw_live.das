@@ -49,13 +49,14 @@ def public glfw_live(title,appf,appd:string)
         live_update(glfwGetTime())
         var display_w, display_h : int
         glfwGetFramebufferSize(window, display_w, display_h)
-        if is_live()
-            invoke_live("display", display_w, display_h)
-        else
-            glViewport(0, 0, display_w, display_h)
-            glClearColor(1.0, 0.0, 0.0, 1.0)
-            glClearDepth(1.0lf)
-            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+        if display_w!=0 && display_h!=0
+            if is_live()
+                invoke_live("display", display_w, display_h)
+            else
+                glViewport(0, 0, display_w, display_h)
+                glClearColor(1.0, 0.0, 0.0, 1.0)
+                glClearDepth(1.0lf)
+                glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
         glfwMakeContextCurrent(window)
         glfwSwapBuffers(window)
         if watch_files()
@@ -85,7 +86,8 @@ def public glfw_app(title:string)
         live_update(glfwGetTime())
         var display_w, display_h : int
         glfwGetFramebufferSize(window, display_w, display_h)
-        invoke_live("display", display_w, display_h)
+        if display_w!=0 && display_h!=0
+            invoke_live("display", display_w, display_h)
         glfwMakeContextCurrent(window)
         glfwSwapBuffers(window)
     invoke_live("shutdown")

@@ -58,7 +58,7 @@ struct PointLight
     color : float4
 
 struct PointLights
-    lights  : PointLight[8]
+    lights  : PointLight[MAX_POINT_LIGHTS]
     nLights : int
 
 var [[in, location=0]] v_position : float3
@@ -775,10 +775,6 @@ def keypressed ( keycode, scancode, action, mods : int )
         key_left  = scancode==331 || scancode==30   // A
         key_right = scancode==333 || scancode==32   // D
         decs_stage("key_controls_changed")
-        if keycode==81 && scancode==16  // letter Q
-            query <| $ ( eid:EntityId; ctrl:KeyControls )
-                eid |> update_entity <| @ ( eid, cmp )
-                    remove_decs_template`KeyControls(cmp)
 
 [export]
 def charpressed ( charcode : uint )
