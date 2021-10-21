@@ -25,11 +25,11 @@ var [[uniform]] c_offset : int
 def vs_effect
     f_color = v_color
     f_texcoord = v_texcoord
-    gl_Position = float4(v_position.x, v_position.y, 0.0, 1.0)
+    gl_Position = float4(v_position, 0.0, 1.0)
 
 [fragment_program(name="FRAGMENT_SRC",version=330)]
 def ps_effect
-    f_outputColor = texture(f_tex,f_texcoord) * float4(f_color.x, f_color.y, f_color.z, 1.0)
+    f_outputColor = texture(f_tex,f_texcoord) * float4(f_color, 1.0)
 
 [compute_program(name="COMPUTE_SRC",version=430,local_size_x=16,local_size_y=16)]
 def compute_effect

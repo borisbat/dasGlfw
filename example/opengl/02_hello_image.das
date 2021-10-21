@@ -18,11 +18,11 @@ var [[uniform]] f_tex : sampler2D
 def vs_main
     f_color = v_color
     f_texcoord = v_texcoord
-    gl_Position = float4(v_position.x, v_position.y, 0.0, 1.0)
+    gl_Position = float4(v_position, 0.0, 1.0)
 
 [fragment_program(name="FRAGMENT_SRC",version=330)]
 def ps_main
-    f_outputColor = texture(f_tex,f_texcoord) * float4(f_color.x, f_color.y, f_color.z, 1.0)
+    f_outputColor = texture(f_tex,f_texcoord) * float4(f_color, 1.0)
 
 var program : uint
 var vao : uint

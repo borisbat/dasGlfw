@@ -19,7 +19,7 @@ var [[uniform]] f_tex : sampler2D
 def vs_effect
     f_color = v_color
     f_texcoord = v_texcoord
-    gl_Position = float4(v_position.x, v_position.y, 0.0, 1.0)
+    gl_Position = float4(v_position, 0.0, 1.0)
 
 def checker(uv:float2; checkSize:float=8.0)
     let fmodResult = (floor(checkSize * uv.x) + floor(checkSize * uv.y)) % 2.0
@@ -31,7 +31,7 @@ def greyscale(color:float3)
 [fragment_program(name="FRAGMENT_SRC",version=330)]
 def ps_effect
     let coord = f_texcoord + f_offset
-    f_outputColor = texture(f_tex,coord) * float4(f_color.x, f_color.y, f_color.z, 1.0)
+    f_outputColor = texture(f_tex,coord) * float4(f_color, 1.0)
 
 [fragment_program(name="DISPLAY_FRAGMENT_SRC",version=330)]
 def ps_display

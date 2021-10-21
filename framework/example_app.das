@@ -83,7 +83,7 @@ var [[ssbo, binding=1]] c_lights : PointLights
 def vs_preview
     f_texcoord = v_texcoord
     f_normal = normalize ( float3x3(v_model) * v_normal )
-    let tpos = v_model * float4(v_position.x, v_position.y, v_position.z, 1.0)
+    let tpos = v_model * float4(v_position, 1.0)
     f_position = tpos.xyz
     gl_Position = v_projection * v_view * tpos
 
@@ -354,7 +354,7 @@ def shutdown
     delete cylinder
 
 def draw_sphere ( pos:float3; scale:float; color:float3; alpha:float=1. )
-    v_model = compose(float4(pos.x,pos.y,pos.z,0.0), float4(0.0), float4(scale))
+    v_model = compose(float4(pos,0.0), float4(0.0), float4(scale))
     f_Color.xyz = color
     f_Color.w = alpha
     vs_preview_bind_uniform(program)
@@ -362,7 +362,7 @@ def draw_sphere ( pos:float3; scale:float; color:float3; alpha:float=1. )
     sphere |> draw_fragment()
 
 def draw_ground_plane ( pos:float3; scale:float; color:float3 )
-    v_model = compose(float4(pos.x,pos.y,pos.z,0.0), float4(0.0), float4(scale))
+    v_model = compose(float4(pos,0.0), float4(0.0), float4(scale))
     f_Color.xyz = color
     f_Color.w = 1.
     vs_preview_bind_uniform(program)
@@ -378,11 +378,11 @@ def draw_cylinder ( tm:float4x4; color:float3 )
     cylinder |> draw_fragment()
 
 def draw_cylinder ( pos:float3; scale:float; color:float3 )
-    let tm = compose(float4(pos.x,pos.y,pos.z,0.0), float4(0), float4(scale, scale, scale, 1.))
+    let tm = compose(float4(pos,0.0), float4(0), float4(scale, scale, scale, 1.))
     draw_cylinder(tm, color)
 
 def draw_cylinder ( pos:float3; scale:float3; color:float3 )
-    let tm = compose(float4(pos.x,pos.y,pos.z,0.0), float4(0), float4(scale.x, scale.y, scale.z, 1.))
+    let tm = compose(float4(pos,0.0), float4(0), float4(scale, 1.))
     draw_cylinder(tm, color)
 
 var tick_dt = 1.0
@@ -724,15 +724,15 @@ def draw_kaboom ( var kaboom:Kaboom )
 [decs(stage=update_lights)]
 def update_kaboom_light ( var kaboom:Kaboom )
     if c_lights.nLights<MAX_POINT_LIGHTS && kaboom.light_f>0.
-        c_lights.lights[c_lights.nLights].xyz_r = float4(kaboom.pos.x, kaboom.pos.y, kaboom.pos.z, kaboom.radius*kaboom.light_f)
-        c_lights.lights[c_lights.nLights].color = float4(kaboom.color.x, kaboom.color.y, kaboom.color.z, 1.)
+        c_lights.lights[c_lights.nLights].xyz_r = float4(kaboom.pos, kaboom.radius*kaboom.light_f)
+        c_lights.lights[c_lights.nLights].color = float4(kaboom.color, 1.)
         c_lights.nLights ++
 
 [decs(stage=update_lights)]
 def update_pickup_light ( var p:PickUpItem )
     if c_lights.nLights<MAX_POINT_LIGHTS
-        c_lights.lights[c_lights.nLights].xyz_r = float4(p.pos.x, p.pos.y, p.pos.z, 1.5 + p.fade)
-        c_lights.lights[c_lights.nLights].color = float4(p.color.x, p.color.y, p.color.z, 1.)
+        c_lights.lights[c_lights.nLights].xyz_r = float4(p.pos, 1.5 + p.fade)
+        c_lights.lights[c_lights.nLights].color = float4(p.color, 1.)
         c_lights.nLights ++
 
 def update_lights
@@ -750,7 +750,7 @@ def draw_turrets ( pos:float3; color:float3; turret:Turret )
     let m_ofsa = compose(float4(0.3+0.2*cannon_recoil,.6,0.,0.),float4(0),float4(1))
     let rotSide = un_quat_from_unit_vec_ang(float3(0,0,1), PI/2.)
     let m_rot = compose(float4(0),rotSide,float4(1))
-    let m_pos = compose(float4(pos.x,pos.y,pos.z,0.0), float4(0), float4(1))
+    let m_pos = compose(float4(pos,0.0), float4(0), float4(1))
     draw_cylinder ( m_pos * m_rota * m_ofsa * m_rot * m_scale, color )
 
 [export]
@@ -824,7 +824,7 @@ def display ( _display_w, _display_h : int )
         float3(0.,1.,0.)
     )
     let tm_shadow = planar_shadow(
-        float4(LIGHT_DIRECTION.x, LIGHT_DIRECTION.y, LIGHT_DIRECTION.z, 0.),
+        float4(LIGHT_DIRECTION, 0.),
         plane_from_point_normal(float3(0.),float3(0.,1.,0.))
     )
     v_projection = perspective_rh_opengl( 45.0f*PI/180., aspect, 0.1f, 200.0f)   // bind projection

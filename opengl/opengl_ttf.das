@@ -25,12 +25,12 @@ var [[uniform]] f_tint : float3
 [vertex_program(name="VERTEX_SRC",version=330)]
 def vs_main
     f_texcoord = v_texcoord
-    gl_Position = v_mvp * float4(v_position.x, v_position.y, 0.0, 1.0)
+    gl_Position = v_mvp * float4(v_position, 0.0, 1.0)
 
 [fragment_program(name="FRAGMENT_SRC",version=330)]
 def ps_main
     let tex = texture(f_tex,f_texcoord)
-    f_outputColor = float4(f_tint.x,f_tint.y,f_tint.z,tex.w)
+    f_outputColor = float4(f_tint,tex.w)
 
 [vertex_buffer]
 struct public FontVertex
@@ -177,9 +177,9 @@ def public quads_view ( quads : array<FontVertex>; scale:float2; h:HJust = HJust
     else
         o.y = 0.
     return compose(
-        float4(o.x,o.y,0.,0.),
+        float4(o,0.,0.),
         float4(1,0,0,0),
-        float4(scale.x,scale.y,0.,1.))
+        float4(scale,0.,1.))
 
 
 

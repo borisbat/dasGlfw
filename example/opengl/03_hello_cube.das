@@ -23,7 +23,7 @@ def vs_main
     let light = normalize(float3(1,-1,-1))
     let norm = normalize ( float3x3(v_model) * v_normal )
     f_color = float3(saturate(-dot(norm,light)))
-    gl_Position = v_projection * v_view * v_model * float4(v_position.x, v_position.y, v_position.z, 1.0)
+    gl_Position = v_projection * v_view * v_model * float4(v_position, 1.0)
 
 [fragment_program(name="FRAGMENT_SRC",version=330)]
 def ps_main
