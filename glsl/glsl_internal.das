@@ -64,16 +64,15 @@ class GlslShader : AstFunctionAnnotation
         for_each_global(compiling_module()) <| $ ( var glob )
             if err |> empty()
                 if glob.init == null
-                    peek(glob.name) <| $ ( gname )
-                        if gname == argName as tString
-                            glob.init <- new [[ExprConstString() at=func.at,
-                                value:=generate_glsl(func, err, shaderType, version, compute_local_size),
-                                _type <- new [[TypeDecl() at=func.at, baseType=Type tString]]
-                            ]]
-                            if ! err |> empty()
-                                glob.init := null
-                            else
-                                glob._type.flags |= TypeDeclFlags constant
+                    if glob.name == argName as tString
+                        glob.init <- new [[ExprConstString() at=func.at,
+                            value:=generate_glsl(func, err, shaderType, version, compute_local_size),
+                            _type <- new [[TypeDecl() at=func.at, baseType=Type tString]]
+                        ]]
+                        if ! err |> empty()
+                            glob.init := null
+                        else
+                            glob._type.flags |= TypeDeclFlags constant
         if !err |> empty()
             errors := join(err, "\n")
             return false
@@ -200,11 +199,11 @@ class GlslExport : AstVisitor
         var funname = "{fun.name}"
         if fun.flags.builtIn
             pass
-        elif eq(fun._module.name,"$")
+        elif fun._module.name=="$"
             pass
-        elif eq(fun._module.name,"glsl")
+        elif fun._module.name=="glsl"
             pass
-        elif !eq(fun._module.name,"")
+        elif fun._module.name!=""
             funname = "{funname}_in_{fun._module.name}"
         while stnames |> key_exists(funname)
             funname = "_{funname}"
@@ -242,9 +241,9 @@ class GlslExport : AstVisitor
                 self->produce_zero(fld._type)
             *writer |> write(")")
         elif t.baseType==Type tHandle
-            if eq(t.annotation.name,"float3x3")
+            if t.annotation.name=="float3x3"
                 *writer |> write("mat3(vec3(0),vec3(0),vec3(0))")
-            elif eq(t.annotation.name,"float4x4")
+            elif t.annotation.name=="float4x4"
                 *writer |> write("mat4(vec4(0),vec4(0),vec4(0),vec4(0))")
             else
                 self->error("unsupported zero for handled type {describe(t)}", t.at)
@@ -301,7 +300,7 @@ class GlslExport : AstVisitor
         for_each_function(mod, "") <| $ ( fun )
             if depFun |> key_exists(intptr(get_ptr(fun)))
                 if !self->isMainFunction(fun)
-                    if !eq(fun._module.name,"glsl")
+                    if fun._module.name!="glsl"
                         let ss = self->describe_glsl_function(fun)
                         *writer |> write("{ss};")
                         self->newLine(1)
@@ -354,7 +353,7 @@ class GlslExport : AstVisitor
     def override canVisitStructure(str:Structure?)
         if !(depStruct |> key_exists(intptr(str)))
             return false
-        if eq(str._module.name,"glsl")
+        if str._module.name=="glsl"
             return false
         return true
     def override preVisitStructure(str:StructurePtr)
@@ -386,7 +385,7 @@ class GlslExport : AstVisitor
     def override canVisitFunction(arg:Function?):bool
         if !depFun |> key_exists(intptr(arg))
             return false
-        if eq(arg._module.name,"glsl")
+        if arg._module.name=="glsl"
             return false
         return true
     def override preVisitFunction(fun:FunctionPtr)
@@ -397,11 +396,10 @@ class GlslExport : AstVisitor
     def override preVisitFunctionBody(fun:FunctionPtr)
         *writer |> write(" )")
         for ann in fun.annotations
-            peek(ann.annotation.name) <| $ ( aname )
-                if aname=="pixel_shader" // TODO: other ann
-                    let argo = find_arg("output",ann.arguments)
-                    if argo is tString
-                        *writer |> write(" : {argo as tString}")
+            if ann.annotation.name=="pixel_shader" // TODO: other ann
+                let argo = find_arg("output",ann.arguments)
+                if argo is tString
+                    *writer |> write(" : {argo as tString}")
         self->newLine(1)
     def override visitFunction(fun:FunctionPtr) : FunctionPtr
         self->newLine(1)
@@ -458,7 +456,7 @@ class GlslExport : AstVisitor
     def override canVisitGlobalVariable(arg:Variable?):bool
         if !depVar |> key_exists(intptr(arg))
             return false
-        if eq(arg._module.name,"glsl")
+        if arg._module.name=="glsl"
             return false
         if !(find_arg("cbuffer",arg.annotation) is nothing)
             return false
@@ -1055,7 +1053,7 @@ def generate_bind_uniform_dummy(fnMain:FunctionPtr)
 [macro_function]
 def is_glsl_structure(arg; name:string)
     if arg._type.baseType==Type tStructure && length(arg._type.dim)==0
-        if eq(arg._type.structType._module.name,"glsl") && eq(arg._type.structType.name,name)
+        if arg._type.structType._module.name=="glsl" && arg._type.structType.name==name
             return true
     return false
 
