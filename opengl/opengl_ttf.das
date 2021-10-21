@@ -20,6 +20,7 @@ var [[uniform]] v_mvp : float4x4
 var [[inout]] f_texcoord : float2
 var [[out]] f_outputColor : float4
 var [[uniform]] f_tex : sampler2D
+var [[uniform]] f_tint : float3
 
 [vertex_program(name="VERTEX_SRC",version=330)]
 def vs_main
@@ -29,7 +30,7 @@ def vs_main
 [fragment_program(name="FRAGMENT_SRC",version=330)]
 def ps_main
     let tex = texture(f_tex,f_texcoord)
-    f_outputColor = float4(1.,1.,1.,tex.w)
+    f_outputColor = float4(f_tint.x,f_tint.y,f_tint.z,tex.w)
 
 [vertex_buffer]
 struct public FontVertex
@@ -111,13 +112,13 @@ def public get_ttf_program : tuple<vtx:string;frag:string>
 def public set_ttf_objects(prog:uint)
     program = prog
 
-def public draw_quads_2d ( font:Font; quads : array<FontVertex>; w,h,x,y:int )
+def public draw_quads_2d ( font:Font; quads : array<FontVertex>; w,h,x,y:int; tint:float3 = float3(1.) )
     let view = translation(float3(x, y, 0))
     let projection = ortho_rh(0., float(w), float(h), 0., -1., 1.)
     let mvp = projection * view
-    font |> draw_quads(quads, mvp)
+    font |> draw_quads(quads, mvp, tint)
 
-def public draw_quads ( font:Font; quads : array<FontVertex>; mvp:float4x4 )
+def public draw_quads ( font:Font; quads : array<FontVertex>; mvp:float4x4; tint:float3 = float3(1.) )
     assert(program!=0u,"missing create_ttf_objects or cache_ttf_objects somewhere in the initialization")
     if empty(quads)
         return
@@ -125,6 +126,7 @@ def public draw_quads ( font:Font; quads : array<FontVertex>; mvp:float4x4 )
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glUseProgram(program)
     f_tex.texture2D = font.tex
+    f_tint = tint
     v_mvp = mvp
     vs_main_bind_uniform(program)
     ps_main_bind_uniform(program)

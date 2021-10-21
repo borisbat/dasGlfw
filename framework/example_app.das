@@ -75,7 +75,6 @@ var [[uniform]] v_projection : float4x4
 var [[inout]] f_texcoord : float2
 var [[inout]] f_normal : float3
 var [[inout]] f_position : float3
-var [[uniform, binding=0]] f_tex : sampler2D
 var [[uniform]] f_Color : float4
 var [[out]] f_outputColor : float4
 var [[ssbo, binding=1]] c_lights : PointLights
@@ -314,8 +313,14 @@ def make_level_2
     make_tank(float3(-8, 0, -8))
     commit()
 
+var cursor : GLFWcursor?
+
 [export]
 def initialize(full_restart:bool)
+    cursor = glfwCreateStandardCursor(int(GLFW_CROSSHAIR_CURSOR))
+    let window = get_live_window()
+    assert(window!=null)
+    glfwSetCursor(window,cursor)
     cache_ttf_objects()
     font = cache_font("c:/windows/fonts/arial.ttf")
     cube <- gen_cube()
@@ -340,6 +345,8 @@ def initialize(full_restart:bool)
 
 [export]
 def shutdown
+    if cursor != null
+        glfwDestroyCursor(cursor)
     glDeleteTextures(1,safe_addr(tex))
     delete cube
     delete sphere
@@ -417,7 +424,7 @@ def update_turret_direction ( pos:float3; var turret:Turret; var ctrl:MouseContr
     if turret.health==0
         return
     // project to 2d screen space
-    var pos4d = v_projection * v_view * float4(pos.x, pos.y, pos.z, 1.0)
+    var pos4d = v_projection * v_view * float4(pos.x, pos.y + 1.25, pos.z, 1.0)
     pos4d = pos4d / pos4d.w
     let pos2d = (pos4d.xy * float2(0.5,-0.5) + float2(0.5)) * float2(display_w,display_h)
     // get rotation angle out of relative mouse position
@@ -759,7 +766,7 @@ def draw_health_overlay
     query() <| $ ( name:string; Turret_health:int )
         let text = "{name} : {Turret_health}"
         var hw_text <- *font |> create_quads(text)
-        *font |> draw_quads_2d(hw_text, display_w, display_h, 30, vofs)
+        *font |> draw_quads_2d(hw_text, display_w, display_h, 30, vofs, UCOLOR_TO_RGB(0x0D7DEC))
         vofs += 30
         delete hw_text
 
