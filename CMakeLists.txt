@@ -43,6 +43,7 @@ ENDIF()
 		# GENERATED GLFW
 
         FIND_FILE(GL_H "GL/gl.h")
+		MESSAGE("gl.h at ${GL_H}")
         SET(DAS_GLFW_CONSTS
             "${glfw_INCLUDE_DIR}/GLFW/glfw3.h"
             "${GL_H}"
@@ -85,8 +86,7 @@ ENDIF()
 			ADD_MODULE_DAS(opengl opengl opengl_ttf)
 			ADD_MODULE_DAS(opengl opengl opengl_gen)
 			ADD_MODULE_DAS(opengl opengl opengl_cache)
-			ADD_MODULE_DAS(glsl glsl glsl)
-			ADD_MODULE_DAS(glsl glsl glsl_internal)
+			ADD_MODULE_DAS(glsl glsl glsl_opengl)
 			ADD_LIBRARY(libDasModuleOpenGL ${DAS_OPENGL_MODULE_SRC})
 			#TARGET_LINK_LIBRARIES(libDasModuleGlfw ${glfw_LIBRARIES})
 			ADD_DEPENDENCIES(libDasModuleOpenGL libDaScript)

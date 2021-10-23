@@ -9,7 +9,7 @@ require opengl public
 require daslib/safe_addr
 require daslib/contracts
 
-require glsl/glsl public
+require glsl/glsl_opengl public
 
 require opengl/opengl_state
 require opengl/opengl_boost_internal public
