@@ -48,7 +48,6 @@ def private generate_bind_uniform(fnMain:FunctionPtr; var fn:FunctionPtr)
     var blk <- new [[ExprBlock() at=fn.at]]
     collect_dependencies(fnMain) <| $ ( vfun, vvar )
         for vv in vvar
-            var needUniform = true
             if find_arg("uniform", vv.annotation) is tBool
                 if is_glsl_structure(vv,"sampler2D")
                     // bind_sampler_2d(binding, varName.texture2D)
