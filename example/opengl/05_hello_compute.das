@@ -29,7 +29,7 @@ def vs_effect
 
 [fragment_program(name="FRAGMENT_SRC",version=330)]
 def ps_effect
-    f_outputColor = texture(f_tex,f_texcoord) * float4(f_color, 1.0)
+    f_outputColor = texture2D(f_tex,f_texcoord) * float4(f_color, 1.0)
 
 [compute_program(name="COMPUTE_SRC",version=430,local_size_x=16,local_size_y=16)]
 def compute_effect

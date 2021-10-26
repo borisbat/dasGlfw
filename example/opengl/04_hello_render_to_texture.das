@@ -31,12 +31,12 @@ def greyscale(color:float3)
 [fragment_program(name="FRAGMENT_SRC",version=330)]
 def ps_effect
     let coord = f_texcoord + f_offset
-    f_outputColor = texture(f_tex,coord) * float4(f_color, 1.0)
+    f_outputColor = texture2D(f_tex,coord) * float4(f_color, 1.0)
 
 [fragment_program(name="DISPLAY_FRAGMENT_SRC",version=330)]
 def ps_display
     let f = checker(f_texcoord.xy)
-    let trgb = texture(f_tex,float2(f_texcoord.x,1.-f_texcoord.y)).xyz
+    let trgb = texture2D(f_tex,float2(f_texcoord.x,1.-f_texcoord.y)).xyz
     let tgrey = greyscale(trgb)
     f_outputColor.xyz = trgb*f + float3(tgrey)*(1.0-f)
     f_outputColor.w = 1.

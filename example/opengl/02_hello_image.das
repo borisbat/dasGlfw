@@ -22,7 +22,7 @@ def vs_main
 
 [fragment_program(name="FRAGMENT_SRC",version=330)]
 def ps_main
-    f_outputColor = texture(f_tex,f_texcoord) * float4(f_color, 1.0)
+    f_outputColor = texture2D(f_tex,f_texcoord) * float4(f_color, 1.0)
 
 var program : uint
 var vao : uint
