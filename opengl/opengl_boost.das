@@ -125,10 +125,10 @@ def create_shader ( src:string implicit; shaderType:uint; canfail:bool = false )
         if !canfail
             unsafe
                 var log : array<uint>
-                resize(log, 4096)
+                resize(log, 16384)
                 var slog = reinterpret<string> addr(log[0])
-                glGetShaderInfoLog(s, 512, null, slog)
-                panic("{src}\n\nFAILED TO CREATE SHADER ({status}):\n{slog}\n")
+                glGetShaderInfoLog(s, 16384, null, slog)
+                panic("{slog}\n\nFAILED TO CREATE SHADER ({status}):\n{src}\n")
                 delete log
         return 0u
     else
