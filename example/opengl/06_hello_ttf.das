@@ -44,6 +44,7 @@ def main
         let projection = perspective_rh( 45.0f*PI/180., aspect, 0.1f, 50.0f)
         let mvp = projection * view * model
         font |> draw_quads(hw_text, mvp)
+        font |> draw_quads_2d(hw_text, display_w, display_h, 100, 100)
         // swap buffers
         glfwMakeContextCurrent(window)
         glfwSwapBuffers(window)
