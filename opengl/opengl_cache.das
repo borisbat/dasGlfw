@@ -17,6 +17,7 @@ var fonts : table<string; Font?>
 [apply_in_context(opengl_cache)]
 def public cache_font(name:string implicit) : Font?
     if ! fonts |> key_exists(name)
+        create_ttf_adapter()
         var font <- new [[Font]]
         *font <- load_ttf(name)
         fonts[clone_string(name)] = font

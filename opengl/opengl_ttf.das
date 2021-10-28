@@ -48,8 +48,12 @@ class OpenGLTTFApiAdapter : TTFApiAdapter
 
 var private program : uint
 
+def public create_ttf_adapter
+    if !has_api_adapter()
+        set_api_adapter <| new OpenGLTTFApiAdapter()
+
 def public create_ttf_objects
-    set_api_adapter <| new OpenGLTTFApiAdapter()
+    create_ttf_adapter()
     program = create_shader_program(TTF_VERTEX_SRC,TTF_FRAGMENT_SRC)
     return program
 
@@ -57,6 +61,7 @@ def public get_ttf_program : tuple<vtx:string;frag:string>
     return [[auto TTF_VERTEX_SRC, TTF_FRAGMENT_SRC]]
 
 def public set_ttf_objects(prog:uint)
+    create_ttf_adapter()
     program = prog
 
 def public draw_quads_2d ( font:Font; quads : array<FontVertex>; w,h,x,y:int; tint:float3 = float3(1.) )
