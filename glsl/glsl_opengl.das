@@ -51,7 +51,7 @@ def private generate_bind_uniform(fnMain:FunctionPtr; var fn:FunctionPtr)
             if find_arg("uniform", vv.annotation) is tBool
                 if is_glsl_structure(vv,"sampler2D")
                     // bind_sampler_2d(binding, varName.texture2D)
-                    var binding = find_arg("binding", vv.annotation) ?as tInt ?? 0
+                    var binding = find_arg("stage", vv.annotation) ?as tInt ?? 0
                     var vtex <- new [[ExprField() at=vv.at,
                         value <- new [[ExprVar() at=vv.at, name:=vv.name]],
                         name := "texture2D"
@@ -70,7 +70,7 @@ def private generate_bind_uniform(fnMain:FunctionPtr; var fn:FunctionPtr)
                     blk.list |>emplace(cll_uni)
                 elif is_glsl_structure(vv,"image2D")
                     // bind_sampler_2d(binding, varName.texture2D, format, access)
-                    var binding = find_arg("binding", vv.annotation) ?as tInt ?? 0
+                    var binding = find_arg("stage", vv.annotation) ?as tInt ?? 0
                     var vtex <- new [[ExprField() at=vv.at,
                         value <- new [[ExprVar() at=vv.at, name:=vv.name]],
                         name := "texture2D"

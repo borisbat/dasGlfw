@@ -27,13 +27,13 @@ var vbo : uint
 
 [vertex_buffer]
 struct Vertex
-    [[type=GL_FLOAT, size=2, normalized=false]] xy : float2
-    [[type=GL_FLOAT, size=3, normalized=false]] rgb : float3
+    xy : float2
+    rgb : float3
 
 let vertices = [[Vertex
-        xy=float2(-0.5, 0.5), rgb=float3(0.0,0.0,0.0);
-        xy=float2( 0.5, 0.5), rgb=float3(1.0,1.0,0.0);
-        xy=float2( 0.5,-0.5), rgb=float3(1.0,0.0,0.0)
+    xy=float2(-0.5, 0.5), rgb=float3(0.0,0.0,0.0);
+    xy=float2( 0.5, 0.5), rgb=float3(1.0,1.0,0.0);
+    xy=float2( 0.5,-0.5), rgb=float3(1.0,0.0,0.0)
 ]]
 
 def create_gl_objects

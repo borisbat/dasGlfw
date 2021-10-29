@@ -29,8 +29,8 @@ def ps_main
 
 [vertex_buffer]
 struct TTF_FontVertex
-    [[type=GL_FLOAT, size=2, normalized=false] ]xy : float2
-    [[type=GL_FLOAT, size=2, normalized=false]] uv : float2
+    xy : float2
+    uv : float2
 
 class OpenGLTTFApiAdapter : TTFApiAdapter
     def override create_font_texture ( dim:int2; data:array<uint8> ) : uint64

@@ -9,6 +9,8 @@ require daslib/ast_boost
 require daslib/templates
 require daslib/templates_boost
 
+require glsl/glsl_internal
+
 require opengl
 
 [structure_macro(name="vertex_buffer")]
@@ -49,23 +51,26 @@ class GlslVertexBuffer : AstStructureAnnotation
             var cll_evaa <- new [[ExprCall() at=fld.at, name:="glEnableVertexAttribArray" ]]
             cll_evaa.arguments |> emplace_new() <| clone_expression(vattr_i)
             blk.list |> emplace(cll_evaa)
-            var num_attr = find_arg("size",fld.annotation) ?as tInt ?? 0
-            var attr_type = find_arg("type",fld.annotation) ?as tString ?? ""
-            var is_norm = find_arg("normalized",fld.annotation) ?as tBool ?? false
-            if num_attr==0
-                // TODO: determine size from attribute type
-                errors := "{fld.name} - undefined size"
+            var dinfo = get_decl_info(fld._type, fld.annotation)
+            if !dinfo.ok
+                errors := "field {fld.name} is missing type information"
                 return false
-            if attr_type==""
-                // TODO: determine type from attribute type
-                errors := "{fld.name} = undefined argument type"
+            var ttype = 0u
+            if dinfo.info.typet==Type tFloat
+                ttype = GL_FLOAT
+            elif dinfo.info.typet==Type tUInt
+                ttype = GL_UNSIGNED_BYTE
+            elif dinfo.info.typet==Type tInt16
+                ttype = GL_SHORT
+            else
+                errors := "field {fld.name} type {dinfo.info.typet} is not supported"
                 return false
             // glVertexAttribPointer(attri, num_attr, attr_type, is_norm, sizeof(VertexType), offsetof(VertexType::fld))
             var cll_vap <- new [[ExprCall() at=fld.at, name:="glVertexAttribPointer"]]
             cll_vap.arguments |> emplace_new() <| clone_expression(vattr_i)
-            cll_vap.arguments |> emplace_new() <| new [[ExprConstInt() at=fld.at, value=num_attr]]
-            cll_vap.arguments |> emplace_new() <| new [[ExprVar() at=fld.at, name:=attr_type]]
-            cll_vap.arguments |> emplace_new() <| new [[ExprConstBool() at=fld.at, value=is_norm]]
+            cll_vap.arguments |> emplace_new() <| new [[ExprConstInt() at=fld.at, value=dinfo.info.sizei]]
+            cll_vap.arguments |> emplace_new() <| new [[ExprConstUInt() at=fld.at, value=ttype]]
+            cll_vap.arguments |> emplace_new() <| new [[ExprConstBool() at=fld.at, value=dinfo.info.normalized]]
             cll_vap.arguments |> emplace_new() <| new [[ExprTypeInfo() at=fld.at, trait := "sizeof", typeexpr <- clone_type(stype)]]
             cll_vap.arguments |> emplace_new() <| new [[ExprVar() at=fld.at, name:="ptrd"]]
             cll_vap.arguments |> emplace_new() <| new [[ExprTypeInfo() at=fld.at, trait := "offsetof",

@@ -78,7 +78,7 @@ var [[inout]] f_normal : float3
 var [[inout]] f_position : float3
 var [[uniform]] f_Color : float4
 var [[out]] f_outputColor : float4
-var [[ssbo, binding=1]] c_lights : PointLights
+var [[ssbo, stage=1]] c_lights : PointLights
 
 [vertex_program(name="PBR_VERTEX_SRC",version=430)]
 def vs_preview

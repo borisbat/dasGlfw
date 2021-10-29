@@ -17,8 +17,8 @@ var [[inout]] f_color : float3
 var [[inout]] f_texcoord : float2
 var [[out]] f_outputColor : float4
 var [[uniform]] f_tex : sampler2D
-var [[uniform, format=rgba8, binding=0, writeonly]] c_destTex : image2D
-var [[ssbo, binding=1]] c_mat : MatTest
+var [[uniform, format=rgba8, stage=0, writeonly]] c_destTex : image2D
+var [[ssbo, stage=1]] c_mat : MatTest
 var [[uniform]] c_offset : int
 
 [vertex_program(name="VERTEX_SRC",version=330)]
@@ -55,15 +55,15 @@ var ssbo : uint
 
 [vertex_buffer]
 struct EffectVertex
-    [[type=GL_FLOAT, size=2, normalized=false]] xy  : float2
-    [[type=GL_FLOAT, size=3, normalized=false]] rgb : float3
-    [[type=GL_FLOAT, size=2, normalized=false]] uv  : float2
+    xy  : float2
+    rgb : float3
+    uv  : float2
 
 let effect_vertices = [[EffectVertex
-        xy=float2(-1.0, 1.0), rgb=float3(0.0,0.0,0.0), uv=float2(0.0,0.0);
-        xy=float2( 1.0, 1.0), rgb=float3(1.0,1.0,0.0), uv=float2(1.0,0.0);
-        xy=float2( 1.0,-1.0), rgb=float3(1.0,0.0,0.0), uv=float2(1.0,1.0);
-        xy=float2(-1.0,-1.0), rgb=float3(1.0,1.0,0.0), uv=float2(0.0,1.0)
+    xy=float2(-1.0, 1.0), rgb=float3(0.0,0.0,0.0), uv=float2(0.0,0.0);
+    xy=float2( 1.0, 1.0), rgb=float3(1.0,1.0,0.0), uv=float2(1.0,0.0);
+    xy=float2( 1.0,-1.0), rgb=float3(1.0,0.0,0.0), uv=float2(1.0,1.0);
+    xy=float2(-1.0,-1.0), rgb=float3(1.0,1.0,0.0), uv=float2(0.0,1.0)
 ]]
 
 let effect_indices = [[int 0; 1; 2; 2; 3; 0]]
@@ -124,7 +124,7 @@ def main
         // run program
         glUseProgram(compute_program)
         write_ssbo(ssbo, c_mat)             // upload c_mat
-        c_destTex.texture2D = texture
+        c_destTex := texture
         compute_effect_bind_uniform(compute_program)
         glDispatchCompute(16u,16u,1u)
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT|GL_SHADER_STORAGE_BARRIER_BIT)
@@ -145,7 +145,7 @@ def main
         glViewport(0, 0, display_w, display_h)
         glUseProgram(display_program)
         glBindBuffer(GL_ARRAY_BUFFER, vbo)
-        f_tex.texture2D = texture
+        f_tex := texture
         vs_effect_bind_uniform(display_program)
         ps_effect_bind_uniform(display_program)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)

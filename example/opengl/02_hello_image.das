@@ -32,15 +32,15 @@ var texture : uint
 
 [vertex_buffer]
 struct Vertex
-    [[type=GL_FLOAT, size=2, normalized=false]] xy  : float2
-    [[type=GL_FLOAT, size=3, normalized=false]] rgb : float3
-    [[type=GL_FLOAT, size=2, normalized=false]] uv  : float2
+    xy  : float2
+    rgb : float3
+    uv  : float2
 
 let vertices = [[Vertex
-        xy=float2(-0.5, 0.5), rgb=float3(0.0,0.0,0.0), uv=float2(0.0,0.0);
-        xy=float2( 0.5, 0.5), rgb=float3(1.0,1.0,0.0), uv=float2(1.0,0.0);
-        xy=float2( 0.5,-0.5), rgb=float3(1.0,0.0,0.0), uv=float2(1.0,1.0);
-        xy=float2(-0.5,-0.5), rgb=float3(1.0,1.0,0.0), uv=float2(0.0,1.0)
+    xy=float2(-0.5, 0.5), rgb=float3(0.0,0.0,0.0), uv=float2(0.0,0.0);
+    xy=float2( 0.5, 0.5), rgb=float3(1.0,1.0,0.0), uv=float2(1.0,0.0);
+    xy=float2( 0.5,-0.5), rgb=float3(1.0,0.0,0.0), uv=float2(1.0,1.0);
+    xy=float2(-0.5,-0.5), rgb=float3(1.0,1.0,0.0), uv=float2(0.0,1.0)
 ]]
 
 let indices = [[int 0; 1; 2; 2; 3; 0]]
@@ -89,7 +89,7 @@ def main
         glEnable(GL_DEPTH_TEST)
         glDepthFunc(GL_LEQUAL)
         glUseProgram(program)
-        f_tex.texture2D = texture           // bind texture
+        f_tex := texture           // bind texture
         vs_main_bind_uniform(program)
         ps_main_bind_uniform(program)
         glBindVertexArray(vao)

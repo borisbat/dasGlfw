@@ -53,15 +53,15 @@ var target_texture : uint
 
 [vertex_buffer]
 struct EffectVertex
-    [[type=GL_FLOAT, size=2, normalized=false]] xy  : float2
-    [[type=GL_FLOAT, size=3, normalized=false]] rgb : float3
-    [[type=GL_FLOAT, size=2, normalized=false]] uv  : float2
+    xy  : float2
+    rgb : float3
+    uv  : float2
 
 let effect_vertices = [[EffectVertex
-        xy=float2(-1.0, 1.0), rgb=float3(0.0,0.0,0.0), uv=float2(0.0,0.0);
-        xy=float2( 1.0, 1.0), rgb=float3(1.0,1.0,0.0), uv=float2(1.0,0.0);
-        xy=float2( 1.0,-1.0), rgb=float3(1.0,0.0,0.0), uv=float2(1.0,1.0);
-        xy=float2(-1.0,-1.0), rgb=float3(1.0,1.0,0.0), uv=float2(0.0,1.0)
+    xy=float2(-1.0, 1.0), rgb=float3(0.0,0.0,0.0), uv=float2(0.0,0.0);
+    xy=float2( 1.0, 1.0), rgb=float3(1.0,1.0,0.0), uv=float2(1.0,0.0);
+    xy=float2( 1.0,-1.0), rgb=float3(1.0,0.0,0.0), uv=float2(1.0,1.0);
+    xy=float2(-1.0,-1.0), rgb=float3(1.0,1.0,0.0), uv=float2(0.0,1.0)
 ]]
 
 let effect_indices = [[int 0; 1; 2; 2; 3; 0]]
@@ -124,7 +124,7 @@ def main
         glBindFramebuffer(GL_FRAMEBUFFER, fbo)
         glViewport(0, 0, fbo_width, fbo_height)
         glUseProgram(program)
-        f_tex.texture2D = texture
+        f_tex := texture
         vs_effect_bind_uniform(program)
         ps_effect_bind_uniform(program)
         glBindVertexArray(vao)
@@ -134,7 +134,7 @@ def main
         glBindFramebuffer(GL_FRAMEBUFFER, 0u)
         glViewport(0, 0, display_w, display_h)
         glUseProgram(display_program)
-        f_tex.texture2D = target_texture
+        f_tex := target_texture
         vs_effect_bind_uniform(display_program)
         ps_display_bind_uniform(display_program)
         glBindVertexArray(vao)

@@ -10,9 +10,9 @@ require math
 
 [vertex_buffer]
 struct PreviewVertex
-    [[type=GL_FLOAT, size=3, normalized=false]] xyz    : float3
-    [[type=GL_FLOAT, size=3, normalized=true]]  normal : float3
-    [[type=GL_FLOAT, size=2, normalized=false]] uv     : float2
+    xyz : float3
+    [[normalized=true]] normal : float3
+    uv : float2
 
 struct Fragment
     vertices : array<PreviewVertex>
