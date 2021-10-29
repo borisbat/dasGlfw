@@ -36,7 +36,7 @@ def fs_preview
     let refl = normalize ( reflect(camera_dir,normal) )
     let kS = saturate(dot(-light_dir,refl))
     let specular = float3(pow(kS,pS)*kS)
-    gl_FragColor.xyz = texture(f_tex,f_texcoord).xyz * diffuse + specular
+    gl_FragColor.xyz = texture2D(f_tex,f_texcoord).xyz * diffuse + specular
     gl_FragColor.w = 1.
 
 [export]

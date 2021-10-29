@@ -23,7 +23,7 @@ def vs_main
 
 [fragment_program(name="TTF_FRAGMENT_SRC")]
 def fs_main
-    let tex = texture(f_tex,f_texcoord)
+    let tex = texture2D(f_tex,f_texcoord)
     gl_FragColor = float4(f_tint,tex.w)
 
 [vertex_buffer]
