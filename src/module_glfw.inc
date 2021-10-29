@@ -443,11 +443,6 @@ addExtern<DAS_BIND_FUN(glfwGetWindowPos)>(*this, lib, "glfwGetWindowPos",SideEff
 ;
 #endif
 #ifdef GLOBAL_NAMESPACE
-addExtern<DAS_BIND_FUN(__report_gsfailure)>(*this, lib, "__report_gsfailure",SideEffects::worstDefault, "__report_gsfailure")
-	->args({"_StackCookie"})
-;
-#endif
-#ifdef GLOBAL_NAMESPACE
 addExtern<DAS_BIND_FUN(glfwGetError)>(*this, lib, "glfwGetError",SideEffects::worstDefault, "glfwGetError")
 	->args({"description"})
 ;
