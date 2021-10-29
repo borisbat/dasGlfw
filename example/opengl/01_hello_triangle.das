@@ -8,16 +8,15 @@ require daslib/safe_addr
 var [[in, location=0]] v_position : float2
 var [[in, location=1]] v_color : float3
 var [[inout]] f_color : float3
-var [[out]] f_outputColor : float4
 
-[vertex_program(name="VERTEX_SRC",version=330)]
+[vertex_program]
 def vs_main
     f_color = v_color
     gl_Position = float4(v_position, 0.0, 1.0)
 
-[fragment_program(name="FRAGMENT_SRC",version=330)]
-def ps_main
-    f_outputColor = float4(f_color, 1.0)
+[fragment_program]
+def fs_main
+    gl_FragColor = float4(f_color, 1.0)
 
 var program : uint
 var vao : uint
@@ -35,7 +34,7 @@ let vertices = [[Vertex
 ]]
 
 def create_gl_objects
-    program = create_shader_program(VERTEX_SRC,FRAGMENT_SRC)
+    program = create_shader_program(@@vs_main,@@fs_main)
     // vao
     glGenVertexArrays(1, safe_addr(vao))
     glBindVertexArray(vao);
@@ -53,7 +52,7 @@ def main
         glfwTerminate()
     glfwInitOpenGL(3,3,true)
     glSetBreakOnOpenGLError(true)
-    var window = glfwCreateWindow(1280, 720, "Hello triangle", null, null)
+    var window = glfwCreateWindow(1280, 720, "OpenGL - Hello triangle", null, null)
     if window==null
 		panic("can't create window")
     defer <|
@@ -72,7 +71,7 @@ def main
         glDepthFunc(GL_LEQUAL)
         glUseProgram(program)
         vs_main_bind_uniform(program)
-        ps_main_bind_uniform(program)
+        fs_main_bind_uniform(program)
         glBindVertexArray(vao)
         glDrawArrays(GL_TRIANGLES, 0, 3)
         // swap buffers

@@ -11,18 +11,17 @@ var [[in, location=1]] v_color : float3
 var [[in, location=2]] v_texcoord : float2
 var [[inout]] f_color : float3
 var [[inout]] f_texcoord : float2
-var [[out]] f_outputColor : float4
 var [[uniform]] f_tex : sampler2D
 
-[vertex_program(name="VERTEX_SRC",version=330)]
+[vertex_program]
 def vs_main
     f_color = v_color
     f_texcoord = v_texcoord
     gl_Position = float4(v_position, 0.0, 1.0)
 
-[fragment_program(name="FRAGMENT_SRC",version=330)]
-def ps_main
-    f_outputColor = texture2D(f_tex,f_texcoord) * float4(f_color, 1.0)
+[fragment_program]
+def fs_main
+    gl_FragColor = texture2D(f_tex,f_texcoord) * float4(f_color, 1.0)
 
 var program : uint
 var vao : uint
@@ -46,7 +45,7 @@ let vertices = [[Vertex
 let indices = [[int 0; 1; 2; 2; 3; 0]]
 
 def create_gl_objects
-    program = create_shader_program(VERTEX_SRC,FRAGMENT_SRC)
+    program = create_shader_program(@@vs_main,@@fs_main)
     // vao
     glGenVertexArrays(1, safe_addr(vao))
     glBindVertexArray(vao);
@@ -70,7 +69,7 @@ def main
         glfwTerminate()
     glfwInitOpenGL(3,3,true)
     glSetBreakOnOpenGLError(true)
-    var window = glfwCreateWindow(1280, 720, "Hello image", null, null)
+    var window = glfwCreateWindow(1280, 720, "OpenGL - Hello image", null, null)
     if window==null
 		panic("can't create window")
     defer <|
@@ -91,7 +90,7 @@ def main
         glUseProgram(program)
         f_tex := texture           // bind texture
         vs_main_bind_uniform(program)
-        ps_main_bind_uniform(program)
+        fs_main_bind_uniform(program)
         glBindVertexArray(vao)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, null)

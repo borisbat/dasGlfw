@@ -12,10 +12,9 @@ var [[in, location=2]] v_texcoord : float2
 var [[uniform]] f_offset : float2
 var [[inout]] f_color : float3
 var [[inout]] f_texcoord : float2
-var [[out]] f_outputColor : float4
 var [[uniform]] f_tex : sampler2D
 
-[vertex_program(name="VERTEX_SRC",version=330)]
+[vertex_program]
 def vs_effect
     f_color = v_color
     f_texcoord = v_texcoord
@@ -28,18 +27,18 @@ def checker(uv:float2; checkSize:float=8.0)
 def greyscale(color:float3)
     return dot(color,float3(0.2126,0.7152,0.0722))
 
-[fragment_program(name="FRAGMENT_SRC",version=330)]
-def ps_effect
+[fragment_program]
+def fs_effect
     let coord = f_texcoord + f_offset
-    f_outputColor = texture2D(f_tex,coord) * float4(f_color, 1.0)
+    gl_FragColor = texture2D(f_tex,coord) * float4(f_color, 1.0)
 
-[fragment_program(name="DISPLAY_FRAGMENT_SRC",version=330)]
-def ps_display
+[fragment_program]
+def fs_display
     let f = checker(f_texcoord.xy)
     let trgb = texture2D(f_tex,float2(f_texcoord.x,1.-f_texcoord.y)).xyz
     let tgrey = greyscale(trgb)
-    f_outputColor.xyz = trgb*f + float3(tgrey)*(1.0-f)
-    f_outputColor.w = 1.
+    gl_FragColor.xyz = trgb*f + float3(tgrey)*(1.0-f)
+    gl_FragColor.w = 1.
 
 var program, display_program : uint
 var vao : uint
@@ -67,8 +66,8 @@ let effect_vertices = [[EffectVertex
 let effect_indices = [[int 0; 1; 2; 2; 3; 0]]
 
 def create_gl_objects
-    program = create_shader_program(VERTEX_SRC,FRAGMENT_SRC)
-    display_program = create_shader_program(VERTEX_SRC,DISPLAY_FRAGMENT_SRC)
+    program = create_shader_program(@@vs_effect,@@fs_effect)
+    display_program = create_shader_program(@@vs_effect,@@fs_display)
     // vao
     glGenVertexArrays(1, safe_addr(vao))
     glBindVertexArray(vao);
@@ -104,7 +103,7 @@ def main
         glfwTerminate()
     glfwInitOpenGL(3,3,true)
     glSetBreakOnOpenGLError(true)
-    var window = glfwCreateWindow(1280, 720, "Hello render to texture", null, null)
+    var window = glfwCreateWindow(1280, 720, "OpenGL - Hello render to texture", null, null)
     if window==null
 		panic("can't create window")
     defer <|
@@ -126,7 +125,7 @@ def main
         glUseProgram(program)
         f_tex := texture
         vs_effect_bind_uniform(program)
-        ps_effect_bind_uniform(program)
+        fs_effect_bind_uniform(program)
         glBindVertexArray(vao)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, null)
@@ -136,7 +135,7 @@ def main
         glUseProgram(display_program)
         f_tex := target_texture
         vs_effect_bind_uniform(display_program)
-        ps_display_bind_uniform(display_program)
+        fs_display_bind_uniform(display_program)
         glBindVertexArray(vao)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, null)

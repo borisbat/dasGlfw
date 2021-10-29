@@ -14,10 +14,9 @@ var [[uniform]] v_view : float4x4
 var [[uniform]] v_projection : float4x4
 var [[inout]] f_color : float3
 var [[inout]] f_texcoord : float2
-var [[out]] f_outputColor : float4
 var [[uniform]] f_tex : sampler2D
 
-[vertex_program(name="VERTEX_SRC",version=330)]
+[vertex_program]
 def vs_main
     f_texcoord = v_texcoord
     let light = normalize(float3(1,-1,-1))
@@ -25,10 +24,10 @@ def vs_main
     f_color = float3(saturate(-dot(norm,light)))
     gl_Position = v_projection * v_view * v_model * float4(v_position, 1.0)
 
-[fragment_program(name="FRAGMENT_SRC",version=330)]
-def ps_main
-    f_outputColor.xyz = texture2D(f_tex,f_texcoord).xyz * f_color
-    f_outputColor.w = 1.
+[fragment_program]
+def fs_main
+    gl_FragColor.xyz = texture2D(f_tex,f_texcoord).xyz * f_color
+    gl_FragColor.w = 1.
 
 var program : uint
 var vao : uint
@@ -77,7 +76,7 @@ let indices = [[int
     20;21;22;  22;23;20 ]]    // back
 
 def create_gl_objects
-    program = create_shader_program(VERTEX_SRC,FRAGMENT_SRC)
+    program = create_shader_program(@@vs_main,@@fs_main)
     // vao
     glGenVertexArrays(1, safe_addr(vao))
     glBindVertexArray(vao)
@@ -101,18 +100,14 @@ def main
         glfwTerminate()
     glfwInitOpenGL(3,3,true)
     glSetBreakOnOpenGLError(true)
-    var window = glfwCreateWindow(1280, 720, "Hello cube", null, null)
+    var window = glfwCreateWindow(1280, 720, "OpenGL - Hello cube", null, null)
     if window==null
 		panic("can't create window")
     defer <|
         glfwDestroyWindow(window)
     glfwMakeContextCurrent(window)
     create_gl_objects()
-    v_view = look_at_rh(
-        float3(0,0,10),
-        float3(0,0,0),
-        float3(0,1,0)
-    )
+    v_view = look_at_rh(float3(0,0,10),float3(0,0,0),float3(0,1,0))
     while glfwWindowShouldClose(window)==0
         glfwPollEvents()
         var display_w, display_h : int
@@ -136,7 +131,7 @@ def main
         glUseProgram(program)
         f_tex := texture
         vs_main_bind_uniform(program)
-        ps_main_bind_uniform(program)
+        fs_main_bind_uniform(program)
         glBindVertexArray(vao)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, null)

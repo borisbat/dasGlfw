@@ -80,7 +80,7 @@ var [[uniform]] f_Color : float4
 var [[out]] f_outputColor : float4
 var [[ssbo, stage=1]] c_lights : PointLights
 
-[vertex_program(name="PBR_VERTEX_SRC",version=430)]
+[vertex_program]
 def vs_preview
     f_texcoord = v_texcoord
     f_normal = normalize ( float3x3(v_model) * v_normal )
@@ -88,7 +88,7 @@ def vs_preview
     f_position = tpos.xyz
     gl_Position = v_projection * v_view * tpos
 
-[fragment_program(name="LIT_FRAGMENT_SRC",version=430)]
+[fragment_program(version=430)]
 def ps_preview
     let camera_dir = normalize(f_position)
     let normal = normalize(f_normal)
@@ -103,10 +103,10 @@ def ps_preview
     f_outputColor.xyz = f_Color.xyz*(LIGHT_COLOR*k + LIGHT_BK_COLOR*k2) + diffuse
     f_outputColor.w = f_Color.w
 
-[fragment_program(name="SHADOW_FRAGMENT_SRC",version=330)]
+[fragment_program]
 def ps_shadow_preview
-    f_outputColor.xyz = SHADOW_COLOR
-    f_outputColor.w = f_Color.w
+    gl_FragColor.xyz = SHADOW_COLOR
+    gl_FragColor.w = f_Color.w
 
 var program, shadow_program : uint
 var ssbo : uint
@@ -333,8 +333,8 @@ def initialize(full_restart:bool)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
     glBindTexture(GL_TEXTURE_2D, 0u)
-    program = cache_shader_program(PBR_VERTEX_SRC,LIT_FRAGMENT_SRC)
-    shadow_program = cache_shader_program(PBR_VERTEX_SRC,SHADOW_FRAGMENT_SRC)
+    program = cache_shader_program(vs_preview`shader_text,ps_preview`shader_text)
+    shadow_program = cache_shader_program(vs_preview`shader_text,ps_shadow_preview`shader_text)
     ssbo = create_ssbo(c_lights)
     if length(decsState.allArchetypes)==0 || full_restart
         print("create all new ecs objects\n")

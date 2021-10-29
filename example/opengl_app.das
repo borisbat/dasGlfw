@@ -8,16 +8,15 @@ require daslib/safe_addr
 var [[in, location=0]] v_position : float2
 var [[in, location=1]] v_color : float3
 var [[inout]] f_color : float3
-var [[out]] f_outputColor : float4
 
-[vertex_program(name="VERTEX_SRC",version=330)]
+[vertex_program]
 def vs_main
     f_color = v_color
     gl_Position = float4(v_position.x, v_position.y, 0.0, 1.0)
 
-[fragment_program(name="FRAGMENT_SRC",version=330)]
-def ps_main
-    f_outputColor = float4(f_color.x, f_color.y, f_color.z, 1.0)
+[fragment_program]
+def fs_main
+    gl_FragColor = float4(f_color.x, f_color.y, f_color.z, 1.0)
 
 var vertex : uint
 var fragment : uint
@@ -37,10 +36,7 @@ let vertices = [[Vertex
 ]]
 
 def create_gl_objects
-    vertex = create_shader(VERTEX_SRC, GL_VERTEX_SHADER)
-    fragment = create_shader(FRAGMENT_SRC, GL_FRAGMENT_SHADER)
-    program = create_shader_program(vertex, fragment)
-    link_shader(program)
+    program = create_shader_program(@@vs_main, @@fs_main)
     glGenVertexArrays(1, safe_addr(vao))
     glBindVertexArray(vao);
     glGenBuffers(1, safe_addr(vbo))

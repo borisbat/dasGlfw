@@ -13,19 +13,18 @@ var [[in, location=0]] v_position : float2
 var [[in, location=1]] v_texcoord : float2
 var [[uniform]] v_mvp : float4x4
 var [[inout]] f_texcoord : float2
-var [[out]] f_outputColor : float4
 var [[uniform]] f_tex : sampler2D
 var [[uniform]] f_tint : float3
 
-[vertex_program(name="TTF_VERTEX_SRC",version=330)]
+[vertex_program(name="TTF_VERTEX_SRC")]
 def vs_main
     f_texcoord = v_texcoord
     gl_Position = v_mvp * float4(v_position, 0.0, 1.0)
 
-[fragment_program(name="TTF_FRAGMENT_SRC",version=330)]
-def ps_main
+[fragment_program(name="TTF_FRAGMENT_SRC")]
+def fs_main
     let tex = texture(f_tex,f_texcoord)
-    f_outputColor = float4(f_tint,tex.w)
+    gl_FragColor = float4(f_tint,tex.w)
 
 [vertex_buffer]
 struct TTF_FontVertex
@@ -54,7 +53,7 @@ def public create_ttf_adapter
 
 def public create_ttf_objects
     create_ttf_adapter()
-    program = create_shader_program(TTF_VERTEX_SRC,TTF_FRAGMENT_SRC)
+    program = create_shader_program(@@vs_main,@@fs_main)
     return program
 
 def public get_ttf_program : tuple<vtx:string;frag:string>
@@ -81,7 +80,7 @@ def public draw_quads ( font:Font; quads : array<FontVertex>; mvp:float4x4; tint
     f_tint = tint
     v_mvp = mvp
     vs_main_bind_uniform(program)
-    ps_main_bind_uniform(program)
+    fs_main_bind_uniform(program)
     glBindVertexArray(0u)
     glBindBuffer(GL_ARRAY_BUFFER, 0u)
     unsafe

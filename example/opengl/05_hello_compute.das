@@ -15,23 +15,22 @@ var [[in, location=1]] v_color : float3
 var [[in, location=2]] v_texcoord : float2
 var [[inout]] f_color : float3
 var [[inout]] f_texcoord : float2
-var [[out]] f_outputColor : float4
 var [[uniform]] f_tex : sampler2D
 var [[uniform, format=rgba8, stage=0, writeonly]] c_destTex : image2D
 var [[ssbo, stage=1]] c_mat : MatTest
 var [[uniform]] c_offset : int
 
-[vertex_program(name="VERTEX_SRC",version=330)]
+[vertex_program]
 def vs_effect
     f_color = v_color
     f_texcoord = v_texcoord
     gl_Position = float4(v_position, 0.0, 1.0)
 
-[fragment_program(name="FRAGMENT_SRC",version=330)]
-def ps_effect
-    f_outputColor = texture2D(f_tex,f_texcoord) * float4(f_color, 1.0)
+[fragment_program]
+def fs_effect
+    gl_FragColor = texture2D(f_tex,f_texcoord) * float4(f_color, 1.0)
 
-[compute_program(name="COMPUTE_SRC",version=430,local_size_x=16,local_size_y=16)]
+[compute_program(local_size_x=16,local_size_y=16)]
 def compute_effect
     let storePos = int2(gl_GlobalInvocationID.xy)
     let bitPos = storePos + int2(c_offset*3,c_offset)
@@ -70,8 +69,8 @@ let effect_indices = [[int 0; 1; 2; 2; 3; 0]]
 
 def create_gl_objects
     // programs
-    compute_program = create_compute_shader_program(COMPUTE_SRC)
-    display_program = create_shader_program(VERTEX_SRC,FRAGMENT_SRC)
+    compute_program = create_compute_shader_program(@@compute_effect)
+    display_program = create_shader_program(@@vs_effect,@@fs_effect)
     // vao
     glGenVertexArrays(1, safe_addr(vao))
     glBindVertexArray(vao);
@@ -101,7 +100,7 @@ def main
         glfwTerminate()
     glfwInitOpenGL(4,6,true)
     glSetBreakOnOpenGLError(true)
-    var window = glfwCreateWindow(1280, 720, "Hello compute shader", null, null)
+    var window = glfwCreateWindow(1280, 720, "OpenGL - Hello compute shader", null, null)
     if window==null
 		panic("can't create window")
     defer <|
@@ -147,7 +146,7 @@ def main
         glBindBuffer(GL_ARRAY_BUFFER, vbo)
         f_tex := texture
         vs_effect_bind_uniform(display_program)
-        ps_effect_bind_uniform(display_program)
+        fs_effect_bind_uniform(display_program)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, null)
         // swap buffers

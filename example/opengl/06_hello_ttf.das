@@ -15,7 +15,7 @@ def main
         glfwTerminate()
     glfwInitOpenGL(3,3,true)
     glSetBreakOnOpenGLError(true)
-    var window = glfwCreateWindow(1280, 720, "Hello opengl_ttf", null, null)
+    var window = glfwCreateWindow(1280, 720, "OpenGL - Hello opengl_ttf", null, null)
     if window==null
 		panic("can't create window")
     defer <|

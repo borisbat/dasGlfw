@@ -140,7 +140,7 @@ def create_shader_program ( vertex,fragment:uint )
     glAttachShader(program, fragment)
     return program
 
-def create_shader_program ( compute:uint )
+def create_compute_shader_program ( compute:uint )
     let program = glCreateProgram()
     glAttachShader(program, compute)
     return program
@@ -171,7 +171,7 @@ def create_shader_program ( vsrc,fsrc:string implicit )
 
 def create_compute_shader_program ( csrc:string implicit )
     let compute = create_shader(csrc, GL_COMPUTE_SHADER)
-    let program = create_shader_program(compute)
+    let program = create_compute_shader_program(compute)
     link_shader(program)
     glDeleteShader(compute)
     return program
