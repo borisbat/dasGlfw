@@ -110,8 +110,8 @@ def ps_shadow_preview
 
 var program, shadow_program : uint
 var ssbo : uint
-var cube, sphere, cylinder : Fragment
-var ground : Fragment
+var cube, sphere, cylinder : OpenGLGeometryFragment
+var ground : OpenGLGeometryFragment
 var tex : uint
 var font : Font?
 
@@ -324,11 +324,11 @@ def initialize(full_restart:bool)
     glfwSetCursor(window,cursor)
     cache_ttf_objects()
     font = cache_font("c:/windows/fonts/arial.ttf")
-    cube <- gen_cube()
-    sphere <- gen_sphere(32,16,false)
-    ground <- gen_plane(GenDirection xz)
-    cylinder <- gen_cylinder(GenDirection xz, 32)
-    tex = gen_tex_checkerboard(16, 16, 0xff404040 , 0xff808080)
+    cube <- create_geometry_fragment <| gen_cube()
+    sphere <- create_geometry_fragment <| gen_sphere(32,16,false)
+    ground <- create_geometry_fragment <| gen_plane(GenDirection xz)
+    cylinder <- create_geometry_fragment <| gen_cylinder(GenDirection xz, 32)
+    tex = create_texture <| gen_image_checkerboard(16, 16, 0xff404040 , 0xff808080)
     glBindTexture(GL_TEXTURE_2D, tex)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
@@ -360,7 +360,7 @@ def draw_sphere ( pos:float3; scale:float; color:float3; alpha:float=1. )
     f_Color.w = alpha
     vs_preview_bind_uniform(program)
     ps_preview_bind_uniform(program)
-    sphere |> draw_fragment()
+    sphere |> draw_geometry_fragment()
 
 def draw_ground_plane ( pos:float3; scale:float; color:float3 )
     v_model = compose(float4(pos,0.0), float4(0.0), float4(scale))
@@ -368,7 +368,7 @@ def draw_ground_plane ( pos:float3; scale:float; color:float3 )
     f_Color.w = 1.
     vs_preview_bind_uniform(program)
     ps_preview_bind_uniform(program)
-    ground |> draw_fragment()
+    ground |> draw_geometry_fragment()
 
 def draw_cylinder ( tm:float4x4; color:float3 )
     v_model = tm
@@ -376,7 +376,7 @@ def draw_cylinder ( tm:float4x4; color:float3 )
     f_Color.w = 1.
     vs_preview_bind_uniform(program)
     ps_preview_bind_uniform(program)
-    cylinder |> draw_fragment()
+    cylinder |> draw_geometry_fragment()
 
 def draw_cylinder ( pos:float3; scale:float; color:float3 )
     let tm = compose(float4(pos,0.0), float4(0), float4(scale, scale, scale, 1.))
@@ -689,14 +689,14 @@ def draw_objects ( obj:Object )
     let ofs = obj.pos + float3(0., obj.dim.y * 0.5, 0.)  // we put it on the ground place
     let scl = obj.dim * (0.5 * obj.scale)
     v_model = compose(ofs.xyzz, float4(0), scl.xyzz)
-    f_Color.xyz = color
+    f_Color.xyz = obj.color
     f_Color.w = 1.
     vs_preview_bind_uniform(program)
     ps_preview_bind_uniform(program)
     if obj.prim==Primitive cube
-        cube |> draw_fragment()
+        cube |> draw_geometry_fragment()
     elif obj.prim==Primitive cylinder
-        cylinder |> draw_fragment()
+        cylinder |> draw_geometry_fragment()
 
 [decs(stage=draw_pickup_items)]
 def draw_pickup_items ( var p:PickUpItem )
@@ -712,7 +712,7 @@ def draw_pickup_items ( var p:PickUpItem )
     f_Color.w = p.fade
     vs_preview_bind_uniform(program)
     ps_preview_bind_uniform(program)
-    cube |> draw_fragment()
+    cube |> draw_geometry_fragment()
 
 [decs(stage=draw)]
 def draw_projectiles ( var proj:Projectile )
