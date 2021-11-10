@@ -1,5 +1,4 @@
 options persistent_heap
-options persistent_string_heap
 options gc
 
 require glfw/glfw_live
