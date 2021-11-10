@@ -16,6 +16,8 @@ require daslib/random
 require daslib/math_boost
 require strings
 
+require daslib/live
+
 let LIGHT_DIRECTION = normalize(float3(-1,-4,3))
 
 let LIGHT_COLOR = UCOLOR_TO_RGB(0xffffff)
@@ -900,5 +902,3 @@ def mousescroll ( x, y : double )
 def main
     glfw_app("GLFW demo in app mode")
 
-options debugger
-require daslib/debug

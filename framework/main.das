@@ -10,6 +10,3 @@ def main
         "example_app.das",
         "{get_das_root()}/modules/dasGlfw/framework"
     )
-
-options debugger
-require daslib/debug
