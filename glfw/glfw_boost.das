@@ -19,7 +19,7 @@ def glfwInitOpenGL(major:int=3;minor:int=3;dctx:bool=false)
         glfwWindowHint(int(GLFW_OPENGL_DEBUG_CONTEXT), 1)
 
 def glfwGetFramebufferSize ( window:GLFWwindow?; var display_w,display_h:int& )
-    glfwGetFramebufferSize(window, safe_addr(display_w), safe_addr(display_h))
+    glfwGetFramebufferSize(window, unsafe(addr(display_w)), unsafe(addr(display_h)))
 
 def gl_array_ptr ( foo : array<auto> ) : void?
     unsafe
