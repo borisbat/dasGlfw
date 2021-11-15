@@ -17,3 +17,12 @@ opengl/_aot_generated/opengl_gen.das.cpp
 opengl/_aot_generated/opengl_state.das.cpp
 opengl/_aot_generated/opengl_ttf.das.cpp
 opengl/_aot_generated/opengl_cache.das.cpp
+dasglfw/_aot_generated/glfw_boost.das.cpp
+glfw/include/GLFW/glfw3.h
+glfw/include/GLFW/glfw3native.h
+glfw/lib/glfw3.lib
+glfw/lib/cmake/glfw3/glfw3Config.cmake
+glfw/lib/cmake/glfw3/glfw3ConfigVersion.cmake
+glfw/lib/cmake/glfw3/glfw3Targets.cmake
+glfw/lib/cmake/glfw3/glfw3Targets-release.cmake
+glfw/lib/pkgconfig/glfw3.pc
