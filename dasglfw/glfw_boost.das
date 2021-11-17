@@ -9,11 +9,14 @@ require daslib/safe_addr
 require math
 require rtti
 
-def glfwInitOpenGL(major:int=3;minor:int=3;dctx:bool=false)
+def glfwInitOpenGL(major:int=3;minor:int=3;dctx:bool=false;compat:bool=false)
     this_context().category |= bitfield(1u << 3u)   // setup OpenGL flag
     glfwWindowHint(int(GLFW_CONTEXT_VERSION_MAJOR), major)
     glfwWindowHint(int(GLFW_CONTEXT_VERSION_MINOR), minor)
-    glfwWindowHint(int(GLFW_OPENGL_PROFILE), int(GLFW_OPENGL_CORE_PROFILE)) // int(GLFW_OPENGL_COMPAT_PROFILE))
+    if compat
+        glfwWindowHint(int(GLFW_OPENGL_PROFILE), int(GLFW_OPENGL_COMPAT_PROFILE))
+    else
+        glfwWindowHint(int(GLFW_OPENGL_PROFILE), int(GLFW_OPENGL_CORE_PROFILE))
     glfwWindowHint(int(GLFW_OPENGL_FORWARD_COMPAT), 1)
     if dctx
         glfwWindowHint(int(GLFW_OPENGL_DEBUG_CONTEXT), 1)

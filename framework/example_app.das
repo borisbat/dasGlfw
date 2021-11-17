@@ -80,6 +80,7 @@ var [[inout]] f_position : float3
 var [[uniform]] f_Color : float4
 var [[out]] f_outputColor : float4
 var [[ssbo, stage=1]] c_lights : PointLights
+var [[out]] f_FragColor : float4
 
 [vertex_program]
 def vs_preview
@@ -106,8 +107,8 @@ def ps_preview
 
 [fragment_program]
 def ps_shadow_preview
-    gl_FragColor.xyz = SHADOW_COLOR
-    gl_FragColor.w = f_Color.w
+    f_FragColor.xyz = SHADOW_COLOR
+    f_FragColor.w = f_Color.w
 
 var program, shadow_program : uint
 var ssbo : uint
