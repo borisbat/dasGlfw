@@ -9,6 +9,7 @@ def main
 		panic("can't init glfw")
     defer <|
         glfwTerminate()
+    glfwWindowHint(int(GLFW_CLIENT_API), GLFW_NO_API)
     var window = glfwCreateWindow(1270, 720, "Hello GLFW", null, null)
     if window==null
 		panic("can't create window")
@@ -17,6 +18,3 @@ def main
     glfwMakeContextCurrent(window)
     while glfwWindowShouldClose(window)==0
         glfwPollEvents()
-        // swap buffers
-        glfwMakeContextCurrent(window)
-        glfwSwapBuffers(window)
