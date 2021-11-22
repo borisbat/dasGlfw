@@ -34,7 +34,7 @@ namespace das {
         GlswCB  scrollCB;
     };
 
-    static das_map<GLFWwindow *, GlswCallbacks>   g_Callbacks;
+    static thread_local das_map<GLFWwindow *, GlswCallbacks>   g_Callbacks;
 
     void DasGlfw_KeyFunction ( GLFWwindow* window, int keyCode, int scanCode, int action, int modes ) {
         auto & cb = g_Callbacks[window].keyCB;
