@@ -1,6 +1,6 @@
 IF((NOT DAS_GLFW_INCLUDED) AND (NOT ${DAS_GLFW_DISABLED}))
     SET(DAS_GLFW_INCLUDED TRUE)
-    MESSAGE(STATUS "dasGlfw module included. ${DAS_GLFW_DISABLED}")
+    MESSAGE(STATUS "dasGlfw module included.")
 	SET(DAS_GLFW_DIR ${CMAKE_SOURCE_DIR}/modules/dasGlfw)
 	SET(GLFW_INCLUDE_DIR ${DAS_GLFW_DIR}/glfw/include)
 	IF(APPLE)
