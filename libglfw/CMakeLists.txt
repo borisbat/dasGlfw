@@ -289,6 +289,10 @@ endif()
 #--------------------------------------------------------------------
 # Use Cocoa for window creation and NSOpenGL for context creation
 #--------------------------------------------------------------------
+if (APPLE)
+    MESSAGE("ON APPLE ADD ARM64")
+    SET(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for Mac OS X" FORCE)
+endif()
 if (_GLFW_COCOA)
 
     list(APPEND glfw_LIBRARIES
