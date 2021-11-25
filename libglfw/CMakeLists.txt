@@ -289,17 +289,9 @@ endif()
 #--------------------------------------------------------------------
 # Use Cocoa for window creation and NSOpenGL for context creation
 #--------------------------------------------------------------------
-if (APPLE)
-    IF(DEFINED DAS_OSX_ARCH)
-        MESSAGE("GLFW3 APPLE ${DAS_OSX_ARCH}")
-        SET(CMAKE_OSX_ARCHITECTURES "${DAS_OSX_ARCH}" CACHE STRING "Build architectures for Mac OS X" FORCE)
-    ELSE()
-        MESSAGE("GLFW3 APPLE DEFAULT x86_64;arm64")
-        SET(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for Mac OS X" FORCE)
-    ENDIF()
-    ADD_COMPILE_OPTIONS(-Wno-deprecated-declarations)
-endif()
 if (_GLFW_COCOA)
+    set(CMAKE_OSX_ARCHITECTURES ${OSX_ARCHITECTURES})
+    message("APPLE WITH ${OSX_ARCHITECTURES}\n")
 
     list(APPEND glfw_LIBRARIES
         "-framework Cocoa"
