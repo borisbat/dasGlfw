@@ -63,7 +63,7 @@ IF((NOT DAS_GLFW_INCLUDED) AND ((NOT ${DAS_GLFW_DISABLED}) OR (NOT DEFINED DAS_G
 	ADD_MODULE_DAS(glfw dasglfw glfw_live)
 	ADD_LIBRARY(libDasModuleGlfw ${DAS_GLFW_MODULE_SRC})
 	TARGET_LINK_LIBRARIES(libDasModuleGlfw ${GLFW_LIBRARIES})
-	ADD_DEPENDENCIES(libDasModuleGlfw libDaScript GLFW3)
+	ADD_DEPENDENCIES(libDasModuleGlfw GLFW3)
 #IF(UNIX)
 	#target_link_libraries(libDasModuleGlfw ${OPENGL_gl_LIBRARY} GL glfw)
 #ENDIF()
