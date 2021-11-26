@@ -39,10 +39,24 @@ namespace das {
     }
 }
 
+#elif defined(__linux__)
+
+// forward declaration only, cause allowing native headers breaks compilation here
+typedef long Window;
+extern "C" GLFWAPI Window glfwGetX11Window(GLFWwindow* window);
+
+namespace das {
+    void * DAS_glfwGetNativeWindow(GLFWwindow* window) {
+        auto wnd = glfwGetX11Window(window);
+        return (void *) wnd;
+    }
+}
+
+
 #else
 namespace das {
     void * DAS_glfwGetNativeWindow(GLFWwindow* window) {
-        return null;
+        return nullptr;
     }
 }
 
