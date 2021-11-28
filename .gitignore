@@ -27,3 +27,4 @@ glfw/lib/cmake/glfw3/glfw3Targets.cmake
 glfw/lib/cmake/glfw3/glfw3Targets-release.cmake
 glfw/lib/pkgconfig/glfw3.pc
 glfw/lib/cmake/glfw3/glfw3Targets-relwithdebinfo.cmake
+dasglfw/_aot_generated/GREYPRINT_AOT_glfw_boost.das.cpp
