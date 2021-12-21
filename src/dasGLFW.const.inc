@@ -1,3 +1,6 @@
+// this file is generated via daScript automatic C++ binder
+// all user modifications will be lost after this file is re-generated
+
 addConstant<uint32_t>(*this,"GLFW_MOD_SHIFT",uint32_t(0x0001u));
 addConstant<uint32_t>(*this,"GLFW_MOD_CONTROL",uint32_t(0x0002u));
 addConstant<uint32_t>(*this,"GLFW_MOD_ALT",uint32_t(0x0004u));
@@ -91,7 +94,7 @@ addConstant<uint32_t>(*this,"GLFW_COCOA_CHDIR_RESOURCES",uint32_t(0x00051001u));
 addConstant<uint32_t>(*this,"GLFW_COCOA_MENUBAR",uint32_t(0x00051002u));
 addConstant<int32_t>(*this,"GLFW_VERSION_MAJOR",int32_t(3));
 addConstant<int32_t>(*this,"GLFW_VERSION_MINOR",int32_t(3));
-addConstant<int32_t>(*this,"GLFW_VERSION_REVISION",int32_t(2));
+addConstant<int32_t>(*this,"GLFW_VERSION_REVISION",int32_t(6));
 addConstant<int32_t>(*this,"GLFW_TRUE",int32_t(1));
 addConstant<int32_t>(*this,"GLFW_FALSE",int32_t(0));
 addConstant<int32_t>(*this,"GLFW_RELEASE",int32_t(0));

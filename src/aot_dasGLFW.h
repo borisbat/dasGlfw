@@ -15,4 +15,5 @@ namespace das {
     void DasGlfw_SetScrollCallback ( GLFWwindow * window, TLambda<void,const GLFWwindow*,double,double> func, Context * ctx );
     void DasGlfw_Shutdown();
     void DasGlfw_DestroyWindow ( GLFWwindow * window );
+    void * DAS_glfwGetNativeWindow ( GLFWwindow* window );
 }

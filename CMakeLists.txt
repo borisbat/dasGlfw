@@ -41,27 +41,42 @@ IF((NOT DAS_GLFW_INCLUDED) AND ((NOT ${DAS_GLFW_DISABLED}) OR (NOT DEFINED DAS_G
 		)
 	ENDIF()
 
+	SET(DAS_GLFW_BIND_DIR ${DAS_GLFW_DIR})
+
 	# libDasModuleGlfw
-	SET(DAS_GLFW_MODULE_SRC
-		${DAS_GLFW_DIR}/src/need_glfw.h
-		${DAS_GLFW_DIR}/src/aot_glfw.h
-		${DAS_GLFW_DIR}/src/module_glfw.ann.cpp_inc
-		${DAS_GLFW_DIR}/src/module_glfw.ann.inc
-		${DAS_GLFW_DIR}/src/module_glfw.const_inc
-		${DAS_GLFW_DIR}/src/module_glfw.cpp
-		${DAS_GLFW_DIR}/src/module_glfw_ann.cpp
-		${DAS_GLFW_DIR}/src/module_glfw_const.cpp
-		${DAS_GLFW_DIR}/src/module_glfw_fun.cpp
-		${DAS_GLFW_DIR}/src/module_glfw.enum.cpp_inc
-		${DAS_GLFW_DIR}/src/module_glfw.enum.inc
-		${DAS_GLFW_DIR}/src/module_glfw.inc
-		${DAS_GLFW_DIR}/src/module_glfw.method.inc
+	SET(DAS_GLFW_BIND_MODULE_SRC
+		${DAS_GLFW_BIND_DIR}/src/aot_dasGLFW.h
+		${DAS_GLFW_BIND_DIR}/src/cb_dasGLFW.h
+		${DAS_GLFW_BIND_DIR}/src/need_dasGLFW.h
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.h
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.cpp
+	# user include
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.main.cpp
+	# generated binding includes
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.alias.add.inc
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.dummy.add.inc
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.enum.add.inc
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.enum.class.inc
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.enum.decl.inc
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.struct.add.inc
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.struct.postadd.inc
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.struct.class.inc
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.struct.decl.inc
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.struct.impl.inc
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.struct.cast.inc
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.const.inc
+	# generated functions
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.func_1.cpp
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.func_2.cpp
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.func_3.cpp
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.func_4.cpp
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.func_5.cpp
 	)
 	ADD_MODULE_LIB(libDasModuleGlfw)
-	ADD_MODULE_CPP(glfw)
+	ADD_MODULE_CPP(dasGLFW)
 	ADD_MODULE_DAS(glfw dasglfw glfw_boost)
 	ADD_MODULE_DAS(glfw dasglfw glfw_live)
-	ADD_LIBRARY(libDasModuleGlfw ${DAS_GLFW_MODULE_SRC})
+	ADD_LIBRARY(libDasModuleGlfw ${DAS_GLFW_BIND_MODULE_SRC})
 	TARGET_LINK_LIBRARIES(libDasModuleGlfw ${GLFW_LIBRARIES})
 	ADD_DEPENDENCIES(libDasModuleGlfw GLFW3)
 IF(UNIX AND NOT APPLE)
@@ -70,22 +85,4 @@ IF(UNIX AND NOT APPLE)
 ENDIF()
 	TARGET_INCLUDE_DIRECTORIES(libDasModuleGlfw PUBLIC ${GLFW_INCLUDE_DIR})
 	SETUP_CPP11(libDasModuleGlfw)
-
-	# GENERATED GLFW
-
-	FIND_FILE(GL_H "GL/gl.h")
-	MESSAGE("gl.h at ${GL_H}")
-	SET(DAS_GLFW_CONSTS
-		"${GLFW_INCLUDE_DIR}/GLFW/glfw3.h"
-		"${GL_H}"
-	)
-	DAS_CPP_BIND_AST(
-		GLFW_GENERATE
-		generate_glfw.das
-		${DAS_GLFW_DIR}/src/glfw_headers.h
-		${DAS_GLFW_DIR}/src/module_glfw
-		${DAS_GLFW_DIR}/src
-		"${GLFW_INCLUDE_DIR}"
-		"${DAS_GLFW_CONSTS}"
-	)
 ENDIF()
