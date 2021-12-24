@@ -2,7 +2,7 @@
 // all user modifications will be lost after this file is re-generated
 
 struct GLFWvidmode_GeneratedAnnotation : ManagedStructureAnnotation<GLFWvidmode> {
-	GLFWvidmode_GeneratedAnnotation(ModuleLibrary & ml) : ManagedStructureAnnotation ("GLFWvidmode", ml) {
+	GLFWvidmode_GeneratedAnnotation(ModuleLibrary & ml) : ManagedStructureAnnotation ("GLFWvidmode", ml, "GLFWvidmode") {
 	}
 	void init () {
 		addField<DAS_BIND_MANAGED_FIELD(width)>("width","width");
@@ -15,7 +15,7 @@ struct GLFWvidmode_GeneratedAnnotation : ManagedStructureAnnotation<GLFWvidmode>
 };
 
 struct GLFWgammaramp_GeneratedAnnotation : ManagedStructureAnnotation<GLFWgammaramp> {
-	GLFWgammaramp_GeneratedAnnotation(ModuleLibrary & ml) : ManagedStructureAnnotation ("GLFWgammaramp", ml) {
+	GLFWgammaramp_GeneratedAnnotation(ModuleLibrary & ml) : ManagedStructureAnnotation ("GLFWgammaramp", ml, "GLFWgammaramp") {
 	}
 	void init () {
 		addField<DAS_BIND_MANAGED_FIELD(red)>("red","red");
@@ -26,7 +26,7 @@ struct GLFWgammaramp_GeneratedAnnotation : ManagedStructureAnnotation<GLFWgammar
 };
 
 struct GLFWimage_GeneratedAnnotation : ManagedStructureAnnotation<GLFWimage> {
-	GLFWimage_GeneratedAnnotation(ModuleLibrary & ml) : ManagedStructureAnnotation ("GLFWimage", ml) {
+	GLFWimage_GeneratedAnnotation(ModuleLibrary & ml) : ManagedStructureAnnotation ("GLFWimage", ml, "GLFWimage") {
 	}
 	void init () {
 		addField<DAS_BIND_MANAGED_FIELD(width)>("width","width");
@@ -36,7 +36,7 @@ struct GLFWimage_GeneratedAnnotation : ManagedStructureAnnotation<GLFWimage> {
 };
 
 struct GLFWgamepadstate_GeneratedAnnotation : ManagedStructureAnnotation<GLFWgamepadstate> {
-	GLFWgamepadstate_GeneratedAnnotation(ModuleLibrary & ml) : ManagedStructureAnnotation ("GLFWgamepadstate", ml) {
+	GLFWgamepadstate_GeneratedAnnotation(ModuleLibrary & ml) : ManagedStructureAnnotation ("GLFWgamepadstate", ml, "GLFWgamepadstate") {
 	}
 	void init () {
 		addField<DAS_BIND_MANAGED_FIELD(buttons)>("buttons","buttons");

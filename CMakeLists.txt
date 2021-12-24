@@ -58,6 +58,7 @@ IF((NOT DAS_GLFW_INCLUDED) AND ((NOT ${DAS_GLFW_DISABLED}) OR (NOT DEFINED DAS_G
 		${DAS_GLFW_BIND_DIR}/src/dasGLFW.enum.add.inc
 		${DAS_GLFW_BIND_DIR}/src/dasGLFW.enum.class.inc
 		${DAS_GLFW_BIND_DIR}/src/dasGLFW.enum.decl.inc
+		${DAS_GLFW_BIND_DIR}/src/dasGLFW.enum.decl.cast.inc
 		${DAS_GLFW_BIND_DIR}/src/dasGLFW.struct.add.inc
 		${DAS_GLFW_BIND_DIR}/src/dasGLFW.struct.postadd.inc
 		${DAS_GLFW_BIND_DIR}/src/dasGLFW.struct.class.inc

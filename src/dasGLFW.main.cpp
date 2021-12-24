@@ -169,7 +169,8 @@ namespace das {
         // add your stuff here
         tw << "#include <GLFW/glfw3.h>\n";
         tw << "#include \"../modules/dasGlfw/src/aot_dasGLFW.h\"\n";
-        // specifying AOT type, in this case direct cpp mode (and not hybrid mode)
+        tw << "#include \"daScript/simulate/bind_enum.h\"\n";
+        tw << "#include \"../modules/dasGlfw/src/dasGLFW.enum.decl.cast.inc\"\n";
         return ModuleAotType::cpp;
     }
 

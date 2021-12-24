@@ -14,12 +14,12 @@ namespace das {
 #include "dasGLFW.enum.class.inc"
 #include "dasGLFW.struct.class.inc"
 Module_dasGLFW::Module_dasGLFW() : Module("glfw") {
-	lib.addModule(this);
-	lib.addBuiltInModule();
 }
 bool Module_dasGLFW::initDependencies() {
 	if ( initialized ) return true;
 	initialized = true;
+	lib.addModule(this);
+	lib.addBuiltInModule();
 	#include "dasGLFW.const.inc"
 	#include "dasGLFW.enum.add.inc"
 	#include "dasGLFW.dummy.add.inc"
