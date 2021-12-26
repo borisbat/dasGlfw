@@ -22,6 +22,9 @@ namespace das {
 
 #elif __APPLE__
 
+#define GLFW_EXPOSE_NATIVE_COCOA
+#include <GLFW/glfw3native.h>
+
 namespace das {
     void * DAS_glfwGetNativeWindow(GLFWwindow* window) {
         auto wnd = glfwGetCocoaWindow(window);
