@@ -35,3 +35,8 @@ def gl_array_ptr ( foo : auto[] ) : void?
 def gl_array_ptr ( foo : auto[][] ) : void?
     unsafe
         return reinterpret<void?> addr(foo[0][0])
+
+def glfwGetCursorPos ( window:GLFWwindow? ) : float2
+    var xpos, ypos : double
+    glfwGetCursorPos(window,safe_addr(xpos),safe_addr(ypos))
+    return float2(xpos,ypos)
