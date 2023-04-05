@@ -86,4 +86,16 @@ IF((NOT DAS_GLFW_INCLUDED) AND ((NOT ${DAS_GLFW_DISABLED}) OR (NOT DEFINED DAS_G
 	ENDIF()
 	TARGET_INCLUDE_DIRECTORIES(libDasModuleGlfw PUBLIC ${GLFW_INCLUDE_DIR})
 	SETUP_CPP11(libDasModuleGlfw)
+
+	INSTALL(DIRECTORY ${DAS_GLFW_DIR}/dasglfw
+		DESTINATION modules/dasglfw
+	)
+
+    file(GLOB DAS_GLFW_EXAMPLES
+		${DAS_GLFW_DIR}/examples/*.*
+    )
+    install(FILES ${DAS_GLFW_EXAMPLES}
+        DESTINATION examples/glfw
+    )
+
 ENDIF()
