@@ -442,7 +442,7 @@ def fire_turret ( var turret_reload:float& implicit; turret_reload_time, turret_
     turret_reload = turret_reload_time
     create_entity <| @ ( eid, cmp )
         cmp |> set ( "eid", eid )
-        let qr = un_quat_from_unit_vec_ang(float3(0,1,0), turret_dir)
+        let qr = quat_from_unit_vec_ang(float3(0,1,0), turret_dir)
         let vel = quat_mul_vec(qr, float3(1.,0.,0.))
         apply_decs_template(cmp, [[Projectile
             pos = pos + float3(0.,0.625,0.) + vel*0.5,
@@ -702,9 +702,9 @@ def draw_objects ( obj:Object )
 
 [decs(stage=draw_pickup_items)]
 def draw_pickup_items ( var p:PickUpItem )
-    let rot_a = un_quat_from_unit_vec_ang(float3(1,0,0), radians(45.))
-    let rot_b = un_quat_from_unit_vec_ang(float3(0,1,0), radians(45.))
-    let rot_t = un_quat_from_unit_vec_ang(float3(0,1,0), 2.*PI*(p.rot_t/p.rot_total))
+    let rot_a = quat_from_unit_vec_ang(float3(1,0,0), radians(45.))
+    let rot_b = quat_from_unit_vec_ang(float3(0,1,0), radians(45.))
+    let rot_t = quat_from_unit_vec_ang(float3(0,1,0), 2.*PI*(p.rot_t/p.rot_total))
     let rot_q = quat_mul( rot_t, quat_mul(rot_a, rot_b) )
     let tm_scale = compose(float4(0),float4(0),float4(0.15,0.5,.15,.1))
     let tm_rot = compose(float4(0), rot_q, float4(1))
@@ -747,11 +747,11 @@ def draw_turrets ( pos:float3; color:float3; turret:Turret )
     draw_cylinder(pos + float3(0.,0.5,0.), float3(0.25,0.25,0.25), color)
     // build turret
     let cannon_recoil = 1. - turret.reload / turret.reload_time
-    let rot_a = un_quat_from_unit_vec_ang(float3(0,1,0), turret.dir)
+    let rot_a = quat_from_unit_vec_ang(float3(0,1,0), turret.dir)
     let m_rota =compose(float4(0),rot_a,float4(1))
     let m_scale = compose(float4(0),float4(0),float4(.125,.3,.125,1.))
     let m_ofsa = compose(float4(0.3+0.2*cannon_recoil,.6,0.,0.),float4(0),float4(1))
-    let rotSide = un_quat_from_unit_vec_ang(float3(0,0,1), PI/2.)
+    let rotSide = quat_from_unit_vec_ang(float3(0,0,1), PI/2.)
     let m_rot = compose(float4(0),rotSide,float4(1))
     let m_pos = compose(float4(pos,0.0), float4(0), float4(1))
     draw_cylinder ( m_pos * m_rota * m_ofsa * m_rot * m_scale, color )
