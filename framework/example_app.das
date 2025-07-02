@@ -1,3 +1,4 @@
+options gen2=false;
 options persistent_heap
 options gc
 
@@ -122,9 +123,10 @@ bitfield Obstacle
     tank
     tower
 
-enum Primitive
-    cube
-    cylinder
+enum Primitive {
+    cube;
+    cylinder;
+}
 
 [decs_template]
 struct KeyControls
@@ -357,7 +359,7 @@ def shutdown
     delete cylinder
 
 def draw_sphere(pos : float3; scale : float; color : float3; alpha : float = 1.)
-    v_model = compose(float4(pos, 0.0), float4(0.0), float4(scale))
+    v_model = compose(float3(pos), float4(0.0), float3(scale))
     f_Color.xyz = color
     f_Color.w = alpha
     vs_preview_bind_uniform(program)
@@ -365,7 +367,7 @@ def draw_sphere(pos : float3; scale : float; color : float3; alpha : float = 1.)
     sphere |> draw_geometry_fragment()
 
 def draw_ground_plane(pos : float3; scale : float; color : float3)
-    v_model = compose(float4(pos, 0.0), float4(0.0), float4(scale))
+    v_model = compose(float3(pos), float4(0.0), float3(scale))
     f_Color.xyz = color
     f_Color.w = 1.
     vs_preview_bind_uniform(program)
@@ -381,11 +383,11 @@ def draw_cylinder(tm : float4x4; color : float3)
     cylinder |> draw_geometry_fragment()
 
 def draw_cylinder(pos : float3; scale : float; color : float3)
-    let tm = compose(float4(pos, 0.0), float4(0), float4(scale, scale, scale, 1.))
+    let tm = compose(float3(pos), float4(0), float3(scale, scale, scale))
     draw_cylinder(tm, color)
 
 def draw_cylinder(pos : float3; scale : float3; color : float3)
-    let tm = compose(float4(pos, 0.0), float4(0), float4(scale, 1.))
+    let tm = compose(float3(pos), float4(0), float3(scale))
     draw_cylinder(tm, color)
 
 var tick_dt = 1.0
@@ -690,7 +692,7 @@ def update_turrets(eid : EntityId; var pos : float3&; turret : Turret)
 def draw_objects(obj : Object)
     let ofs = obj.pos + float3(0., obj.dim.y * 0.5, 0.)  // we put it on the ground place
     let scl = obj.dim * (0.5 * obj.scale)
-    v_model = compose(ofs.xyzz, float4(0), scl.xyzz)
+    v_model = compose(ofs.xyz, float4(0), scl.xyz)
     f_Color.xyz = obj.color
     f_Color.w = 1.
     vs_preview_bind_uniform(program)
@@ -706,9 +708,9 @@ def draw_pickup_items(var p : PickUpItem)
     let rot_b = quat_from_unit_vec_ang(float3(0, 1, 0), radians(45.))
     let rot_t = quat_from_unit_vec_ang(float3(0, 1, 0), 2. * PI * (p.rot_t / p.rot_total))
     let rot_q = quat_mul(rot_t, quat_mul(rot_a, rot_b))
-    let tm_scale = compose(float4(0), float4(0), float4(0.15, 0.5, .15, .1))
-    let tm_rot = compose(float4(0), rot_q, float4(1))
-    let tm_pos = compose(float4(p.pos.x, p.pos.y + 0.25, p.pos.z, 1.), float4(0), float4(1))
+    let tm_scale = compose(float3(0), float4(0), float3(0.15, 0.5, .15))
+    let tm_rot = compose(float3(0), rot_q, float3(1))
+    let tm_pos = compose(float3(p.pos.x, p.pos.y + 0.25, p.pos.z), float4(0), float3(1))
     v_model = tm_pos * tm_scale * tm_rot
     f_Color.xyz = p.color
     f_Color.w = p.fade
@@ -748,12 +750,12 @@ def draw_turrets(pos : float3; color : float3; turret : Turret)
     // build turret
     let cannon_recoil = 1. - turret.reload / turret.reload_time
     let rot_a = quat_from_unit_vec_ang(float3(0, 1, 0), turret.dir)
-    let m_rota = compose(float4(0), rot_a, float4(1))
-    let m_scale = compose(float4(0), float4(0), float4(.125, .3, .125, 1.))
-    let m_ofsa = compose(float4(0.3 + 0.2 * cannon_recoil, .6, 0., 0.), float4(0), float4(1))
+    let m_rota = compose(float3(0), rot_a, float3(1))
+    let m_scale = compose(float3(0), float4(0), float3(.125, .3, .125))
+    let m_ofsa = compose(float3(0.3 + 0.2 * cannon_recoil, .6, 0.), float4(0), float3(1))
     let rotSide = quat_from_unit_vec_ang(float3(0, 0, 1), PI / 2.)
-    let m_rot = compose(float4(0), rotSide, float4(1))
-    let m_pos = compose(float4(pos, 0.0), float4(0), float4(1))
+    let m_rot = compose(float3(0), rotSide, float3(1))
+    let m_pos = compose(pos, float4(0), float3(1))
     draw_cylinder(m_pos * m_rota * m_ofsa * m_rot * m_scale, color)
 
 [export]
