@@ -119,7 +119,8 @@ def public glfw_app(title : string) {
     init_opengl_cache()
     setup_events(glfw_live_window)
     go_main()
-    invoke_live("initialize")
+    let full_restart : bool = false
+    invoke_live("initialize", full_restart)
     while (glfwWindowShouldClose(glfw_live_window) == 0) {
         glfwPollEvents()
         live_update(glfwGetTime())
