@@ -362,7 +362,7 @@ def initialize(full_restart : bool) {
     assert(window != null)
     glfwSetCursor(window, cursor)
     cache_ttf_objects()
-    font = cache_font("c:/windows/fonts/arial.ttf")
+    font = cache_font("{get_das_root()}/modules/dasBGFX/bgfx/bgfx/examples/runtime/font/entypo.ttf")
     cube <- create_geometry_fragment <| gen_cube()
     sphere <- create_geometry_fragment <| gen_sphere(32, 16, false)
     ground <- create_geometry_fragment <| gen_plane(GenDirection.xz)
