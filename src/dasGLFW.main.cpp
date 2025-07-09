@@ -18,6 +18,8 @@ namespace das {
         auto wnd = glfwGetWin32Window(window);
         return (void *) wnd;
     }
+
+    void * DAS_glfwGetNativeDisplay() { return nullptr; }
 }
 
 #elif __APPLE__
@@ -30,6 +32,9 @@ namespace das {
         auto wnd = glfwGetCocoaWindow(window);
         return (void *) wnd;
     }
+
+    void * DAS_glfwGetNativeDisplay() { return nullptr; }
+
 }
 
 #elif defined(__linux__)
@@ -37,10 +42,17 @@ namespace das {
 // forward declaration only, cause allowing native headers breaks compilation here
 typedef long Window;
 extern "C" GLFWAPI Window glfwGetX11Window(GLFWwindow* window);
+typedef long Display;
+extern "C" GLFWAPI Display* glfwGetX11Display(void);
 
 namespace das {
     void * DAS_glfwGetNativeWindow(GLFWwindow* window) {
         auto wnd = glfwGetX11Window(window);
+        return (void *) wnd;
+    }
+
+    void * DAS_glfwGetNativeDisplay() {
+        auto wnd = glfwGetX11Display();
         return (void *) wnd;
     }
 }
@@ -166,6 +178,7 @@ namespace das {
             SideEffects::worstDefault,"DasGlfw_DestroyWindow");
         addExtern<DAS_BIND_FUN(DAS_glfwGetNativeWindow)>(*this, lib, "glfwGetNativeWindow",SideEffects::worstDefault, "DAS_glfwGetNativeWindow")
             ->args({"window"});
+        addExtern<DAS_BIND_FUN(DAS_glfwGetNativeDisplay)>(*this, lib, "glfwGetNativeDisplay",SideEffects::worstDefault, "DAS_glfwGetNativeDisplay");
     }
 
 	ModuleAotType Module_dasGLFW::aotRequire ( TextWriter & tw ) const {
