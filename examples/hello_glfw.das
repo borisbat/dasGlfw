@@ -12,7 +12,7 @@ def main {
     defer <| $() {
         glfwTerminate()
     }
-    glfwWindowHint(int(GLFW_CLIENT_API), GLFW_NO_API)
+
     var window = glfwCreateWindow(1270, 720, "Hello GLFW", null, null)
     if (window == null) {
         panic("can't create window")
