@@ -107,7 +107,7 @@ IF((NOT DAS_GLFW_INCLUDED) AND ((NOT ${DAS_GLFW_DISABLED}) OR (NOT DEFINED DAS_G
 			find_package(OpenGL REQUIRED)
 			target_link_libraries(${glfw_mod_lib} PRIVATE ${OPENGL_gl_LIBRARY} GL X11 Xrandr pthread Xi dl)
 		ENDIF()
-		TARGET_INCLUDE_DIRECTORIES(${glfw_mod_lib} PUBLIC ${GLFW_INCLUDE_DIR})
+		TARGET_INCLUDE_DIRECTORIES(${glfw_mod_lib} PRIVATE ${GLFW_INCLUDE_DIR})
 		SETUP_CPP11(${glfw_mod_lib})
 	ENDMACRO()
 	SETUP_GLFW(libDasModuleGlfw GLFW3)
