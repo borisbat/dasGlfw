@@ -29,6 +29,7 @@ bool Module_dasGLFW::initDependencies() {
 	initMain();
 	return true;
 }
+REGISTER_DYN_MODULE(Module_dasGLFW,Module_dasGLFW);
 }
 REGISTER_MODULE_IN_NAMESPACE(Module_dasGLFW,das);
 
