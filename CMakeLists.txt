@@ -129,11 +129,14 @@ IF((NOT DAS_GLFW_INCLUDED) AND ((NOT ${DAS_GLFW_DISABLED}) OR (NOT DEFINED DAS_G
 		TARGET_LINK_LIBRARIES(libDasModuleGlfw PUBLIC ${APPLE_GLFW_LIBRARIES})
 	ENDIF()
 
-	# ADD_CUSTOM_COMMAND(TARGET glfw_mod POST_BUILD
-	# 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-	# 		${DAS_GLFW_DYN_PATH}
-	# 		"$<TARGET_FILE_DIR:libDasModuleGlfw>"
-	# )
+	# Copy glfw3.dll next to daslang.exe so the dynamic module can find it at runtime.
+	IF(WIN32)
+		ADD_CUSTOM_COMMAND(TARGET dasModuleGlfw POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different
+				"${GLFW_DYNAMIC_LIB_PATH}/bin/glfw3.dll"
+				"${EXECUTABLE_OUTPUT_PATH}/$<CONFIG>/glfw3.dll"
+		)
+	ENDIF()
 	IF(WIN32)
 		# On Win we have .dll and .lib in runtime only .dll is needed. 
 		install(FILES ${GLFW_DYNAMIC_LIB_PATH}/bin/glfw3.dll DESTINATION ${DAS_INSTALL_BINDIR})
